@@ -79,7 +79,7 @@ var moderationCommands = []*dcommand.SummitCommand{
 				return
 			}
 
-			if config.ModerationLogChannel != "" {
+			if config.ModerationLogChannel == "" {
 				functions.SendBasicMessage(data.ChannelID, "Please setup a modlog channel I can access before running this command")
 				return
 			}
@@ -145,7 +145,7 @@ var moderationCommands = []*dcommand.SummitCommand{
 				return
 			}
 
-			if config.ModerationLogChannel != "" {
+			if config.ModerationLogChannel == "" {
 				functions.SendBasicMessage(data.ChannelID, "Please setup a modlog channel I can access before running this command")
 				return
 			}
@@ -235,7 +235,7 @@ var moderationCommands = []*dcommand.SummitCommand{
 				return
 			}
 
-			if config.ModerationLogChannel != "" {
+			if config.ModerationLogChannel == "" {
 				functions.SendBasicMessage(data.ChannelID, "Please setup a modlog channel I can access before running this command")
 				return
 			}
@@ -319,7 +319,7 @@ var moderationCommands = []*dcommand.SummitCommand{
 				return
 			}
 
-			if config.ModerationLogChannel != "" {
+			if config.ModerationLogChannel == "" {
 				functions.SendBasicMessage(data.ChannelID, "Please setup a modlog channel I can access before running this command")
 				return
 			}
@@ -398,7 +398,7 @@ var moderationCommands = []*dcommand.SummitCommand{
 				return
 			}
 
-			if config.ModerationLogChannel != "" {
+			if config.ModerationLogChannel == "" {
 				functions.SendBasicMessage(data.ChannelID, "Please setup a modlog channel I can access before running this command")
 				return
 			}
@@ -483,7 +483,7 @@ var moderationCommands = []*dcommand.SummitCommand{
 				return
 			}
 
-			if config.ModerationLogChannel != "" {
+			if config.ModerationLogChannel == "" {
 				functions.SendBasicMessage(data.ChannelID, "Please setup a modlog channel I can access before running this command")
 				return
 			}
