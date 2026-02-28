@@ -27,14 +27,17 @@ var (
 
 // SummitCommand defines the general data that must be set during the addition of a new command
 type SummitCommand struct {
-	Command      string
-	Category     CommandCategory
-	Aliases      []string
-	Description  string
-	ArgsRequired int
-	Args         []*Arg
-	Run          Run
-	Data         *Data
+	Command     string
+	Category    CommandCategory
+	Aliases     []string
+	Description string
+
+	Args           []*Arg
+	ArgsRequired   int // Ignored if using combos
+	ArgumentCombos [][]int
+
+	Run  Run
+	Data *Data
 }
 
 // CommandCategory defines the available category types for commands
@@ -51,11 +54,13 @@ type CommandHandler struct {
 
 // RegisteredCommand defines the context required to access data surrounding a command
 type RegisteredCommand struct {
-	Trigger     string
-	Category    CommandCategory
-	Aliases     []string
-	Description string
-	Args        []*Arg
+	Trigger        string
+	Category       CommandCategory
+	Aliases        []string
+	Description    string
+	Args           []*Arg
+	RequiredArgs   int
+	ArgumentCombos [][]int
 }
 
 // RegisterCommands adds each command to the command handler
@@ -78,11 +83,12 @@ func (c *CommandHandler) RegisteredCommands() map[string]RegisteredCommand {
 	cmdMap := make(map[string]RegisteredCommand)
 	for _, cmd := range c.cmdMap {
 		rcmd := &RegisteredCommand{
-			Trigger:     cmd.Command,
-			Category:    cmd.Category,
-			Aliases:     cmd.Aliases,
-			Description: cmd.Description,
-			Args:        cmd.Args,
+			Trigger:        cmd.Command,
+			Category:       cmd.Category,
+			Aliases:        cmd.Aliases,
+			Description:    cmd.Description,
+			Args:           cmd.Args,
+			ArgumentCombos: cmd.ArgumentCombos,
 		}
 		cmdMap[cmd.Command] = *rcmd
 	}
