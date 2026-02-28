@@ -36,8 +36,7 @@ type SummitCommand struct {
 	ArgsRequired   int // Ignored if using combos
 	ArgumentCombos [][]int
 
-	Run  Run
-	Data *Data
+	Run Run
 }
 
 // CommandCategory defines the available category types for commands
