@@ -219,7 +219,7 @@ func roleOptionsSingle(roles []*discordgo.Role, selectedRoleID string, uniqueID 
 // roles: slice of Discord role objects
 // selectedRoleIDs: slice of string IDs of currently selected roles
 // uniqueID: string for the hidden input ID (used to retrieve and store changed data)
-// highestBotRolePosition: the position of the bots highest role
+// highestBotRolePosition: the position of the bots highest role. Use -1 to enable roles above the bot
 func roleOptionsMulti(roles []*discordgo.Role, selectedRoleIDs interface{}, uniqueID string, highestBotRolePosition int) template.HTML {
 	selectedMap := make(map[string]bool)
 	if selectedRoleIDs != nil {
@@ -275,7 +275,7 @@ func roleOptionsMulti(roles []*discordgo.Role, selectedRoleIDs interface{}, uniq
 		}
 		disabled := ""
 		disabledMsg := ""
-		if highestBotRolePosition <= role.Position {
+		if highestBotRolePosition > 0 && (highestBotRolePosition <= role.Position) {
 			disabled = " disabled"
 			disabledMsg = " (bot higher than role)"
 		}
