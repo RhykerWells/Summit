@@ -67,13 +67,20 @@ type RegisteredCommand struct {
 func (c *CommandHandler) RegisterCommands(cmds ...*SummitCommand) {
 	for _, cmd := range cmds {
 		c.cmdInstances = append(c.cmdInstances, *cmd)
-		for range cmd.Command {
-			if len(cmd.Aliases) > 3 {
-				aliasOver := len(cmd.Aliases) - 3
-				cmd.Aliases = cmd.Aliases[:len(cmd.Aliases)-aliasOver]
-				logrus.Warnln(fmt.Sprintf("%s has %d too many aliases. Automatically removed the last %d.", cmd.Command, aliasOver, aliasOver))
-			}
-			c.cmdMap[cmd.Command] = *cmd
+
+		// Limit aliases to 3 max
+		if len(cmd.Aliases) > 3 {
+			aliasOver := len(cmd.Aliases) - 3
+			cmd.Aliases = cmd.Aliases[:3]
+			logrus.Warnln(fmt.Sprintf("%s has %[2]d too many aliases. Automatically removed the last %[2]d.", cmd.Command, aliasOver))
+		}
+
+		// Register main command
+		c.cmdMap[cmd.Command] = *cmd
+
+		// Register aliases
+		for _, alias := range cmd.Aliases {
+			c.cmdMap[alias] = *cmd
 		}
 	}
 }
