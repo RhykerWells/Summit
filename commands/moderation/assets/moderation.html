@@ -86,9 +86,9 @@
 											<div class="modal-body">
 												<p class="card-text">Required moderator roles</p>
 												{{if eq $moderationAction "Warn"}}
-												{{roleOptionsMulti $.CurrentGuild.Roles $.ModerationConfig.WarnRequiredRoles (printf "%sRequiredRoles"  $moderationAction) $.CurrentGuild.BotHighestRolePosition}}
+												{{roleOptionsMulti $.CurrentGuild.Roles $.ModerationConfig.WarnRequiredRoles (printf "%sRequiredRoles"  $moderationAction) -1}}
 												{{else if eq $moderationAction "Mute"}}
-												{{roleOptionsMulti $.CurrentGuild.Roles $.ModerationConfig.MuteRequiredRoles (printf "%sRequiredRoles"  $moderationAction) $.CurrentGuild.BotHighestRolePosition}}
+												{{roleOptionsMulti $.CurrentGuild.Roles $.ModerationConfig.MuteRequiredRoles (printf "%sRequiredRoles"  $moderationAction) -1}}
 												<p class="card-text">Role given when a user is muted.</p>
 												{{roleOptionsSingle $.CurrentGuild.Roles $.ModerationConfig.MuteRole "MuteRole" $.CurrentGuild.BotHighestRolePosition}}
 												<p class="card-text">Enable the bot to manage the mute role.</p>
@@ -96,9 +96,9 @@
 												<p class="card-text">Remove and re-add the following roles on <code>mute</code> and <code>unmute</code>.</p>
 												{{roleOptionsMulti $.CurrentGuild.Roles $.ModerationConfig.MuteUpdateRoles "MuteUpdateRoles" $.CurrentGuild.BotHighestRolePosition}}
 												{{else if eq $moderationAction "Kick"}}
-												{{roleOptionsMulti $.CurrentGuild.Roles $.ModerationConfig.KickRequiredRoles (printf "%sRequiredRoles"  $moderationAction) $.CurrentGuild.BotHighestRolePosition}}
+												{{roleOptionsMulti $.CurrentGuild.Roles $.ModerationConfig.KickRequiredRoles (printf "%sRequiredRoles"  $moderationAction) -1}}
 												{{else if eq $moderationAction "Ban"}}
-												{{roleOptionsMulti $.CurrentGuild.Roles $.ModerationConfig.BanRequiredRoles (printf "%sRequiredRoles"  $moderationAction) $.CurrentGuild.BotHighestRolePosition}}
+												{{roleOptionsMulti $.CurrentGuild.Roles $.ModerationConfig.BanRequiredRoles (printf "%sRequiredRoles"  $moderationAction) -1}}
 												{{end}}
 											</div>
 											<div class="modal-footer">
