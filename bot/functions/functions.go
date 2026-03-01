@@ -16,7 +16,10 @@ import (
 
 // GetGuild returns the full guild object for a guild
 func GetGuild(guildID string) *discordgo.Guild {
-	guild, _ := common.Session.Guild(guildID)
+	guild, err := common.Session.Guild(guildID)
+	if err != nil {
+		return nil
+	}
 	return guild
 }
 
