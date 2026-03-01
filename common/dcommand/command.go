@@ -98,6 +98,11 @@ func (c *CommandHandler) RegisteredCommands() map[string]RegisteredCommand {
 			ArgumentCombos: cmd.ArgumentCombos,
 		}
 		cmdMap[cmd.Command] = *rcmd
+
+		// Also register aliases as keys for lookup
+		for _, alias := range cmd.Aliases {
+			cmdMap[alias] = *rcmd
+		}
 	}
 	return cmdMap
 }
