@@ -219,7 +219,7 @@ var informationCommands = []*dcommand.SummitCommand{
 		Category: dcommand.CategoryEconomy,
 		Aliases:  []string{"lb", "top"},
 		Args: []*dcommand.Arg{
-			{Name: "Page", Type: &dcommand.IntArg{Min: 1}, Optional: true},
+			{Name: "Page", Type: &dcommand.IntArg{Min: 1}},
 		},
 		Description: "Views your server leaderboard",
 		Run: (func(data *dcommand.Data) {
@@ -520,14 +520,17 @@ var incomeCommands = []*dcommand.SummitCommand{
 		},
 	},
 	{
-		Command:      "coinflip",
-		Category:     dcommand.CategoryEconomy,
-		Aliases:      []string{"cf", "flip"},
-		Description:  "Flips a coin. Head or tails. Payout is equal to `<Bet>`",
-		ArgsRequired: 2,
+		Command:     "coinflip",
+		Category:    dcommand.CategoryEconomy,
+		Aliases:     []string{"cf", "flip"},
+		Description: "Flips a coin. Head or tails. Payout is equal to `<Bet>`",
 		Args: []*dcommand.Arg{
 			{Name: "Bet", Type: &dcommand.BetArg{Min: 1}},
 			{Name: "Coin side", Type: dcommand.Coin},
+		},
+		ArgumentCombos: [][]int{
+			{0, 1},
+			{1, 0},
 		},
 		Run: func(data *dcommand.Data) {
 			guildConfig := GetConfig(data.GuildID)
@@ -924,14 +927,17 @@ var transferCommands = []*dcommand.SummitCommand{
 		},
 	},
 	{
-		Command:      "addmoney",
-		Category:     dcommand.CategoryEconomy,
-		Description:  "Adds money to a specified users cash/bank balance",
-		ArgsRequired: 3,
+		Command:     "addmoney",
+		Category:    dcommand.CategoryEconomy,
+		Description: "Adds money to a specified users cash/bank balance",
 		Args: []*dcommand.Arg{
 			{Name: "Member", Type: dcommand.Member},
 			{Name: "Amount", Type: &dcommand.BetArg{Min: 1}},
 			{Name: "Place", Type: dcommand.UserBalance},
+		},
+		ArgumentCombos: [][]int{
+			{0, 1, 2},
+			{0, 2, 1},
 		},
 		Run: util.AdminOrManageServerCommand(func(data *dcommand.Data) {
 			guildConfig := GetConfig(data.GuildID)
@@ -965,14 +971,17 @@ var transferCommands = []*dcommand.SummitCommand{
 		}),
 	},
 	{
-		Command:      "removemoney",
-		Category:     dcommand.CategoryEconomy,
-		Description:  "Removes money from a specified users cash/bank balance",
-		ArgsRequired: 3,
+		Command:     "removemoney",
+		Category:    dcommand.CategoryEconomy,
+		Description: "Removes money from a specified users cash/bank balance",
 		Args: []*dcommand.Arg{
 			{Name: "Member", Type: dcommand.Member},
 			{Name: "Amount", Type: &dcommand.BetArg{Min: 1}},
 			{Name: "Place", Type: dcommand.UserBalance},
+		},
+		ArgumentCombos: [][]int{
+			{0, 1, 2},
+			{0, 2, 1},
 		},
 		Run: util.AdminOrManageServerCommand(func(data *dcommand.Data) {
 			guildConfig := GetConfig(data.GuildID)
@@ -1080,7 +1089,7 @@ var shopCommands = []*dcommand.SummitCommand{
 		Category:    dcommand.CategoryEconomy,
 		Description: "Views the shop for the server",
 		Args: []*dcommand.Arg{
-			{Name: "Page", Type: &dcommand.IntArg{Min: 1}, Optional: true},
+			{Name: "Page", Type: &dcommand.IntArg{Min: 1}},
 		},
 		Run: func(data *dcommand.Data) {
 			guildConfig := GetConfig(data.GuildID)
@@ -1172,7 +1181,7 @@ var shopCommands = []*dcommand.SummitCommand{
 		ArgsRequired: 1,
 		Args: []*dcommand.Arg{
 			{Name: "Name", Type: dcommand.String},
-			{Name: "Quantity", Type: &dcommand.BetArg{Min: 1}, Optional: true},
+			{Name: "Quantity", Type: &dcommand.BetArg{Min: 1}},
 		},
 		Run: func(data *dcommand.Data) {
 			guildConfig := GetConfig(data.GuildID)
@@ -1337,7 +1346,7 @@ var inventoryCommands = []*dcommand.SummitCommand{
 		Aliases:     []string{"inv"},
 		Description: "Your inventory",
 		Args: []*dcommand.Arg{
-			{Name: "Page", Type: &dcommand.IntArg{Min: 1}, Optional: true},
+			{Name: "Page", Type: &dcommand.IntArg{Min: 1}},
 		},
 		Run: func(data *dcommand.Data) {
 			embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username + " Inventory", IconURL: data.Author.AvatarURL("256")}, Description: "There are no item on this page\nBuy some with `buyitem`", Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
