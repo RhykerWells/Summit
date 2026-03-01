@@ -2,6 +2,7 @@ package run
 
 import (
 	"context"
+	"flag"
 	"os"
 	"os/signal"
 	"syscall"
@@ -16,6 +17,11 @@ import (
 // Init initialises the core database system, discord gateway connection, and
 // starts all the additional bot services
 func Init() {
+	testing := flag.Bool("testing", false, "Enable test mode")
+	flag.Parse()
+
+	common.ConfigTestMode = *testing
+
 	err := common.Init()
 	if err != nil {
 		log.WithError(err).Fatal("Failed to start core")
