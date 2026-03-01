@@ -94,6 +94,7 @@ func (c *CommandHandler) RegisteredCommands() map[string]RegisteredCommand {
 			Aliases:        cmd.Aliases,
 			Description:    cmd.Description,
 			Args:           cmd.Args,
+			RequiredArgs:   cmd.ArgsRequired,
 			ArgumentCombos: cmd.ArgumentCombos,
 		}
 		cmdMap[cmd.Command] = *rcmd
