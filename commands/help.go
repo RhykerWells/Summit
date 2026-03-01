@@ -105,7 +105,7 @@ func help(command string, channelID string) {
 	args := getArgs(cmd)
 	helpEmbed.Description = cmd.Description
 	if args != "" {
-		helpEmbed.Description += "\n```" + cmd.Trigger + args + "\n```"
+		helpEmbed.Description += "\n```" + args + "\n```"
 	}
 	message := &discordgo.MessageSend{
 		Embed: helpEmbed,
@@ -122,16 +122,17 @@ func getArgs(command dcommand.RegisteredCommand) (str string) {
 		parts := []string{}
 		for _, combo := range command.ArgumentCombos {
 			var s strings.Builder
+			s.WriteString(command.Trigger) // Trigger once at start
 			for _, idx := range combo {
-				// Ensure index in range
 				if idx < 0 || idx >= len(command.Args) {
 					continue
 				}
-				s.WriteString(" <" + argHelp(command.Args[idx]) + ">")
+				s.WriteString(" <" + argHelp(command.Args[idx]) + ">") // Space before arg
 			}
-			parts = append(parts, strings.TrimSpace(s.String()))
+			parts = append(parts, s.String())
 		}
-		return " " + strings.Join(parts, "\nmute ")
+
+		return strings.Join(parts, "\n")
 	}
 
 	// Fallback: use RequiredArgs to mark which are required vs optional
