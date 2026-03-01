@@ -13,7 +13,6 @@ import (
 type Arg struct {
 	Name     string
 	Type     ArgumentType
-	Optional bool
 }
 
 type ArgumentType interface {
