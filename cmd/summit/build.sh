@@ -1,4 +1,8 @@
 #!/bin/bash
-VERSION=$(git describe --tags --abbrev=0)
-echo Building Summit version $VERSION
-go build -ldflags "-X github.com/RhykerWells/Summit/common.VERSION=$VERSION"
+set -euo pipefail
+
+# Compute version including commits ahead of tag
+VERSION=$(git describe --tags --always --dirty)
+echo "Building Summit development version $VERSION"
+
+go build -ldflags "-s -w -X github.com/RhykerWells/Summit/common.VERSION=$VERSION"

@@ -1,14 +1,26 @@
-FROM docker.io/golang:1.24.1
+# ---------- Builder ----------
+FROM golang:1.24.1 AS builder
 
 WORKDIR /app
-COPY ./go.mod ./go.sum ./
+
+COPY go.mod go.sum ./
 RUN go mod download
 
-COPY ./ .
+COPY . .
+
+ARG VERSION
 
 WORKDIR /app/cmd/summit
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-X github.com/RhykerWells/Summit/common.VERSION=$(git describe --tags --abbrev=0)"
+RUN CGO_ENABLED=0 GOOS=linux \
+    go build -ldflags "-s -w -X github.com/RhykerWells/Summit/common.VERSION=$VERSION"
+
+# ---------- Runtime ----------
+FROM gcr.io/distroless/base-debian12
+
+WORKDIR /app
+
+COPY --from=builder /app/cmd/summit/summit .
 
 EXPOSE 80
 
-CMD ["/app/cmd/summit/summit"]
+CMD ["/app/summit"]
