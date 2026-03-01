@@ -226,9 +226,12 @@ func getGithubReleases() []GithubRelease {
 	// Precompile the regex to match GitHub PR links
 	prLinkRe := regexp.MustCompile(`https://github\.com/[^/]+/[^/]+/pull/(\d+)`)
 
-	botVersion, err := semver.ParseTolerant(common.VERSION)
+	re := regexp.MustCompile(`^v?\d+\.\d+\.\d+`)
+	match := re.FindString(common.VERSION)
+
+	botVersion, err := semver.ParseTolerant(match)
 	if err != nil {
-		botVersion = semver.Version{} // fallback to 0.0.0
+		botVersion = semver.Version{}
 	}
 
 	filtered := make([]GithubRelease, 0, len(releases))
