@@ -36,7 +36,7 @@
 			<div class="col-lg-5 pb-5">
 				<div class="card">
 					<div class="card-header">
-						<h2 class="card-title">Information</h2>
+						<h2 class="card-title">Information {{if .Testing}}(development: <code>{{.Version}}</code>){{end}}</h2>
 					</div>
 					<div class="card-body">
 						<p>Summit started off as a hobby project to teach myself Golang (which the bot is written in).</p>
