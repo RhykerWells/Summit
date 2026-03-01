@@ -47,16 +47,23 @@ func muteUser(config *Config, targetID string, duration time.Duration) error {
 		}
 	}
 
-	unmuteTime := time.Now().Add(duration)
+	var unmuteTime time.Time
+	if duration > 0 {
+		unmuteTime = time.Now().Add(duration)
+	}
+
 	muteEntry := models.ModerationMute{
 		GuildID:  config.GuildID,
 		UserID:   targetID,
 		Roles:    rolesRemoved,
 		UnmuteAt: unmuteTime,
 	}
+
 	muteEntry.Upsert(context.Background(), common.PQ, true, []string{models.ModerationMuteColumns.GuildID, models.ModerationMuteColumns.UserID}, boil.Whitelist(models.ModerationMuteColumns.UnmuteAt), boil.Infer())
 
-	scheduleUnmute(config, targetID, unmuteTime)
+	if duration > 0 {
+		scheduleUnmute(config, targetID, unmuteTime)
+	}
 
 	return nil
 }

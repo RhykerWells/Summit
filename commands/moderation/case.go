@@ -68,10 +68,21 @@ func buildLogEmbed(caseNumber int64, author, target *discordgo.User, action logA
 		Description: fmt.Sprintf("%s **Case number:** %s\n%s **Who:** %s `(ID %s)`\n%s **Action:** %s\n%s **Channel:** <#%s>\n%s **Reason:** %s", caseEmoji, humanReadableCaseNumber, userEmoji, target.Mention(), target.ID, actionEmoji, action.Name, channelEmoji, channelID, reasonEmoji, reason),
 		Color:       action.Colour,
 	}
+
+	if action != logMute && action != logBan {
+		return embed
+	}
+
 	if len(duration) > 0 {
 		d := duration[0]
-		embed.Footer = &discordgo.MessageEmbedFooter{
-			Text: fmt.Sprintf("Duration: %s", durationutil.HumanizeDuration(d)),
+		if d > 0 {
+			embed.Footer = &discordgo.MessageEmbedFooter{
+				Text: fmt.Sprintf("Duration: %s", durationutil.HumanizeDuration(d)),
+			}
+		} else {
+			embed.Footer = &discordgo.MessageEmbedFooter{
+				Text: "Duration: Indefinite",
+			}
 		}
 	}
 
