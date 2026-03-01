@@ -224,7 +224,11 @@ var informationCommands = []*dcommand.SummitCommand{
 		Description: "Views your server leaderboard",
 		Run: (func(data *dcommand.Data) {
 			guildConfig := GetConfig(data.GuildID)
-			guild, _ := common.Session.Guild(data.GuildID)
+			guild, err := common.Session.Guild(data.GuildID)
+			if err != nil || guild == nil {
+				functions.SendBasicMessage(data.ChannelID, "Failed to retrieve guild information.")
+				return
+			}
 			embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " leaderboard", IconURL: guild.IconURL("256")}, Description: "No users are on this page", Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
 			components := []discordgo.MessageComponent{discordgo.ActionsRow{Components: []discordgo.MessageComponent{discordgo.Button{Label: "previous", Style: 4, Disabled: true, CustomID: "leaderboard_back"}, discordgo.Button{Label: "next", Style: 3, Disabled: true, CustomID: "leaderboard_forward"}}}}
 
@@ -267,7 +271,10 @@ func leaderboardPagination(s *discordgo.Session, b *discordgo.InteractionCreate)
 	}
 
 	guildConfig := GetConfig(b.GuildID)
-	guild, _ := common.Session.Guild(b.GuildID)
+	guild, err := common.Session.Guild(b.GuildID)
+	if err != nil || guild == nil {
+		return
+	}
 	embed := []*discordgo.MessageEmbed{{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " leaderboard", IconURL: guild.IconURL("256")}, Description: "No users are on this page", Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}}
 	components := []discordgo.MessageComponent{discordgo.ActionsRow{Components: []discordgo.MessageComponent{discordgo.Button{Label: "previous", Style: 4, Disabled: true, CustomID: "leaderboard_back"}, discordgo.Button{Label: "next", Style: 3, Disabled: true, CustomID: "leaderboard_forward"}}}}
 
@@ -1093,7 +1100,11 @@ var shopCommands = []*dcommand.SummitCommand{
 		},
 		Run: func(data *dcommand.Data) {
 			guildConfig := GetConfig(data.GuildID)
-			guild, _ := common.Session.Guild(data.GuildID)
+			guild, err := common.Session.Guild(data.GuildID)
+			if err != nil || guild == nil {
+				functions.SendBasicMessage(data.ChannelID, "Failed to retrieve guild information.")
+				return
+			}
 			embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " Shop", IconURL: guild.IconURL("256")}, Description: "No items are in the shop for this page.\nAdd some with `createitem`", Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
 			components := []discordgo.MessageComponent{discordgo.ActionsRow{Components: []discordgo.MessageComponent{discordgo.Button{Label: "previous", Style: 4, Disabled: true, CustomID: "shop_back"}, discordgo.Button{Label: "next", Style: 3, Disabled: true, CustomID: "shop_forward"}}}}
 
@@ -1148,7 +1159,11 @@ var shopCommands = []*dcommand.SummitCommand{
 		},
 		Run: func(data *dcommand.Data) {
 			guildConfig := GetConfig(data.GuildID)
-			guild, _ := common.Session.Guild(data.GuildID)
+			guild, err := common.Session.Guild(data.GuildID)
+			if err != nil || guild == nil {
+				functions.SendBasicMessage(data.ChannelID, "Failed to retrieve guild information.")
+				return
+			}
 			embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " Store", IconURL: guild.IconURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
 
 			item, err := models.EconomyShops(models.EconomyShopWhere.GuildID.EQ(data.GuildID), models.EconomyShopWhere.Name.EQ(data.ParsedArgs[0].String())).One(context.Background(), common.PQ)
@@ -1185,7 +1200,11 @@ var shopCommands = []*dcommand.SummitCommand{
 		},
 		Run: func(data *dcommand.Data) {
 			guildConfig := GetConfig(data.GuildID)
-			guild, _ := common.Session.Guild(data.GuildID)
+			guild, err := common.Session.Guild(data.GuildID)
+			if err != nil || guild == nil {
+				functions.SendBasicMessage(data.ChannelID, "Failed to retrieve guild information.")
+				return
+			}
 			embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " Store", IconURL: guild.IconURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
 
 			fullEconomyMember := getFullEconomyMember(guildConfig, data.Author.ID)
@@ -1276,7 +1295,10 @@ func shopPagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
 	}
 
 	guildConfig := GetConfig(b.GuildID)
-	guild, _ := common.Session.Guild(b.GuildID)
+	guild, err := common.Session.Guild(b.GuildID)
+	if err != nil || guild == nil {
+		return
+	}
 	embed := []*discordgo.MessageEmbed{{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " Shop", IconURL: guild.IconURL("256")}, Description: "No items are in the shop for this page.\nAdd some with `createitem`", Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}}
 	components := []discordgo.MessageComponent{discordgo.ActionsRow{Components: []discordgo.MessageComponent{discordgo.Button{Label: "previous", Style: 4, Disabled: true, CustomID: "shop_back"}, discordgo.Button{Label: "next", Style: 3, Disabled: true, CustomID: "shop_forward"}}}}
 
@@ -1397,7 +1419,11 @@ var inventoryCommands = []*dcommand.SummitCommand{
 			{Name: "Quantity", Type: dcommand.Int},
 		},
 		Run: func(data *dcommand.Data) {
-			guild, _ := common.Session.Guild(data.GuildID)
+			guild, err := common.Session.Guild(data.GuildID)
+			if err != nil || guild == nil {
+				functions.SendBasicMessage(data.ChannelID, "Failed to retrieve guild information.")
+				return
+			}
 			embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: guild.Name + " Store", IconURL: guild.IconURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
 
 			item, err := models.EconomyUserInventories(models.EconomyUserInventoryWhere.GuildID.EQ(data.GuildID), models.EconomyUserInventoryWhere.UserID.EQ(data.Author.ID), models.EconomyUserInventoryWhere.Name.EQ(data.ParsedArgs[0].String())).One(context.Background(), common.PQ)
