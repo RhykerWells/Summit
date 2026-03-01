@@ -51,8 +51,12 @@ func Init() error {
 	if ConfigPGHost != "" {
 		host = ConfigPGHost
 	}
+	port := "5432"
+	if ConfigPGPort != "" {
+		port = ConfigPGPort
+	}
 
-	err = postgresConnect(db, host, ConfigPGUsername, ConfigPGPassword)
+	err = postgresConnect(db, host, port, ConfigPGUsername, ConfigPGPassword)
 	if err != nil {
 		log.WithError(err).Fatal("Failed to connect to database")
 	}
@@ -71,7 +75,7 @@ func Run(s *discordgo.Session) {
 }
 
 // postgresConnect opens the database connection and sets the global variables to be accessible
-func postgresConnect(database string, host string, username string, password string) error {
+func postgresConnect(database string, host string, port string, username string, password string) error {
 	if host == "" {
 		host = "localhost"
 	}
@@ -81,7 +85,7 @@ func postgresConnect(database string, host string, username string, password str
 	}
 
 	// Initialise database
-	db, err := sql.Open("postgres", fmt.Sprintf("host=%s user=%s dbname=%s sslmode=disable%s", host, username, database, password))
+	db, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable%s", host, port, username, database, password))
 	if err != nil {
 		return err
 	}

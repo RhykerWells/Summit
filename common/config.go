@@ -11,11 +11,13 @@ var (
 	ConfigBotSecret   = os.Getenv("SUMMIT_CLIENTSECRET")
 
 	ConfigPGHost     = os.Getenv("SUMMIT_PGHOST")
+	ConfigPGPort     = os.Getenv("SUMMIT_PGPORT")
 	ConfigPGDB       = os.Getenv("SUMMIT_PGDB")
 	ConfigPGUsername = os.Getenv("SUMMIT_PGUSER")
 	ConfigPGPassword = os.Getenv("SUMMIT_PGPASSWORD")
 
 	ConfigSummitHost         = os.Getenv("SUMMIT_HOST")
+	ConfigSummitHTTPPort     = os.Getenv("SUMMIT_HTTPPORT")
 	ConfigTermsURLOverride   = os.Getenv("SUMMIT_TERMSURLOVERRIDE")
 	ConfigPrivacyURLOverride = os.Getenv("SUMMIT_PRIVACYURLOVERRIDE")
 
