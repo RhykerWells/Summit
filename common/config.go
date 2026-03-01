@@ -17,6 +17,7 @@ var (
 	ConfigPGPassword = os.Getenv("SUMMIT_PGPASSWORD")
 
 	ConfigSummitHost         = os.Getenv("SUMMIT_HOST")
+	ConfigSummitHTTPPort     = os.Getenv("SUMMIT_HTTPPORT")
 	ConfigTermsURLOverride   = os.Getenv("SUMMIT_TERMSURLOVERRIDE")
 	ConfigPrivacyURLOverride = os.Getenv("SUMMIT_PRIVACYURLOVERRIDE")
 
