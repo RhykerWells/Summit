@@ -533,7 +533,7 @@ var incomeCommands = []*dcommand.SummitCommand{
 		Description: "Flips a coin. Head or tails. Payout is equal to `<Bet>`",
 		Args: []*dcommand.Arg{
 			{Name: "Bet", Type: &dcommand.BetArg{Min: 1}},
-			{Name: "Coin side", Type: dcommand.Coin},
+			{Name: "Coin", Type: &dcommand.StringArg{Options: []string{"Heads", "Tails"}}},
 		},
 		ArgumentCombos: [][]int{
 			{0, 1},
@@ -940,7 +940,7 @@ var transferCommands = []*dcommand.SummitCommand{
 		Args: []*dcommand.Arg{
 			{Name: "Member", Type: dcommand.Member},
 			{Name: "Amount", Type: &dcommand.BetArg{Min: 1}},
-			{Name: "Place", Type: dcommand.UserBalance},
+			{Name: "Place", Type: &dcommand.StringArg{Options: []string{"Cash", "Bank"}}},
 		},
 		ArgumentCombos: [][]int{
 			{0, 1, 2},
@@ -984,7 +984,7 @@ var transferCommands = []*dcommand.SummitCommand{
 		Args: []*dcommand.Arg{
 			{Name: "Member", Type: dcommand.Member},
 			{Name: "Amount", Type: &dcommand.BetArg{Min: 1}},
-			{Name: "Place", Type: dcommand.UserBalance},
+			{Name: "Place", Type: &dcommand.StringArg{Options: []string{"Cash", "Bank"}}},
 		},
 		ArgumentCombos: [][]int{
 			{0, 1, 2},
