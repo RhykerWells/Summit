@@ -85,18 +85,13 @@ func findBasicPrefix(message string, guildID string) (string, bool) {
 
 // findMentionPrefix finds a bot mention prefix such as @Summit
 func findMentionPrefix(botID string, message string) (string, bool) {
-	prefix := ""
-	ok := false
-
 	if strings.Index(message, "<@"+botID+">") == 0 {
-		prefix = "<@" + botID + ">"
-		ok = true
+		return "<@" + botID + ">", true
 	} else if strings.Index(message, "<@!"+botID+">") == 0 {
-		prefix = "<@!" + botID + ">"
-		ok = true
+		return "<@!" + botID + ">", true
 	}
 
-	return prefix, ok
+	return "", false
 }
 
 // runCommand logs the command called by the bot, ensures the correct number of args is present, parses the args, then runs the command
