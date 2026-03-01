@@ -219,7 +219,11 @@ func banUser(config *Config, author, target *discordgo.Member, reason string, du
 		return err
 	}
 
-	unbanTime := time.Now().Add(duration)
+	var unbanTime time.Time
+	if duration > 0 {
+		unbanTime = time.Now().Add(duration)
+	}
+
 	banEntry := models.ModerationBan{
 		GuildID: config.GuildID,
 		UserID:  target.User.ID,
