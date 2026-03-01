@@ -30,11 +30,6 @@ func InitEvents(s *discordgo.Session, database *sql.DB) {
 	s.AddHandler(channelUpdate)
 	s.AddHandler(channelDelete)
 
-	// Guild role events
-	s.AddHandler(guildRoleCreate)
-	s.AddHandler(guildRoleUpdate)
-	s.AddHandler(guildRoleDelete)
-
 	// Message events
 	s.AddHandler(messageCreate)
 
