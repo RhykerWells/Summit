@@ -18,6 +18,7 @@ func NewCommandHandler() *CommandHandler {
 		cmdMap:       make(map[string]SummitCommand),
 	}
 	CmdHndlr = handler
+
 	return CmdHndlr
 }
 
@@ -37,23 +38,13 @@ func (c *CommandHandler) HandleMessageCreate(s *discordgo.Session, event *discor
 		return
 	}
 
-	command := strings.ToLower(prefixRemoved[0])
-
-outer:
-	for _, cmd := range c.cmdMap {
-		for _, alias := range cmd.Aliases {
-			if alias == command {
-				command = cmd.Command
-				break outer
-			}
-		}
-	}
-	cmd, ok := c.cmdMap[command]
+	messageTrigger := strings.ToLower(prefixRemoved[0])
+	cmd, ok := c.cmdMap[messageTrigger]
 	if !ok {
 		return
 	}
 
-	commandArgs := prefixRemoved[1:]
+	commandTokens := prefixRemoved[1:]
 
 	data := &Data{
 		Session:    s,
@@ -65,7 +56,7 @@ outer:
 		Message:    event.Message,
 	}
 
-	go runCommand(cmd, data, commandArgs)
+	go runCommand(cmd, data, commandTokens)
 }
 
 // checkMessagePrefix checks a given content for the prefix or bot mention of the guild
@@ -78,6 +69,7 @@ func checkMessagePrefix(botID string, event *discordgo.MessageCreate) (prefix st
 	if ok {
 		return prefix, true
 	}
+
 	return "", false
 }
 
@@ -87,6 +79,7 @@ func findBasicPrefix(message string, guildID string) (string, bool) {
 	if strings.HasPrefix(message, prefix) {
 		return prefix, true
 	}
+
 	return "", false
 }
 
@@ -102,51 +95,22 @@ func findMentionPrefix(botID string, message string) (string, bool) {
 		prefix = "<@!" + botID + ">"
 		ok = true
 	}
+
 	return prefix, ok
 }
 
 // runCommand logs the command called by the bot, ensures the correct number of args is present, parses the args, then runs the command
-func runCommand(cmd SummitCommand, data *Data, commandArgs []string) {
+func runCommand(cmd SummitCommand, data *Data, tokens []string) {
 	logrus.WithFields(logrus.Fields{
 		"Guild":           data.GuildID,
 		"Command":         cmd.Command,
 		"Triggering user": data.Author.ID},
 	).Infoln("Executed command")
 
-	argCount := len(commandArgs)
-	if argCount < cmd.ArgsRequired {
-		handleMissingRequiredArgs(cmd, data)
+	err, embed := handleMissingOrInvalidArgs(cmd, data, tokens)
+	if err != nil {
+		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 		return
-	}
-
-	var parsedArgs []*ParsedArg
-	for i, arg := range cmd.Args {
-		if i >= len(commandArgs) {
-			if arg.Optional {
-				continue
-			}
-		}
-		argValue := commandArgs[i]
-
-		// Assign the excess args to the last string arg if the arg exists
-		if i == len(cmd.Args)-1 && arg.Type == String {
-			argValue = strings.Join(commandArgs[i:], " ")
-		}
-
-		arg := cmd.Args[i]
-		parsedArgs = append(parsedArgs, &ParsedArg{
-			Name:  arg.Name,
-			Type:  arg.Type,
-			Value: argValue,
-		})
-	}
-	data.ParsedArgs = parsedArgs
-
-	if argCount > 0 {
-		if embed, invalid := handleInvalidArgs(cmd, data); invalid {
-			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-			return
-		}
 	}
 
 	cmd.Run(data)

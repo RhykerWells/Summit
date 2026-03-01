@@ -27,14 +27,16 @@ var (
 
 // SummitCommand defines the general data that must be set during the addition of a new command
 type SummitCommand struct {
-	Command      string
-	Category     CommandCategory
-	Aliases      []string
-	Description  string
-	ArgsRequired int
-	Args         []*Arg
-	Run          Run
-	Data         *Data
+	Command     string
+	Category    CommandCategory
+	Aliases     []string
+	Description string
+
+	Args           []*Arg
+	ArgsRequired   int // Ignored if using combos
+	ArgumentCombos [][]int
+
+	Run Run
 }
 
 // CommandCategory defines the available category types for commands
@@ -51,24 +53,33 @@ type CommandHandler struct {
 
 // RegisteredCommand defines the context required to access data surrounding a command
 type RegisteredCommand struct {
-	Trigger     string
-	Category    CommandCategory
-	Aliases     []string
-	Description string
-	Args        []*Arg
+	Trigger        string
+	Category       CommandCategory
+	Aliases        []string
+	Description    string
+	Args           []*Arg
+	RequiredArgs   int
+	ArgumentCombos [][]int
 }
 
 // RegisterCommands adds each command to the command handler
 func (c *CommandHandler) RegisterCommands(cmds ...*SummitCommand) {
 	for _, cmd := range cmds {
 		c.cmdInstances = append(c.cmdInstances, *cmd)
-		for range cmd.Command {
-			if len(cmd.Aliases) > 3 {
-				aliasOver := len(cmd.Aliases) - 3
-				cmd.Aliases = cmd.Aliases[:len(cmd.Aliases)-aliasOver]
-				logrus.Warnln(fmt.Sprintf("%s has %d too many aliases. Automatically removed the last %d.", cmd.Command, aliasOver, aliasOver))
-			}
-			c.cmdMap[cmd.Command] = *cmd
+
+		// Limit aliases to 3 max
+		if len(cmd.Aliases) > 3 {
+			aliasOver := len(cmd.Aliases) - 3
+			cmd.Aliases = cmd.Aliases[:3]
+			logrus.Warnln(fmt.Sprintf("%s has %[2]d too many aliases. Automatically removed the last %[2]d.", cmd.Command, aliasOver))
+		}
+
+		// Register main command
+		c.cmdMap[cmd.Command] = *cmd
+
+		// Register aliases
+		for _, alias := range cmd.Aliases {
+			c.cmdMap[alias] = *cmd
 		}
 	}
 }
@@ -78,11 +89,13 @@ func (c *CommandHandler) RegisteredCommands() map[string]RegisteredCommand {
 	cmdMap := make(map[string]RegisteredCommand)
 	for _, cmd := range c.cmdMap {
 		rcmd := &RegisteredCommand{
-			Trigger:     cmd.Command,
-			Category:    cmd.Category,
-			Aliases:     cmd.Aliases,
-			Description: cmd.Description,
-			Args:        cmd.Args,
+			Trigger:        cmd.Command,
+			Category:       cmd.Category,
+			Aliases:        cmd.Aliases,
+			Description:    cmd.Description,
+			Args:           cmd.Args,
+			RequiredArgs:   cmd.ArgsRequired,
+			ArgumentCombos: cmd.ArgumentCombos,
 		}
 		cmdMap[cmd.Command] = *rcmd
 	}

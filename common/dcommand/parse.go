@@ -1,6 +1,7 @@
 package dcommand
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -110,40 +111,179 @@ func (p *ParsedArg) BalanceType() string {
 	return strings.ToLower(strings.TrimSpace(p.String()))
 }
 
-// handleMissingArgs sends a message to the user notifying them that one or more required
-// arguments are missing from their command invocation. Optional arguments are ignored.
-func handleMissingRequiredArgs(cmd SummitCommand, data *Data) {
-	args := cmd.Args
-	var missingArgs []*Arg
+// handleMissingOrInvalidArgs
+func handleMissingOrInvalidArgs(cmd SummitCommand, data *Data, tokens []string) (error, *discordgo.MessageEmbed) {
+	// If no combos defined, use positional parsing
+	if len(cmd.ArgumentCombos) == 0 {
 
-	for _, arg := range args {
-		if arg.Optional {
+		// Build display string
+		display := ""
+		for i, a := range cmd.Args {
+			if i < cmd.ArgsRequired {
+				display += " <" + a.Name + ":" + a.Type.Help() + ">"
+			} else {
+				display += " [" + a.Name + ":" + a.Type.Help() + "]"
+			}
+		}
+
+		// ensure we satisfy the required arg count
+		if len(tokens) < cmd.ArgsRequired {
+			return errors.New("Token number under threshhold"), errorEmbed(cmd.Command, data, fmt.Sprintf("Missing required arguments\n```%s %s```", cmd.Command, display))
+		}
+
+		parsedArgs := []*ParsedArg{}
+		for i, arg := range cmd.Args {
+			var value string
+			if i < len(tokens) {
+				value = tokens[i]
+				// Last string absorbs remaining tokens
+				if i == len(cmd.Args)-1 && arg.Type == String && len(tokens) > i {
+					value = strings.Join(tokens[i:], " ")
+				}
+			} else {
+				parsedArgs = append(parsedArgs, &ParsedArg{Name: arg.Name, Type: arg.Type, Value: nil})
+				continue
+			}
+
+			parsedArgs = append(parsedArgs, &ParsedArg{
+				Name:  arg.Name,
+				Type:  arg.Type,
+				Value: value,
+			})
+		}
+
+		// Validate only supplied arguments
+		for _, pArg := range parsedArgs {
+			if pArg.Value == nil {
+				continue
+			}
+			if !pArg.Type.ValidateArg(pArg, data) {
+				return errors.New("arg value does not match required type"), errorEmbed(cmd.Command, data, fmt.Sprintf("Invalid `%s` argument. Expected: `%s`", pArg.Name, pArg.Type.Help()))
+			}
+		}
+
+		data.ParsedArgs = parsedArgs
+		return nil, nil
+	}
+
+	// --- Handle combos  ---
+	for _, combo := range cmd.ArgumentCombos {
+
+		// If there are fewer tokens than combo entries, this combo can't match
+		if len(tokens) < len(combo) {
 			continue
 		}
-		missingArgs = append(missingArgs, arg)
+
+		// Determine if we have extra tokens and, if so, which argument can absorb them.
+		absorbIdx := -1
+		if len(tokens) > len(combo) {
+			for i := len(combo) - 1; i >= 0; i-- {
+				if cmd.Args[combo[i]].Type == String {
+					absorbIdx = i
+					break
+				}
+			}
+			if absorbIdx == -1 {
+				// no string argument available to take the overflow
+				continue
+			}
+		}
+
+		// Distribute the tokens to the arguments, with the last string argument absorbing any leftover words
+		ok := true
+		tokenIdx := 0
+
+		for i, defPos := range combo {
+			def := cmd.Args[defPos]
+			var token string
+
+			if absorbIdx != -1 && i == absorbIdx {
+				// This argument swallows either all remaining tokens (if it's last)
+				// or all tokens up until there are enough left for the subsequent
+				// arguments.
+				if absorbIdx == len(combo)-1 {
+					token = strings.Join(tokens[tokenIdx:], " ")
+					tokenIdx = len(tokens)
+				} else {
+					rems := len(combo) - (i + 1) // number of args after this one
+					end := len(tokens) - rems
+					if end <= tokenIdx {
+						ok = false
+						break
+					}
+					token = strings.Join(tokens[tokenIdx:end], " ")
+					tokenIdx = end
+				}
+			} else {
+				if tokenIdx >= len(tokens) {
+					ok = false
+					break
+				}
+				token = tokens[tokenIdx]
+				tokenIdx++
+			}
+
+			if !def.Type.ValidateArg(&ParsedArg{Type: def.Type, Value: token}, data) {
+				ok = false
+				break
+			}
+		}
+		if !ok {
+			continue
+		}
+
+		// Build parsed args according to the combo mapping using similar logic
+		parsedArgs := make([]*ParsedArg, len(cmd.Args))
+		tokenIdx = 0
+		for i, defPos := range combo {
+			def := cmd.Args[defPos]
+			var val string
+
+			if absorbIdx != -1 && i == absorbIdx {
+				if absorbIdx == len(combo)-1 {
+					val = strings.Join(tokens[tokenIdx:], " ")
+					tokenIdx = len(tokens)
+				} else {
+					rems := len(combo) - (i + 1)
+					end := len(tokens) - rems
+					val = strings.Join(tokens[tokenIdx:end], " ")
+					tokenIdx = end
+				}
+			} else {
+				val = tokens[tokenIdx]
+				tokenIdx++
+			}
+
+			parsedArgs[defPos] = &ParsedArg{
+				Name:  def.Name,
+				Type:  def.Type,
+				Value: val,
+			}
+		}
+
+		data.ParsedArgs = parsedArgs
+		return nil, nil
 	}
 
-	var argDisplay string
-	for _, arg := range missingArgs {
-		argDisplay += fmt.Sprintf("<%s:%s> ", arg.Name, arg.Type.Help())
-	}
+	// No combo matched
+	display := ""
+	for _, combo := range cmd.ArgumentCombos {
+		display += "\n" + cmd.Command
+		for i, idx := range combo {
+			if idx < 0 || idx >= len(cmd.Args) {
+				continue
+			}
 
-	embed := errorEmbed(cmd.Command, data, fmt.Sprintf("Missing required args\n```%s %s```", cmd.Command, argDisplay))
-	functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
-}
-
-// handleInvalidArgs validates each argument passed to a command against its defined type.
-// If an invalid argument is found, it returns an error embed and a boolean flag set to true.
-// Otherwise, it returns nil and false.
-func handleInvalidArgs(cmd SummitCommand, data *Data) (*discordgo.MessageEmbed, bool) {
-	for _, arg := range data.ParsedArgs {
-		if !arg.Type.ValidateArg(arg, data) {
-			return errorEmbed(cmd.Command, data, fmt.Sprintf("Invalid `%s` argument. Expected: `%s`", arg.Name, arg.Type.Help())), true
+			arg := cmd.Args[idx]
+			if i < cmd.ArgsRequired {
+				display += " <" + arg.Name + ":" + arg.Type.Help() + ">"
+			} else {
+				display += " [" + arg.Name + ":" + arg.Type.Help() + "]"
+			}
 		}
 	}
 
-	// Return nil if no errors
-	return nil, false
+	return errors.New("Invalid argument order or types"), errorEmbed(cmd.Command, data, fmt.Sprintf("Invalid argument order or types\nExpected one of:\n```%s %s```", cmd.Command, display))
 }
 
 // errorEmbed constructs and returns a standardized error embed for a command execution failure.

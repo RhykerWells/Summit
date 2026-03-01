@@ -16,29 +16,24 @@ var helpCmd = &dcommand.SummitCommand{
 	Aliases:  []string{"h"},
 	Category: dcommand.CategoryGeneral,
 	Args: []*dcommand.Arg{
-		{Name: "Command", Type: dcommand.String, Optional: true},
+		{Name: "Command", Type: dcommand.String},
 	},
 	Description: "Displays bot help",
-	Run:         helpFunc,
-}
+	Run: func(data *dcommand.Data) {
+		command := ""
+		if len(data.ParsedArgs) > 0 {
+			command = data.ParsedArgs[0].String()
+		}
 
-// helpFunc is the entry point for the "help" command.
-// If a command name is provided in Args, it will show detailed help for that command.
-// Otherwise, it will show a generic category overview of all commands.
-func helpFunc(data *dcommand.Data) {
-	command := ""
-	if len(data.ParsedArgs) > 0 {
-		command = data.ParsedArgs[0].String()
-	}
+		// Per-command help
+		if command != "" {
+			help(command, data.ChannelID)
+			return
+		}
 
-	// Per-command help
-	if command != "" {
-		help(command, data.ChannelID)
-		return
-	}
-
-	// Generic help category
-	genericCategoryHelp(data.ChannelID)
+		// Generic help category
+		genericCategoryHelp(data.ChannelID)
+	},
 }
 
 // genericCategoryHelp builds and sends an embed listing all available categories
@@ -122,14 +117,32 @@ func help(command string, channelID string) {
 // Required arguments are enclosed in <angle brackets>, and optional arguments
 // are enclosed in [square brackets].
 func getArgs(command dcommand.RegisteredCommand) (str string) {
-	for _, arg := range command.Args {
-		if arg.Optional {
-			str += " [" + argHelp(arg) + "]"
-		} else {
+	// If explicit argument combos are provided, show them as alternatives
+	if len(command.ArgumentCombos) > 0 {
+		parts := []string{}
+		for _, combo := range command.ArgumentCombos {
+			var s strings.Builder
+			for _, idx := range combo {
+				// Ensure index in range
+				if idx < 0 || idx >= len(command.Args) {
+					continue
+				}
+				s.WriteString(" <" + argHelp(command.Args[idx]) + ">")
+			}
+			parts = append(parts, strings.TrimSpace(s.String()))
+		}
+		return " " + strings.Join(parts, "\nmute ")
+	}
+
+	// Fallback: use RequiredArgs to mark which are required vs optional
+	for i, arg := range command.Args {
+		if i < command.RequiredArgs {
 			str += " <" + argHelp(arg) + ">"
+		} else {
+			str += " [" + argHelp(arg) + "]"
 		}
 	}
-	return
+	return str
 }
 
 // argHelp returns a formatted string for a single argument, showing both its
