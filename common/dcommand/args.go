@@ -11,8 +11,8 @@ import (
 
 // Arg defines the structure to pass argument data with
 type Arg struct {
-	Name     string
-	Type     ArgumentType
+	Name string
+	Type ArgumentType
 }
 
 type ArgumentType interface {
@@ -21,14 +21,12 @@ type ArgumentType interface {
 }
 
 var (
-	String      = &StringArg{}
-	Int         = &IntArg{}
-	User        = &UserArg{}
-	Member      = &MemberArg{}
-	Bet         = &BetArg{}
-	Duration    = &DurationArg{}
-	Coin        = &CoinArg{}
-	UserBalance = &BalanceArg{}
+	String   = &StringArg{}
+	Int      = &IntArg{}
+	User     = &UserArg{}
+	Member   = &MemberArg{}
+	Bet      = &BetArg{}
+	Duration = &DurationArg{}
 )
 
 var (
@@ -38,18 +36,32 @@ var (
 	_ ArgumentType = (*MemberArg)(nil)
 	_ ArgumentType = (*BetArg)(nil)
 	_ ArgumentType = (*DurationArg)(nil)
-	_ ArgumentType = (*CoinArg)(nil)
-	_ ArgumentType = (*BalanceArg)(nil)
 )
 
-type StringArg struct{}
+type StringArg struct {
+	Options []string
+}
 
 func (s *StringArg) Help() string {
+	if len(s.Options) > 0 {
+		return fmt.Sprintf("%s", strings.Join(s.Options, "/"))
+	}
+
 	return "Text"
 }
 
 func (s *StringArg) ValidateArg(arg *ParsedArg, data *Data) bool {
-	return true
+	v := arg.Value.(string)
+	if len(s.Options) > 0 {
+		for _, option := range s.Options {
+			if strings.EqualFold(v, option) {
+				return true
+			}
+		}
+		return false
+	}
+
+	return v != ""
 }
 
 type IntArg struct {
@@ -109,12 +121,16 @@ type BetArg struct {
 }
 
 func (b *BetArg) Help() string {
-	var maxStr string
+	var rangeDesc string
 	if b.Max != 0 {
-		maxStr = fmt.Sprintf(" and below %d", b.Max)
+		rangeDesc = fmt.Sprintf("%d-%d", b.Min, b.Max)
+	} else {
+		rangeDesc = fmt.Sprintf("%d+", b.Min)
 	}
-	return fmt.Sprintf("Whole number above %d%s|Max|All", b.Min, maxStr)
+	return fmt.Sprintf("%s/Max/All", rangeDesc)
 }
+
+var intRegex = regexp.MustCompile(`^-?\d+$`)
 
 func (b *BetArg) ValidateArg(arg *ParsedArg, data *Data) bool {
 	vStr := strings.ToLower(strings.TrimSpace(arg.Value.(string)))
@@ -125,8 +141,7 @@ func (b *BetArg) ValidateArg(arg *ParsedArg, data *Data) bool {
 	}
 
 	// Validate integer via regex or conversion
-	matched, _ := regexp.MatchString(`^-?\d+$`, vStr)
-	if !matched {
+	if !intRegex.MatchString(vStr) {
 		return false
 	}
 
@@ -152,38 +167,4 @@ func (d *DurationArg) ValidateArg(arg *ParsedArg, data *Data) bool {
 	_, err := durationutil.ToDuration(v)
 
 	return err == nil
-}
-
-type CoinArg struct{}
-
-func (c *CoinArg) Help() string {
-	return "Heads/Tails"
-}
-
-func (c *CoinArg) ValidateArg(arg *ParsedArg, data *Data) bool {
-	vStr := strings.ToLower(strings.TrimSpace(arg.Value.(string)))
-
-	// Allow keywords
-	if vStr != "heads" && vStr != "tails" {
-		return false
-	}
-
-	return true
-}
-
-type BalanceArg struct{}
-
-func (b *BalanceArg) Help() string {
-	return "Bank/Cash"
-}
-
-func (b *BalanceArg) ValidateArg(arg *ParsedArg, data *Data) bool {
-	vStr := strings.ToLower(strings.TrimSpace(arg.Value.(string)))
-
-	// Allow keywords
-	if vStr != "bank" && vStr != "cash" {
-		return false
-	}
-
-	return true
 }
