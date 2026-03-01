@@ -177,8 +177,13 @@ func runRootMultiplexer() {
 
 // runWebServer serves the multiplexer on the default http port
 func runWebServer(multiplexer *goji.Mux) {
-	logrus.Info("Webserver started on :80")
-	http.ListenAndServe(":80", multiplexer)
+	httpPort := "80"
+	if common.ConfigSummitHTTPPort != "" {
+		httpPort = common.ConfigSummitHTTPPort
+	}
+
+	logrus.Infof("Webserver started on :%s", httpPort)
+	http.ListenAndServe(":"+httpPort, multiplexer)
 }
 
 // Called by plugins to add their routes
