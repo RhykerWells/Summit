@@ -222,7 +222,7 @@ func AddRole(guildID string, memberID, roleID string) error {
 	return err
 }
 
-// AddRole removes a given roleID to a user
+// RemoveRole removes a given roleID from a user
 func RemoveRole(guildID, memberID, roleID string) error {
 	member, err := GetMember(guildID, memberID)
 	if err != nil {
@@ -230,7 +230,7 @@ func RemoveRole(guildID, memberID, roleID string) error {
 	}
 	if !slices.Contains(member.Roles, roleID) {
 		// User doesn't have role
-		return err
+		return nil
 	}
 	err = common.Session.GuildMemberRoleRemove(guildID, memberID, roleID)
 
