@@ -299,9 +299,8 @@ func IsRoleHigher(higher, lower *discordgo.Role) bool {
 
 // Misc
 func SetStatus(statusText string) {
-	// TODO VERSION on nothing
 	if statusText == "" {
-		statusText = ""
+		statusText = common.VERSION
 	}
 
 	common.Session.UpdateCustomStatus(statusText)
