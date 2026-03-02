@@ -19,7 +19,7 @@ var helpCmd = &dcommand.SummitCommand{
 		{Name: "Command", Type: dcommand.String},
 	},
 	Description: "Displays bot help",
-	Run: func(data *dcommand.Data) {
+	Run: func(data *dcommand.Data) error {
 		command := ""
 		if len(data.ParsedArgs) > 0 {
 			command = data.ParsedArgs[0].String()
@@ -28,11 +28,13 @@ var helpCmd = &dcommand.SummitCommand{
 		// Per-command help
 		if command != "" {
 			help(command, data.ChannelID)
-			return
+			return nil
 		}
 
 		// Generic help category
 		genericCategoryHelp(data.ChannelID)
+
+		return nil
 	},
 }
 

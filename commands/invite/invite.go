@@ -10,7 +10,8 @@ var Command = &dcommand.SummitCommand{
 	Command:     "invite",
 	Category:    dcommand.CategoryGeneral,
 	Description: "Creates an invite link for the bot",
-	Run: (func(data *dcommand.Data) {
+	Run: (func(data *dcommand.Data) error {
 		functions.SendBasicMessage(data.ChannelID, "[Invite link](<https://discord.com/oauth2/authorize?client_id="+common.ConfigBotClientID+">)")
+		return nil
 	}),
 }

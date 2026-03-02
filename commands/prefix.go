@@ -13,8 +13,10 @@ var prefixCmd = &dcommand.SummitCommand{
 	Args: []*dcommand.Arg{
 		{Name: "Prefix", Type: dcommand.String},
 	},
-	Run: (func(data *dcommand.Data) {
+	Run: (func(data *dcommand.Data) error {
 		prefix := prfx.GuildPrefix(data.GuildID)
 		functions.SendBasicMessage(data.ChannelID, "This servers prefix is `"+prefix+"`")
+
+		return nil
 	}),
 }

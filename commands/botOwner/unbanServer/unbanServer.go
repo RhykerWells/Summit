@@ -2,9 +2,9 @@ package unbanserver
 
 import (
 	"context"
+	"errors"
 
 	"github.com/RhykerWells/Summit/bot/core/models"
-	"github.com/RhykerWells/Summit/bot/functions"
 	"github.com/RhykerWells/Summit/commands/util"
 	"github.com/RhykerWells/Summit/common"
 	"github.com/RhykerWells/Summit/common/dcommand"
@@ -18,12 +18,15 @@ var Command = &dcommand.SummitCommand{
 	Args: []*dcommand.Arg{
 		{Name: "GuildID", Type: dcommand.String},
 	},
-	Run: util.OwnerCommand(func(data *dcommand.Data) {
+	Run: util.OwnerCommand(func(data *dcommand.Data) error {
 		banned := util.IsGuildBanned(data.ParsedArgs[0].String())
 		if !banned {
-			functions.SendBasicMessage(data.ChannelID, "That guild was not banned")
-		} else {
-			models.BannedGuilds(models.BannedGuildWhere.GuildID.EQ(data.ParsedArgs[0].String())).DeleteAll(context.Background(), common.PQ)
+			return errors.New("That guild was not banned")
 		}
+
+		models.BannedGuilds(models.BannedGuildWhere.GuildID.EQ(data.ParsedArgs[0].String())).DeleteAll(context.Background(), common.PQ)
+		common.Session.MessageReactionAdd(data.ChannelID, data.Message.ID, "👍")
+
+		return nil
 	}),
 }

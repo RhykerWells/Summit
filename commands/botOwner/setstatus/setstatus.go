@@ -15,11 +15,14 @@ var Command = &dcommand.SummitCommand{
 	Args: []*dcommand.Arg{
 		{Name: "Status", Type: dcommand.String},
 	},
-	Run: util.OwnerCommand(func(data *dcommand.Data) {
+	Run: util.OwnerCommand(func(data *dcommand.Data) error {
 		functions.SetStatus(data.ParsedArgs[0].String())
 		message := &discordgo.MessageSend{
 			Content: "Status changed",
 		}
+
 		functions.SendMessage(data.ChannelID, message)
+
+		return nil
 	}),
 }

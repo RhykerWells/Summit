@@ -11,12 +11,15 @@ var Command = &dcommand.SummitCommand{
 	Command:     "ping",
 	Category:    dcommand.CategoryGeneral,
 	Description: "Displays bot latency",
-	Run: (func(data *dcommand.Data) {
+	Run: (func(data *dcommand.Data) error {
 		msg, err := functions.SendBasicMessage(data.ChannelID, "Ping...")
 		if err != nil {
-			return
+			return nil
 		}
+
 		started := time.Now()
 		functions.EditBasicMessage(msg.ChannelID, msg.ID, "Pong! (Edit): "+(time.Since(started)*time.Microsecond).String())
+
+		return nil
 	}),
 }
