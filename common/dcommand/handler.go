@@ -108,5 +108,8 @@ func runCommand(cmd SummitCommand, data *Data, tokens []string) {
 		return
 	}
 
-	cmd.Run(data)
+	err = cmd.Run(data)
+	if err != nil {
+		functions.SendBasicMessage(data.ChannelID, err.Error())
+	}
 }
