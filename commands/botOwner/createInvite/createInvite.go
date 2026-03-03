@@ -1,6 +1,8 @@
 package createinvite
 
 import (
+	"errors"
+
 	"github.com/RhykerWells/Summit/bot/functions"
 	"github.com/RhykerWells/Summit/commands/util"
 	"github.com/RhykerWells/Summit/common"
@@ -16,7 +18,7 @@ var Command = &dcommand.SummitCommand{
 	Args: []*dcommand.Arg{
 		{Name: "GuildID", Type: dcommand.String},
 	},
-	Run: util.OwnerCommand(func(data *dcommand.Data) {
+	Run: util.OwnerCommand(func(data *dcommand.Data) error {
 		channels, _ := common.Session.GuildChannels(data.ParsedArgs[0].String())
 		var channelID string
 		for _, v := range channels {
@@ -26,7 +28,7 @@ var Command = &dcommand.SummitCommand{
 			}
 		}
 		if channelID == "0" {
-			functions.SendBasicMessage(data.ChannelID, "No available channels")
+			return errors.New("No available channels")
 		}
 
 		invite, _ := common.Session.ChannelInviteCreate(channelID, discordgo.Invite{
@@ -36,5 +38,7 @@ var Command = &dcommand.SummitCommand{
 			Unique:    true,
 		})
 		functions.SendBasicMessage(data.ChannelID, "discord.gg/"+invite.Code)
+
+		return nil
 	}),
 }

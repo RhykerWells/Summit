@@ -118,4 +118,4 @@ func (c *CommandHandler) RegisteredCommands() map[string]RegisteredCommand {
 	return cmdMap
 }
 
-type Run func(data *Data)
+type Run func(data *Data) error
