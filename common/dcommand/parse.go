@@ -266,24 +266,22 @@ func handleMissingOrInvalidArgs(cmd SummitCommand, data *Data, tokens []string) 
 	}
 
 	// No combo matched
-	display := ""
+	parts := []string{}
 	for _, combo := range cmd.ArgumentCombos {
-		display += "\n" + cmd.Command
-		for i, idx := range combo {
+		var s strings.Builder
+		s.WriteString(cmd.Command)
+		for _, idx := range combo {
 			if idx < 0 || idx >= len(cmd.Args) {
 				continue
 			}
-
-			arg := cmd.Args[idx]
-			if i < cmd.ArgsRequired {
-				display += " <" + arg.Name + ":" + arg.Type.Help() + ">"
-			} else {
-				display += " [" + arg.Name + ":" + arg.Type.Help() + "]"
-			}
+			argHelp := cmd.Args[idx].Name + ":" + cmd.Args[idx].Type.Help()
+			s.WriteString(" <" + argHelp + ">")
 		}
+		parts = append(parts, s.String())
 	}
+	display := strings.Join(parts, "\n")
 
-	return errors.New("Invalid argument order or types"), errorEmbed(cmd.Command, data, fmt.Sprintf("Invalid argument order or types\nExpected one of:\n```%s %s```", cmd.Command, display))
+	return errors.New("Invalid arguments"), errorEmbed(cmd.Command, data, fmt.Sprintf("%s", "No matching argument combination found.\nExpected one of:\n```\n"+display+"\n```"))
 }
 
 // errorEmbed constructs and returns a standardized error embed for a command execution failure.
