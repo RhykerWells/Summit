@@ -138,6 +138,7 @@ func getArgs(command dcommand.RegisteredCommand) (str string) {
 	}
 
 	// Fallback: use RequiredArgs to mark which are required vs optional
+	str = command.Trigger
 	for i, arg := range command.Args {
 		if i < command.RequiredArgs {
 			str += " <" + argHelp(arg) + ">"

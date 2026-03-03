@@ -2,6 +2,7 @@ package dcommand
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 )
@@ -67,11 +68,21 @@ func (c *CommandHandler) RegisterCommands(cmds ...*SummitCommand) {
 	for _, cmd := range cmds {
 		c.cmdInstances = append(c.cmdInstances, *cmd)
 
+		// Clean empty aliases before limiting
+		var cleanedAliases []string
+		for _, alias := range cmd.Aliases {
+			alias = strings.TrimSpace(alias)
+			if alias != "" {
+				cleanedAliases = append(cleanedAliases, alias)
+			}
+		}
+		cmd.Aliases = cleanedAliases
+
 		// Limit aliases to 3 max
 		if len(cmd.Aliases) > 3 {
 			aliasOver := len(cmd.Aliases) - 3
 			cmd.Aliases = cmd.Aliases[:3]
-			logrus.Warnln(fmt.Sprintf("%s has %[2]d too many aliases. Automatically removed the last %[2]d.", cmd.Command, aliasOver))
+			logrus.Warnln(fmt.Sprintf("%s has %[2]d too many non-empty aliases. Automatically removed the last %[2]d.", cmd.Command, aliasOver))
 		}
 
 		// Register main command
