@@ -37,6 +37,9 @@ type SummitCommand struct {
 	ArgsRequired   int // Ignored if using combos
 	ArgumentCombos [][]int
 
+	RequiredUserPerms []int64
+	RequiredBotPerms  []int64
+
 	Run Run
 }
 
