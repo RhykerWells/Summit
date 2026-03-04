@@ -14,7 +14,6 @@ import (
 
 	"github.com/RhykerWells/Summit/bot/functions"
 	"github.com/RhykerWells/Summit/commands/economy/models"
-	"github.com/RhykerWells/Summit/commands/util"
 	"github.com/RhykerWells/Summit/common"
 	"github.com/RhykerWells/Summit/common/dcommand"
 	"github.com/aarondl/null/v8"
@@ -894,9 +893,10 @@ var transferCommands = []*dcommand.SummitCommand{
 		},
 	},
 	{
-		Command:     "addmoney",
-		Category:    dcommand.CategoryEconomy,
-		Description: "Adds money to a specified users cash/bank balance",
+		Command:           "addmoney",
+		Category:          dcommand.CategoryEconomy,
+		Description:       "Adds money to a specified users cash/bank balance",
+		RequiredUserPerms: []int64{discordgo.PermissionManageGuild},
 		Args: []*dcommand.Arg{
 			{Name: "Member", Type: dcommand.Member},
 			{Name: "Amount", Type: &dcommand.BetArg{Min: 1}},
@@ -906,7 +906,7 @@ var transferCommands = []*dcommand.SummitCommand{
 			{0, 1, 2},
 			{0, 2, 1},
 		},
-		Run: util.AdminOrManageServerCommand(func(data *dcommand.Data) error {
+		Run: func(data *dcommand.Data) error {
 			guildConfig := GetConfig(data.GuildID)
 			embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
 
@@ -936,12 +936,13 @@ var transferCommands = []*dcommand.SummitCommand{
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 
 			return nil
-		}),
+		},
 	},
 	{
-		Command:     "removemoney",
-		Category:    dcommand.CategoryEconomy,
-		Description: "Removes money from a specified users cash/bank balance",
+		Command:           "removemoney",
+		Category:          dcommand.CategoryEconomy,
+		Description:       "Removes money from a specified users cash/bank balance",
+		RequiredUserPerms: []int64{discordgo.PermissionManageGuild},
 		Args: []*dcommand.Arg{
 			{Name: "Member", Type: dcommand.Member},
 			{Name: "Amount", Type: &dcommand.BetArg{Min: 1}},
@@ -951,7 +952,7 @@ var transferCommands = []*dcommand.SummitCommand{
 			{0, 1, 2},
 			{0, 2, 1},
 		},
-		Run: util.AdminOrManageServerCommand(func(data *dcommand.Data) error {
+		Run: func(data *dcommand.Data) error {
 			guildConfig := GetConfig(data.GuildID)
 			embed := &discordgo.MessageEmbed{Author: &discordgo.MessageEmbedAuthor{Name: data.Author.Username, IconURL: data.Author.AvatarURL("256")}, Timestamp: time.Now().Format(time.RFC3339), Color: common.ErrorRed}
 
@@ -981,7 +982,7 @@ var transferCommands = []*dcommand.SummitCommand{
 
 			functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
 			return nil
-		}),
+		},
 	},
 }
 
