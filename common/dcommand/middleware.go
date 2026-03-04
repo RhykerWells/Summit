@@ -8,7 +8,83 @@ import (
 
 	"github.com/RhykerWells/Summit/common"
 	"github.com/bwmarrin/discordgo"
+	"github.com/sirupsen/logrus"
 )
+
+// hasRequiredPermissions runs the permission validation for the user & bot in the current channel
+func hasRequiredPermissions(cmd SummitCommand, data *Data) error {
+	logrus.Infoln("In permission checker")
+	err := hasUserPermissions(cmd, data)
+	if err != nil {
+		return err
+	}
+
+	err = hasBotPermissions(cmd, data)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// hasUserPermissions validates that the user has one of any permissions required
+func hasUserPermissions(cmd SummitCommand, data *Data) error {
+	if len(cmd.RequiredUserPerms) < 1 {
+		return nil
+	}
+
+	perms, _ := common.Session.State.UserChannelPermissions(data.Author.ID, data.ChannelID)
+
+	permsMet := false
+	for _, perm := range cmd.RequiredUserPerms {
+		if perms&perm != 0 {
+			permsMet = true
+			break
+		}
+	}
+
+	if !permsMet {
+		humanisedPerms := humanisePerms(cmd.RequiredUserPerms)
+		return fmt.Errorf("You do not have any of the required permissions to run this command.\nThis command required one of the following permissions: %s", humanisedPerms)
+	}
+
+	return nil
+}
+
+// hasBotPermissions validates that the bot has one of any permissions required
+func hasBotPermissions(cmd SummitCommand, data *Data) error {
+	if len(cmd.RequiredBotPerms) < 1 {
+		return nil
+	}
+
+	perms, _ := common.Session.State.UserChannelPermissions(common.Bot.ID, data.ChannelID)
+
+	permsMet := false
+	for _, perm := range cmd.RequiredUserPerms {
+		if perms&perm != 0 {
+			permsMet = true
+			break
+		}
+	}
+
+	if !permsMet {
+		humanisedPerms := humanisePerms(cmd.RequiredBotPerms)
+		return fmt.Errorf("The bot does not have any of the required permissions to run this command.\nThis command required one of the following permissions: %s", humanisedPerms)
+	}
+
+	logrus.Infoln(humanisePerms(cmd.RequiredUserPerms))
+
+	return nil
+}
+
+func humanisePerms(perms []int64) string {
+	humanisedPerms := make([]string, 0, len(perms))
+	for _, perm := range perms {
+		humanisedPerms = append(humanisedPerms, fmt.Sprintf("`%s`", permissionName(perm)))
+	}
+
+	return strings.Join(humanisedPerms, " or ")
+}
 
 // handleMissingOrInvalidArgs validates any required arguments/argument combinations
 func handleMissingOrInvalidArgs(cmd SummitCommand, data *Data, tokens []string) (error, *discordgo.MessageEmbed) {

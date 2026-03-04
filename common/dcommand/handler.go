@@ -102,6 +102,12 @@ func runCommand(cmd SummitCommand, data *Data, tokens []string) {
 		"Triggering user": data.Author.ID},
 	).Infoln("Executed command")
 
+	err := hasRequiredPermissions(cmd, data)
+	if err != nil {
+		functions.SendBasicMessage(data.ChannelID, err.Error())
+		return
+	}
+
 	err, embed := handleMissingOrInvalidArgs(cmd, data, tokens)
 	if err != nil {
 		functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: embed})
