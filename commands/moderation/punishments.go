@@ -76,7 +76,7 @@ func unmuteUser(config *Config, authorID, targetID string) error {
 		return errNotMuted
 	}
 
-	targetMember, err := functions.GetMember(config.GuildID, targetID)
+	targetUser, err := functions.GetUser(targetID)
 	if err != nil {
 		if authorID == common.Bot.ID {
 			mutedUser.Delete(context.Background(), common.PQ)
@@ -92,9 +92,9 @@ func unmuteUser(config *Config, authorID, targetID string) error {
 	mutedUser.Delete(context.Background(), common.PQ)
 
 	if authorID == common.Bot.ID {
-		botMember, _ := functions.GetMember(config.GuildID, common.Bot.ID)
-		createCase(config, botMember, targetMember, logUnmute, config.ModerationLogChannel, "Automatic unmute")
-		muteEmbed := buildDMEmbed(config, targetMember.User, logMute, "Automatic unmute")
+		botUser, _ := functions.GetUser(common.Bot.ID)
+		createCase(config, botUser, targetUser, logUnmute, config.ModerationLogChannel, "Automatic unmute")
+		muteEmbed := buildDMEmbed(config, targetUser, logMute, "Automatic unmute")
 		functions.SendDM(targetID, &discordgo.MessageSend{Embed: muteEmbed})
 	}
 
@@ -199,10 +199,10 @@ func scheduleAllPendingUnmutes() {
 }
 
 // kickUser kicks the user from the given guild
-func kickUser(config *Config, author, target *discordgo.Member, reason string) error {
-	auditLogReason := fmt.Sprintf("%s: %s", author.User.Username, reason)
+func kickUser(config *Config, author, target *discordgo.User, reason string) error {
+	auditLogReason := fmt.Sprintf("%s: %s", author.Username, reason)
 
-	err := functions.GuildKickMember(config.GuildID, target.User.ID, auditLogReason)
+	err := functions.GuildKickMember(config.GuildID, target.ID, auditLogReason)
 	if err != nil {
 		return err
 	}
@@ -211,10 +211,10 @@ func kickUser(config *Config, author, target *discordgo.Member, reason string) e
 }
 
 // banUser bans the user from the current guild and adds an entry to the banned entry list
-func banUser(config *Config, author, target *discordgo.Member, reason string, duration time.Duration) error {
-	auditLogReason := fmt.Sprintf("%s: %s", author.User.Username, reason)
+func banUser(config *Config, author, target *discordgo.User, reason string, duration time.Duration) error {
+	auditLogReason := fmt.Sprintf("%s: %s", author.Username, reason)
 
-	err := functions.GuildBanMember(config.GuildID, target.User.ID, auditLogReason)
+	err := functions.GuildBanMember(config.GuildID, target.ID, auditLogReason)
 	if err != nil {
 		return err
 	}
@@ -226,12 +226,12 @@ func banUser(config *Config, author, target *discordgo.Member, reason string, du
 
 	banEntry := models.ModerationBan{
 		GuildID: config.GuildID,
-		UserID:  target.User.ID,
+		UserID:  target.ID,
 		UnbanAt: unbanTime,
 	}
 	banEntry.Upsert(context.Background(), common.PQ, true, []string{models.ModerationBanColumns.GuildID, models.ModerationBanColumns.UserID}, boil.Whitelist(models.ModerationBanColumns.UnbanAt), boil.Infer())
 
-	scheduleUnban(config, target.User.ID, unbanTime)
+	scheduleUnban(config, target.ID, unbanTime)
 	return nil
 }
 
@@ -245,17 +245,14 @@ func unbanUser(config *Config, authorID, targetID string) error {
 	}
 
 	targetUser, _ := functions.GetUser(targetID)
-	targetMember := &discordgo.Member{
-		User: targetUser,
-	}
 
 	if bannedUser != nil {
 		bannedUser.Delete(context.Background(), common.PQ)
 	}
 
 	if authorID == common.Bot.ID {
-		botMember, _ := functions.GetMember(config.GuildID, common.Bot.ID)
-		createCase(config, botMember, targetMember, logUnban, config.ModerationLogChannel, "Automatic unban")
+		botUser, _ := functions.GetUser(common.Bot.ID)
+		createCase(config, botUser, targetUser, logUnban, config.ModerationLogChannel, "Automatic unban")
 	}
 
 	return nil

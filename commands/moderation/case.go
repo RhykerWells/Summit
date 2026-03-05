@@ -95,16 +95,16 @@ func generateLogLink(guildID, channelID, messageID string) string {
 }
 
 // createCase generates the moderationc case for the database and saves it, then attempts to build and log the Discord case log, if this fails the case will be removed
-func createCase(config *Config, author, target *discordgo.Member, action logAction, channelID, reason string, duration ...time.Duration) error {
+func createCase(config *Config, author, target *discordgo.User, action logAction, channelID, reason string, duration ...time.Duration) error {
 	caseID := getNewCaseID(config)
 
 	caseData := models.ModerationCase{
 		CaseID:           caseID,
 		GuildID:          config.GuildID,
-		StaffUsername:    author.User.Username,
-		StaffID:          author.User.ID,
-		OffenderUsername: target.User.Username,
-		OffenderID:       target.User.ID,
+		StaffUsername:    author.Username,
+		StaffID:          author.ID,
+		OffenderUsername: target.Username,
+		OffenderID:       target.ID,
 		Reason:           reason,
 		Action:           action.CaseType,
 		LogLink:          "",
@@ -113,7 +113,7 @@ func createCase(config *Config, author, target *discordgo.Member, action logActi
 		return err
 	}
 
-	embed := buildLogEmbed(caseID, author.User, target.User, action, channelID, reason, duration...)
+	embed := buildLogEmbed(caseID, author, target, action, channelID, reason, duration...)
 	msg, err := functions.SendMessage(config.ModerationLogChannel, &discordgo.MessageSend{Embed: embed})
 	if err != nil {
 		removeFailedCase(caseData)
