@@ -64,20 +64,16 @@ func logGuildModerationNotByBot(g *discordgo.GuildAuditLogEntryCreate) {
 		return
 	}
 
-	author, _ := functions.GetMember(g.GuildID, g.UserID)
-
-	user, _ := functions.GetUser(entry.TargetID)
-	targetMember := &discordgo.Member{
-		User: user,
-	}
+	author, _ := functions.GetUser(g.UserID)
+	target, _ := functions.GetUser(entry.TargetID)
 
 	switch *entry.ActionType {
 	case discordgo.AuditLogActionMemberBanAdd:
-		createCase(config, author, targetMember, logBan, config.ModerationLogChannel, entry.Reason)
+		createCase(config, author, target, logBan, config.ModerationLogChannel, entry.Reason)
 	case discordgo.AuditLogActionMemberBanRemove:
-		createCase(config, author, targetMember, logUnban, config.ModerationLogChannel, entry.Reason)
+		createCase(config, author, target, logUnban, config.ModerationLogChannel, entry.Reason)
 	case discordgo.AuditLogActionMemberKick:
-		createCase(config, author, targetMember, logKick, config.ModerationLogChannel, entry.Reason)
+		createCase(config, author, target, logKick, config.ModerationLogChannel, entry.Reason)
 	}
 }
 
