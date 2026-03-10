@@ -1,4 +1,4 @@
-package commands
+package help
 
 import (
 	"fmt"
@@ -6,33 +6,34 @@ import (
 	"strings"
 
 	"github.com/RhykerWells/Summit/bot/functions"
+	"github.com/RhykerWells/Summit/command"
 	"github.com/RhykerWells/Summit/common"
-	"github.com/RhykerWells/Summit/common/dcommand"
+	"github.com/RhykerWells/dispatch"
 	"github.com/bwmarrin/discordgo"
 )
 
-var helpCmd = &dcommand.SummitCommand{
+var Command = &dispatch.Command{
 	Command:  "help",
 	Aliases:  []string{"h"},
-	Category: dcommand.CategoryGeneral,
-	Args: []*dcommand.Arg{
-		{Name: "Command", Type: dcommand.String},
+	Category: command.CategoryGeneral,
+	Args: []*dispatch.Arg{
+		{Name: "Command", Type: dispatch.String},
 	},
 	Description: "Displays bot help",
-	Run: func(data *dcommand.Data) error {
+	Run: func(data *dispatch.Data) error {
 		command := ""
 		if len(data.ParsedArgs) > 0 {
-			command = data.ParsedArgs[0].String()
+			command = data.ParsedArgs[0].Value.(string)
 		}
 
 		// Per-command help
 		if command != "" {
-			help(command, data.ChannelID)
+			help(command, data.Channel.ID)
 			return nil
 		}
 
 		// Generic help category
-		genericCategoryHelp(data.ChannelID)
+		genericCategoryHelp(data.Channel.ID)
 
 		return nil
 	},
@@ -42,10 +43,10 @@ var helpCmd = &dcommand.SummitCommand{
 // and their commands. The "General" category is always listed first, followed
 // by the other categories sorted alphabetically.
 func genericCategoryHelp(channelID string) {
-	cmdMap := dcommand.CmdHndlr.RegisteredCommands()
+	cmdMap := command.CommandHandler.RegisteredCommands()
 	categories := make(map[string][]string)
 	for _, cmd := range cmdMap {
-		categories[cmd.Category.Name] = append(categories[cmd.Category.Name], cmd.Trigger)
+		categories[cmd.Command.Category.Name] = append(categories[cmd.Command.Category.Name], cmd.Command.Command)
 	}
 	categoryNames := make([]string, 0, len(categories))
 	for categoryName := range categories {
@@ -85,27 +86,27 @@ func genericCategoryHelp(channelID string) {
 // help shows detailed help for a specific command, including its description,
 // aliases, and expected arguments. If the command cannot be found, a simple
 // error message is sent instead.
-func help(command string, channelID string) {
-	cmdMap := dcommand.CmdHndlr.RegisteredCommands()
-	cmd, ok := cmdMap[command]
+func help(commandName string, channelID string) {
+	cmdMap := command.CommandHandler.RegisteredCommands()
+	cmd, ok := cmdMap[commandName]
 	if !ok {
-		functions.SendBasicMessage(channelID, fmt.Sprintf("Command `%s` not found", command))
+		functions.SendBasicMessage(channelID, fmt.Sprintf("Command `%s` not found", commandName))
 		return
 	}
 	aliases := ""
-	if len(cmd.Aliases) >= 1 {
-		aliases = fmt.Sprintf("/%s", strings.Join(cmd.Aliases, "/"))
+	if len(cmd.Command.Aliases) >= 1 {
+		aliases = fmt.Sprintf("/%s", strings.Join(cmd.Command.Aliases, "/"))
 	}
 	helpEmbed := &discordgo.MessageEmbed{
 		Author: &discordgo.MessageEmbedAuthor{
-			Name:    fmt.Sprintf("%s help - %s%s", common.Bot.Username, command, aliases),
+			Name:    fmt.Sprintf("%s help - %s%s", common.Bot.Username, commandName, aliases),
 			IconURL: common.Bot.AvatarURL("256"),
 		},
-		Description: cmd.Description,
+		Description: cmd.Command.Description,
 		Color:       common.SuccessGreen,
 	}
 	args := getArgs(cmd)
-	helpEmbed.Description = cmd.Description
+	helpEmbed.Description = cmd.Command.Description
 	if args != "" {
 		helpEmbed.Description += "\n```" + args + "\n```"
 	}
@@ -118,18 +119,18 @@ func help(command string, channelID string) {
 // getArgs builds the formatted string of arguments for a given command.
 // Required arguments are enclosed in <angle brackets>, and optional arguments
 // are enclosed in [square brackets].
-func getArgs(command dcommand.RegisteredCommand) (str string) {
+func getArgs(command dispatch.RegisteredCommand) (str string) {
 	// If explicit argument combos are provided, show them as alternatives
-	if len(command.ArgumentCombos) > 0 {
+	if len(command.Command.ArgumentCombos) > 0 {
 		parts := []string{}
-		for _, combo := range command.ArgumentCombos {
+		for _, combo := range command.Command.ArgumentCombos {
 			var s strings.Builder
-			s.WriteString(command.Trigger) // Trigger once at start
+			s.WriteString(command.Command.Command) // Trigger once at start
 			for _, idx := range combo {
-				if idx < 0 || idx >= len(command.Args) {
+				if idx < 0 || idx >= len(command.Command.Args) {
 					continue
 				}
-				s.WriteString(" <" + argHelp(command.Args[idx]) + ">") // Space before arg
+				s.WriteString(" <" + argHelp(command.Command.Args[idx]) + ">") // Space before arg
 			}
 			parts = append(parts, s.String())
 		}
@@ -138,9 +139,9 @@ func getArgs(command dcommand.RegisteredCommand) (str string) {
 	}
 
 	// Fallback: use RequiredArgs to mark which are required vs optional
-	str = command.Trigger
-	for i, arg := range command.Args {
-		if i < command.RequiredArgs {
+	str = command.Command.Command
+	for i, arg := range command.Command.Args {
+		if i < command.Command.ArgsRequired {
 			str += " <" + argHelp(arg) + ">"
 		} else {
 			str += " [" + argHelp(arg) + "]"
@@ -151,7 +152,7 @@ func getArgs(command dcommand.RegisteredCommand) (str string) {
 
 // argHelp returns a formatted string for a single argument, showing both its
 // name and type.
-func argHelp(arg *dcommand.Arg) (str string) {
+func argHelp(arg *dispatch.Arg) (str string) {
 	argType := arg.Type.Help()
 	str = fmt.Sprintf("%s:%s", arg.Name, argType)
 	return

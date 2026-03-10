@@ -4,15 +4,16 @@ import (
 	"time"
 
 	"github.com/RhykerWells/Summit/bot/functions"
-	"github.com/RhykerWells/Summit/common/dcommand"
+	"github.com/RhykerWells/Summit/command"
+	"github.com/RhykerWells/dispatch"
 )
 
-var Command = &dcommand.SummitCommand{
+var Command = &dispatch.Command{
 	Command:     "ping",
-	Category:    dcommand.CategoryGeneral,
+	Category:    command.CategoryGeneral,
 	Description: "Displays bot latency",
-	Run: (func(data *dcommand.Data) error {
-		msg, err := functions.SendBasicMessage(data.ChannelID, "Ping...")
+	Run: (func(data *dispatch.Data) error {
+		msg, err := functions.SendBasicMessage(data.Channel.ID, "Ping...")
 		if err != nil {
 			return nil
 		}
