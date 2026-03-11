@@ -8,7 +8,7 @@ import (
 	"github.com/RhykerWells/Summit/bot/events"
 	"github.com/RhykerWells/Summit/commands/economy/models"
 	"github.com/RhykerWells/Summit/common"
-	"github.com/RhykerWells/Summit/common/dcommand"
+	"github.com/RhykerWells/dispatch"
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/bwmarrin/discordgo"
 )
@@ -18,7 +18,7 @@ import (
 //   - Registration of the guild and user join/leave functions
 //   - Initialises the web plugin
 //   - Registration of the economy commands & their pagination
-func EconomySetup(cmdHandler *dcommand.CommandHandler) {
+func EconomySetup(cmdHandler *dispatch.CommandHandler) {
 	common.InitSchema("Economy", GuildEconomySchema...)
 	events.RegisterGuildJoinfunctions([]func(g *discordgo.GuildCreate){
 		guildAddEconomyConfig,
