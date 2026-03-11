@@ -8,8 +8,9 @@ import (
 	"slices"
 
 	"github.com/RhykerWells/Summit/bot/functions"
+	"github.com/RhykerWells/Summit/command"
 	"github.com/RhykerWells/Summit/common"
-	"github.com/RhykerWells/Summit/common/dcommand"
+	"github.com/RhykerWells/dispatch"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -28,8 +29,8 @@ func moderationBase(guildID string) (*Config, error) {
 	return config, nil
 }
 
-func moderationBasePermissionCheck(data *dcommand.Data, target *discordgo.User, discordPermissionRequired int64, additionalPermittanceRoles []string) error {
-	perms, _ := common.Session.State.UserChannelPermissions(data.Author.ID, data.ChannelID)
+func moderationBasePermissionCheck(data *dispatch.Data, target *discordgo.User, discordPermissionRequired int64, additionalPermittanceRoles []string) error {
+	perms, _ := common.Session.State.UserChannelPermissions(data.Author.ID, data.Channel.ID)
 
 	permsMet := false
 	if perms&discordPermissionRequired != 0 {
@@ -37,18 +38,18 @@ func moderationBasePermissionCheck(data *dcommand.Data, target *discordgo.User, 
 	}
 
 	if !permsMet && additionalPermittanceRoles != nil {
-		permsMet = hasRequiredRole(data.GuildID, data.Author.ID, additionalPermittanceRoles)
+		permsMet = hasRequiredRole(data.Guild.ID, data.Author.ID, additionalPermittanceRoles)
 	}
 
 	if !permsMet {
-		humanisedPerm, _ := dcommand.PermissionNames[discordPermissionRequired]
+		humanisedPerm, _ := dispatch.PermissionNames[discordPermissionRequired]
 		return fmt.Errorf("This command requires either the `%s` permission or an additional role set up by admins through the dashboard.", humanisedPerm)
 	}
 
-	targetMember, _ := functions.GetMember(data.GuildID, target.ID)
+	targetMember, _ := functions.GetMember(data.Guild.ID, target.ID)
 	if targetMember != nil {
-		author, _ := functions.GetMember(data.GuildID, data.Author.ID)
-		ok := functions.IsMemberHigher(data.GuildID, author, targetMember)
+		author, _ := functions.GetMember(data.Guild.ID, data.Author.ID)
+		ok := functions.IsMemberHigher(data.Guild.ID, author, targetMember)
 		if !ok {
 			return errors.New("You don't have the correct permissions to warn this user (target has higher or equal role).")
 		}
@@ -95,57 +96,57 @@ func responseEmbed(author, target *discordgo.User, action logAction) *discordgo.
 	}
 }
 
-var moderationCommands = []*dcommand.SummitCommand{
+var moderationCommands = []*dispatch.Command{
 	{
 		Command:      "warn",
-		Category:     dcommand.CategoryModeration,
+		Category:     command.CategoryModeration,
 		Aliases:      []string{""},
 		Description:  "Warns a user for a specified reason",
 		ArgsRequired: 2,
-		Args: []*dcommand.Arg{
-			{Name: "User", Type: dcommand.User},
-			{Name: "Reason", Type: dcommand.String},
+		Args: []*dispatch.Arg{
+			{Name: "User", Type: dispatch.User},
+			{Name: "Reason", Type: dispatch.String},
 		},
-		Run: func(data *dcommand.Data) error {
-			config, err := moderationBase(data.GuildID)
+		Run: func(data *dispatch.Data) error {
+			config, err := moderationBase(data.Guild.ID)
 			if err != nil {
 				return err
 			}
 
-			target := data.ParsedArgs[0].User()
+			target := data.ParsedArgs[0].Value.(*discordgo.User)
 			err = moderationBasePermissionCheck(data, target, discordgo.PermissionModerateMembers, config.WarnRequiredRoles)
 			if err != nil {
 				return err
 			}
 
-			_, err = functions.GetMember(data.GuildID, target.ID)
+			_, err = functions.GetMember(data.Guild.ID, target.ID)
 			if err != nil {
 				return errors.New("Member not found")
 			}
 
-			warnReason := data.ParsedArgs[1].String()
+			warnReason := data.ParsedArgs[1].Value.(string)
 
-			err = createCase(config, data.Author, target, logWarn, data.ChannelID, warnReason)
+			err = createCase(config, data.Author, target, logWarn, data.Channel.ID, warnReason, nil)
 			if err != nil {
 				return fmt.Errorf("Something went wrong creating the case: %s", err.Error())
 			}
 
-			warnEmbed := buildDMEmbed(config, target, logWarn, warnReason)
+			warnEmbed := buildDMEmbed(config, target, logWarn, warnReason, nil)
 			err = functions.SendDM(target.ID, &discordgo.MessageSend{Embed: warnEmbed})
 			if err != nil {
-				functions.SendBasicMessage(data.ChannelID, "Was not able to DM the user.")
+				functions.SendBasicMessage(data.Channel.ID, "Was not able to DM the user.")
 			}
 
 			ok, delay := triggerDeletion(config)
 			if ok {
-				functions.DeleteMessage(data.ChannelID, data.Message.ID, time.Duration(delay)*time.Second)
+				functions.DeleteMessage(data.Channel.ID, data.Message.ID, time.Duration(delay)*time.Second)
 			}
 
 			responseEmbed := responseEmbed(data.Author, target, logWarn)
-			message, _ := functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: responseEmbed})
+			message, _ := functions.SendMessage(data.Channel.ID, &discordgo.MessageSend{Embed: responseEmbed})
 			ok, delay = responseDeletion(config)
 			if ok {
-				functions.DeleteMessage(data.ChannelID, message.ID, time.Duration(delay)*time.Second)
+				functions.DeleteMessage(data.Channel.ID, message.ID, time.Duration(delay)*time.Second)
 			}
 
 			return nil
@@ -153,15 +154,15 @@ var moderationCommands = []*dcommand.SummitCommand{
 	},
 	{
 		Command:          "mute",
-		Category:         dcommand.CategoryModeration,
+		Category:         command.CategoryModeration,
 		Aliases:          []string{""},
 		Description:      "Mutes a user for specified duration and reason",
 		RequiredBotPerms: []int64{discordgo.PermissionAdministrator, discordgo.PermissionManageRoles},
 		ArgsRequired:     3,
-		Args: []*dcommand.Arg{
-			{Name: "User", Type: dcommand.User},
-			{Name: "Duration", Type: dcommand.Duration},
-			{Name: "Reason", Type: dcommand.String},
+		Args: []*dispatch.Arg{
+			{Name: "User", Type: dispatch.User},
+			{Name: "Duration", Type: dispatch.Duration},
+			{Name: "Reason", Type: dispatch.String},
 		},
 		ArgumentCombos: [][]int{
 			{0, 1, 2},
@@ -170,70 +171,66 @@ var moderationCommands = []*dcommand.SummitCommand{
 			{0, 2},
 			{0},
 		},
-		Run: func(data *dcommand.Data) error {
-			config, err := moderationBase(data.GuildID)
+		Run: func(data *dispatch.Data) error {
+			config, err := moderationBase(data.Guild.ID)
 			if err != nil {
 				return err
 			}
 
-			target := data.ParsedArgs[0].User()
+			target := data.ParsedArgs[0].Value.(*discordgo.User)
 			err = moderationBasePermissionCheck(data, target, discordgo.PermissionModerateMembers, config.MuteRequiredRoles)
 			if err != nil {
 				return err
 			}
 
-			_, err = functions.GetMember(data.GuildID, target.ID)
+			_, err = functions.GetMember(data.Guild.ID, target.ID)
 			if err != nil {
 				return errors.New("Member not found")
 			}
 
-			var duration time.Duration
-			var durationProvided bool
+			var durationPtr *time.Duration
 
 			if len(data.ParsedArgs) > 1 && data.ParsedArgs[1] != nil {
-				durPtr := data.ParsedArgs[1].Duration()
-				if durPtr != nil {
-					duration = *durPtr
-					durationProvided = true
+				duration := data.ParsedArgs[1].Value.(time.Duration)
+				if duration < 10*time.Minute {
+					duration = 10 * time.Minute
 				}
-			}
 
-			if durationProvided && duration < 10*time.Minute {
-				duration = 10 * time.Minute
+				durationPtr = &duration
 			}
 
 			muteReason := "(No reason provided)"
 			if len(data.ParsedArgs) > 2 && data.ParsedArgs[2] != nil {
-				muteReason = data.ParsedArgs[2].String()
+				muteReason = data.ParsedArgs[2].Value.(string)
 			}
 
-			err = muteUser(config, target.ID, duration)
+			err = muteUser(config, target.ID, durationPtr)
 			if err != nil {
 				return errors.New("Something went wrong. Is the bot role above the mute role?")
 			}
 
-			err = createCase(config, data.Author, target, logMute, data.ChannelID, muteReason, duration)
+			err = createCase(config, data.Author, target, logMute, data.Channel.ID, muteReason, durationPtr)
 			if err != nil {
 				unmuteUser(config, data.Author.ID, target.ID)
 				return fmt.Errorf("Something went wrong creating the case: %s", err.Error())
 			}
 
-			muteEmbed := buildDMEmbed(config, target, logMute, muteReason, duration)
+			muteEmbed := buildDMEmbed(config, target, logMute, muteReason, durationPtr)
 			err = functions.SendDM(target.ID, &discordgo.MessageSend{Embed: muteEmbed})
 			if err != nil {
-				functions.SendBasicMessage(data.ChannelID, "Was not able to DM the user.")
+				functions.SendBasicMessage(data.Channel.ID, "Was not able to DM the user.")
 			}
 
 			ok, delay := triggerDeletion(config)
 			if ok {
-				functions.DeleteMessage(data.ChannelID, data.Message.ID, time.Duration(delay)*time.Second)
+				functions.DeleteMessage(data.Channel.ID, data.Message.ID, time.Duration(delay)*time.Second)
 			}
 
-			responseEmbed := responseEmbed(data.Author, target, logWarn)
-			message, _ := functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: responseEmbed})
+			responseEmbed := responseEmbed(data.Author, target, logMute)
+			message, _ := functions.SendMessage(data.Channel.ID, &discordgo.MessageSend{Embed: responseEmbed})
 			ok, delay = responseDeletion(config)
 			if ok {
-				functions.DeleteMessage(data.ChannelID, message.ID, time.Duration(delay)*time.Second)
+				functions.DeleteMessage(data.Channel.ID, message.ID, time.Duration(delay)*time.Second)
 			}
 
 			return nil
@@ -241,28 +238,28 @@ var moderationCommands = []*dcommand.SummitCommand{
 	},
 	{
 		Command:          "unmute",
-		Category:         dcommand.CategoryModeration,
+		Category:         command.CategoryModeration,
 		Aliases:          []string{""},
 		Description:      "Unmutes a user for a specified reason",
 		RequiredBotPerms: []int64{discordgo.PermissionAdministrator, discordgo.PermissionManageRoles},
 		ArgsRequired:     1,
-		Args: []*dcommand.Arg{
-			{Name: "User", Type: dcommand.User},
-			{Name: "Reason", Type: dcommand.String},
+		Args: []*dispatch.Arg{
+			{Name: "User", Type: dispatch.User},
+			{Name: "Reason", Type: dispatch.String},
 		},
-		Run: func(data *dcommand.Data) error {
-			config, err := moderationBase(data.GuildID)
+		Run: func(data *dispatch.Data) error {
+			config, err := moderationBase(data.Guild.ID)
 			if err != nil {
 				return err
 			}
 
-			target := data.ParsedArgs[0].User()
+			target := data.ParsedArgs[0].Value.(*discordgo.User)
 			err = moderationBasePermissionCheck(data, target, discordgo.PermissionModerateMembers, config.MuteRequiredRoles)
 			if err != nil {
 				return err
 			}
 
-			_, err = functions.GetMember(data.GuildID, target.ID)
+			_, err = functions.GetMember(data.Guild.ID, target.ID)
 			if err != nil {
 				return errors.New("Member not found")
 			}
@@ -280,30 +277,30 @@ var moderationCommands = []*dcommand.SummitCommand{
 
 			unmuteReason := "(No reason provided)"
 			if len(data.ParsedArgs) > 1 && data.ParsedArgs[1] != nil {
-				unmuteReason = data.ParsedArgs[1].String()
+				unmuteReason = data.ParsedArgs[1].Value.(string)
 			}
 
-			err = createCase(config, data.Author, target, logUnmute, data.ChannelID, unmuteReason)
+			err = createCase(config, data.Author, target, logUnmute, data.Channel.ID, unmuteReason, nil)
 			if err != nil {
 				return fmt.Errorf("Something went wrong creating the case: %s", err.Error())
 			}
 
-			unmuteEmbed := buildDMEmbed(config, target, logUnmute, unmuteReason)
+			unmuteEmbed := buildDMEmbed(config, target, logUnmute, unmuteReason, nil)
 			err = functions.SendDM(target.ID, &discordgo.MessageSend{Embed: unmuteEmbed})
 			if err != nil {
-				functions.SendBasicMessage(data.ChannelID, "Was not able to DM the user.")
+				functions.SendBasicMessage(data.Channel.ID, "Was not able to DM the user.")
 			}
 
 			ok, delay := triggerDeletion(config)
 			if ok {
-				functions.DeleteMessage(data.ChannelID, data.Message.ID, time.Duration(delay)*time.Second)
+				functions.DeleteMessage(data.Channel.ID, data.Message.ID, time.Duration(delay)*time.Second)
 			}
 
 			responseEmbed := responseEmbed(data.Author, target, logUnmute)
-			message, _ := functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: responseEmbed})
+			message, _ := functions.SendMessage(data.Channel.ID, &discordgo.MessageSend{Embed: responseEmbed})
 			ok, delay = responseDeletion(config)
 			if ok {
-				functions.DeleteMessage(data.ChannelID, message.ID, time.Duration(delay)*time.Second)
+				functions.DeleteMessage(data.Channel.ID, message.ID, time.Duration(delay)*time.Second)
 			}
 
 			return nil
@@ -311,46 +308,46 @@ var moderationCommands = []*dcommand.SummitCommand{
 	},
 	{
 		Command:          "kick",
-		Category:         dcommand.CategoryModeration,
+		Category:         command.CategoryModeration,
 		Aliases:          []string{""},
 		Description:      "Kicks a user for a specified reason",
 		RequiredBotPerms: []int64{discordgo.PermissionAdministrator, discordgo.PermissionKickMembers},
 		ArgsRequired:     1,
-		Args: []*dcommand.Arg{
-			{Name: "User", Type: dcommand.User},
-			{Name: "Reason", Type: dcommand.String},
+		Args: []*dispatch.Arg{
+			{Name: "User", Type: dispatch.User},
+			{Name: "Reason", Type: dispatch.String},
 		},
-		Run: func(data *dcommand.Data) error {
-			config, err := moderationBase(data.GuildID)
+		Run: func(data *dispatch.Data) error {
+			config, err := moderationBase(data.Guild.ID)
 			if err != nil {
 				return err
 			}
 
-			target := data.ParsedArgs[0].User()
-			err = moderationBasePermissionCheck(data, target, discordgo.PermissionKickMembers, config.MuteRequiredRoles)
+			target := data.ParsedArgs[0].Value.(*discordgo.User)
+			err = moderationBasePermissionCheck(data, target, discordgo.PermissionKickMembers, config.KickRequiredRoles)
 			if err != nil {
 				return err
 			}
 
-			_, err = functions.GetMember(data.GuildID, target.ID)
+			_, err = functions.GetMember(data.Guild.ID, target.ID)
 			if err != nil {
 				return errors.New("Member not found")
 			}
 
 			kickReason := "(No reason provided)"
 			if len(data.ParsedArgs) > 1 && data.ParsedArgs[1] != nil {
-				kickReason = data.ParsedArgs[1].String()
+				kickReason = data.ParsedArgs[1].Value.(string)
 			}
 
-			err = createCase(config, data.Author, target, logKick, data.ChannelID, kickReason)
+			err = createCase(config, data.Author, target, logKick, data.Channel.ID, kickReason, nil)
 			if err != nil {
 				return fmt.Errorf("Something went wrong creating the case: %s", err.Error())
 			}
 
-			kickEmbed := buildDMEmbed(config, target, logKick, kickReason)
+			kickEmbed := buildDMEmbed(config, target, logKick, kickReason, nil)
 			err = functions.SendDM(target.ID, &discordgo.MessageSend{Embed: kickEmbed})
 			if err != nil {
-				functions.SendBasicMessage(data.ChannelID, "Was not able to DM the user.")
+				functions.SendBasicMessage(data.Channel.ID, "Was not able to DM the user.")
 			}
 
 			err = kickUser(config, data.Author, target, kickReason)
@@ -360,14 +357,14 @@ var moderationCommands = []*dcommand.SummitCommand{
 
 			ok, delay := triggerDeletion(config)
 			if ok {
-				functions.DeleteMessage(data.ChannelID, data.Message.ID, time.Duration(delay)*time.Second)
+				functions.DeleteMessage(data.Channel.ID, data.Message.ID, time.Duration(delay)*time.Second)
 			}
 
 			responseEmbed := responseEmbed(data.Author, target, logKick)
-			message, _ := functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: responseEmbed})
+			message, _ := functions.SendMessage(data.Channel.ID, &discordgo.MessageSend{Embed: responseEmbed})
 			ok, delay = responseDeletion(config)
 			if ok {
-				functions.DeleteMessage(data.ChannelID, message.ID, time.Duration(delay)*time.Second)
+				functions.DeleteMessage(data.Channel.ID, message.ID, time.Duration(delay)*time.Second)
 			}
 
 			return nil
@@ -375,14 +372,14 @@ var moderationCommands = []*dcommand.SummitCommand{
 	},
 	{
 		Command:          "ban",
-		Category:         dcommand.CategoryModeration,
+		Category:         command.CategoryModeration,
 		Aliases:          []string{""},
 		Description:      "Bans a user for specified duration and reason",
 		RequiredBotPerms: []int64{discordgo.PermissionAdministrator, discordgo.PermissionBanMembers},
-		Args: []*dcommand.Arg{
-			{Name: "User", Type: dcommand.User},
-			{Name: "Duration", Type: dcommand.Duration},
-			{Name: "Reason", Type: dcommand.String},
+		Args: []*dispatch.Arg{
+			{Name: "User", Type: dispatch.User},
+			{Name: "Duration", Type: dispatch.Duration},
+			{Name: "Reason", Type: dispatch.String},
 		},
 		ArgumentCombos: [][]int{
 			{0, 1, 2},
@@ -391,64 +388,60 @@ var moderationCommands = []*dcommand.SummitCommand{
 			{0, 2},
 			{0},
 		},
-		Run: func(data *dcommand.Data) error {
-			config, err := moderationBase(data.GuildID)
+		Run: func(data *dispatch.Data) error {
+			config, err := moderationBase(data.Guild.ID)
 			if err != nil {
 				return err
 			}
 
-			target := data.ParsedArgs[0].User()
-			err = moderationBasePermissionCheck(data, target, discordgo.PermissionModerateMembers, config.MuteRequiredRoles)
+			target := data.ParsedArgs[0].Value.(*discordgo.User)
+			err = moderationBasePermissionCheck(data, target, discordgo.PermissionBanMembers, config.BanRequiredRoles)
 			if err != nil {
 				return err
 			}
 
-			var duration time.Duration
-			var durationProvided bool
+			var durationPtr *time.Duration
 
 			if len(data.ParsedArgs) > 1 && data.ParsedArgs[1] != nil {
-				durPtr := data.ParsedArgs[1].Duration()
-				if durPtr != nil {
-					duration = *durPtr
-					durationProvided = true
+				duration := data.ParsedArgs[1].Value.(time.Duration)
+				if duration < 10*time.Minute {
+					duration = 10 * time.Minute
 				}
-			}
 
-			if durationProvided && duration < 10*time.Minute {
-				duration = 10 * time.Minute
+				durationPtr = &duration
 			}
 
 			banReason := "(No reason provided)"
 			if len(data.ParsedArgs) > 2 && data.ParsedArgs[2] != nil {
-				banReason = data.ParsedArgs[2].String()
+				banReason = data.ParsedArgs[2].Value.(string)
 			}
 
-			banEmbed := buildDMEmbed(config, target, logBan, banReason, duration)
+			banEmbed := buildDMEmbed(config, target, logBan, banReason, durationPtr)
 			err = functions.SendDM(target.ID, &discordgo.MessageSend{Embed: banEmbed})
 			if err != nil {
-				functions.SendBasicMessage(data.ChannelID, "Was not able to DM the user.")
+				functions.SendBasicMessage(data.Channel.ID, "Was not able to DM the user.")
 			}
 
-			err = banUser(config, data.Author, target, banReason, duration)
+			err = banUser(config, data.Author, target, banReason, durationPtr)
 			if err != nil {
 				return fmt.Errorf("Something went wrong: %s", err.Error())
 			}
 
-			err = createCase(config, data.Author, target, logBan, data.ChannelID, banReason, duration)
+			err = createCase(config, data.Author, target, logBan, data.Channel.ID, banReason, durationPtr)
 			if err != nil {
 				return fmt.Errorf("Something went wrong creating the case: %s", err.Error())
 			}
 
 			ok, delay := triggerDeletion(config)
 			if ok {
-				functions.DeleteMessage(data.ChannelID, data.Message.ID, time.Duration(delay)*time.Second)
+				functions.DeleteMessage(data.Channel.ID, data.Message.ID, time.Duration(delay)*time.Second)
 			}
 
 			responseEmbed := responseEmbed(data.Author, target, logBan)
-			message, _ := functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: responseEmbed})
+			message, _ := functions.SendMessage(data.Channel.ID, &discordgo.MessageSend{Embed: responseEmbed})
 			ok, delay = responseDeletion(config)
 			if ok {
-				functions.DeleteMessage(data.ChannelID, message.ID, time.Duration(delay)*time.Second)
+				functions.DeleteMessage(data.Channel.ID, message.ID, time.Duration(delay)*time.Second)
 			}
 
 			return nil
@@ -456,49 +449,49 @@ var moderationCommands = []*dcommand.SummitCommand{
 	},
 	{
 		Command:          "unban",
-		Category:         dcommand.CategoryModeration,
+		Category:         command.CategoryModeration,
 		Aliases:          []string{""},
 		Description:      "Unbans a user for a specified reason",
 		RequiredBotPerms: []int64{discordgo.PermissionAdministrator, discordgo.PermissionBanMembers},
 		ArgsRequired:     1,
-		Args: []*dcommand.Arg{
-			{Name: "User", Type: dcommand.User},
-			{Name: "Reason", Type: dcommand.String},
+		Args: []*dispatch.Arg{
+			{Name: "User", Type: dispatch.User},
+			{Name: "Reason", Type: dispatch.String},
 		},
-		Run: func(data *dcommand.Data) error {
-			config, err := moderationBase(data.GuildID)
+		Run: func(data *dispatch.Data) error {
+			config, err := moderationBase(data.Guild.ID)
 			if err != nil {
 				return err
 			}
 
-			target := data.ParsedArgs[0].User()
-			err = moderationBasePermissionCheck(data, target, discordgo.PermissionBanMembers, config.MuteRequiredRoles)
+			target := data.ParsedArgs[0].Value.(*discordgo.User)
+			err = moderationBasePermissionCheck(data, target, discordgo.PermissionBanMembers, config.BanRequiredRoles)
 			if err != nil {
 				return err
 			}
 
-			unbanReason := data.ParsedArgs[1].String()
+			unbanReason := data.ParsedArgs[1].Value.(string)
 
 			err = unbanUser(config, data.Author.ID, target.ID)
 			if err != nil {
 				return fmt.Errorf("Something went wrong: %s", err.Error())
 			}
 
-			err = createCase(config, data.Author, target, logUnban, data.ChannelID, unbanReason)
+			err = createCase(config, data.Author, target, logUnban, data.Channel.ID, unbanReason, nil)
 			if err != nil {
 				return fmt.Errorf("Something went wrong creating the case: %s", err.Error())
 			}
 
 			ok, delay := triggerDeletion(config)
 			if ok {
-				functions.DeleteMessage(data.ChannelID, data.Message.ID, time.Duration(delay)*time.Second)
+				functions.DeleteMessage(data.Channel.ID, data.Message.ID, time.Duration(delay)*time.Second)
 			}
 
 			responseEmbed := responseEmbed(data.Author, target, logUnban)
-			message, _ := functions.SendMessage(data.ChannelID, &discordgo.MessageSend{Embed: responseEmbed})
+			message, _ := functions.SendMessage(data.Channel.ID, &discordgo.MessageSend{Embed: responseEmbed})
 			ok, delay = responseDeletion(config)
 			if ok {
-				functions.DeleteMessage(data.ChannelID, message.ID, time.Duration(delay)*time.Second)
+				functions.DeleteMessage(data.Channel.ID, message.ID, time.Duration(delay)*time.Second)
 			}
 
 			return nil
@@ -506,31 +499,33 @@ var moderationCommands = []*dcommand.SummitCommand{
 	},
 }
 
-var moderationHelpers = []*dcommand.SummitCommand{
+var moderationHelpers = []*dispatch.Command{
 	{
-		Command:      "clean",
-		Category:     dcommand.CategoryModeration,
-		Aliases:      []string{"cl", "purge"},
-		Description:  "Delete the last number of messages from the channel with an optional user",
-		ArgsRequired: 1,
-		Args: []*dcommand.Arg{
-			{Name: "Num to delete", Type: &dcommand.IntArg{Min: 1, Max: 100}},
-			{Name: "User", Type: dcommand.User},
+		Command:           "clean",
+		Category:          command.CategoryModeration,
+		Aliases:           []string{"cl", "purge"},
+		Description:       "Delete the last number of messages from the channel with an optional user",
+		ArgsRequired:      1,
+		RequiredUserPerms: []int64{discordgo.PermissionManageMessages},
+		RequiredBotPerms:  []int64{discordgo.PermissionManageMessages},
+		Args: []*dispatch.Arg{
+			{Name: "Num to delete", Type: &dispatch.IntArg{Min: 1, Max: 100}},
+			{Name: "User", Type: dispatch.User},
 		},
-		Run: func(data *dcommand.Data) error {
-			config, err := moderationBase(data.GuildID)
+		Run: func(data *dispatch.Data) error {
+			config, err := moderationBase(data.Guild.ID)
 			if err != nil {
 				return err
 			}
 
-			deleteNum := data.ParsedArgs[0].Int64() + 1
+			deleteNum := data.ParsedArgs[0].Value.(int) + 1
 
 			var user *discordgo.User
 			if len(data.ParsedArgs) > 1 {
-				user = data.ParsedArgs[1].User()
+				user = data.ParsedArgs[1].Value.(*discordgo.User)
 			}
 
-			messages, err := common.Session.ChannelMessages(data.ChannelID, int(deleteNum), "", "", "")
+			messages, err := common.Session.ChannelMessages(data.Channel.ID, int(deleteNum), "", "", "")
 			if err != nil {
 				return errors.New(err.Error())
 			}
@@ -553,20 +548,20 @@ var moderationHelpers = []*dcommand.SummitCommand{
 				}
 			}
 
-			err = common.Session.ChannelMessagesBulkDelete(data.ChannelID, filteredMessages)
+			err = common.Session.ChannelMessagesBulkDelete(data.Channel.ID, filteredMessages)
 			if err != nil {
 				return errors.New(err.Error())
 			}
 
 			ok, delay := triggerDeletion(config)
 			if ok {
-				functions.DeleteMessage(data.ChannelID, data.Message.ID, time.Duration(delay)*time.Second)
+				functions.DeleteMessage(data.Channel.ID, data.Message.ID, time.Duration(delay)*time.Second)
 			}
 
-			message, _ := functions.SendBasicMessage(data.ChannelID, fmt.Sprintf("Done! Deleted %d messages.", len(filteredMessages)))
+			message, _ := functions.SendBasicMessage(data.Channel.ID, fmt.Sprintf("Done! Deleted %d messages.", len(filteredMessages)))
 			ok, delay = responseDeletion(config)
 			if ok {
-				functions.DeleteMessage(data.ChannelID, message.ID, time.Duration(delay)*time.Second)
+				functions.DeleteMessage(data.Channel.ID, message.ID, time.Duration(delay)*time.Second)
 			}
 
 			return nil
