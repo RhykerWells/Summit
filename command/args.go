@@ -34,7 +34,7 @@ func (b *BetArg) Help() string {
 	return fmt.Sprintf("%s%s", rangeDesc, options)
 }
 
-func (b *BetArg) ValidateArg(arg *dispatch.ParsedArg, data *dispatch.Data) (any, bool) {
+func (b *BetArg) ParseArg(arg *dispatch.ParsedArg, data *dispatch.Data) (any, bool) {
 	vStr := strings.TrimSpace(arg.Raw)
 
 	// Allow keywords

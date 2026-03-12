@@ -5,7 +5,7 @@ go 1.24.0
 toolchain go1.24.1
 
 require (
-	github.com/RhykerWells/dispatch v1.1.0
+	github.com/RhykerWells/dispatch v1.2.0
 	github.com/RhykerWells/durationutil v1.0.1
 	github.com/aarondl/null/v8 v8.1.3
 	github.com/aarondl/sqlboiler/v4 v4.19.5
