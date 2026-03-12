@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/RhykerWells/Summit/bot/functions"
+	"github.com/RhykerWells/Summit/command"
 	"github.com/RhykerWells/Summit/commands/moderation/models"
-	"github.com/RhykerWells/Summit/commands/util"
 	"github.com/RhykerWells/Summit/common"
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/bwmarrin/discordgo"
@@ -22,7 +22,7 @@ var (
 
 // muteUser automatically applies a mute role to the target user and removes any roles set to be removed
 // within the configuration and saves the mute to the database
-func muteUser(config *Config, targetID string, duration time.Duration) error {
+func muteUser(config *Config, targetID string, duration *time.Duration) error {
 	err := functions.AddRole(config.GuildID, targetID, config.MuteRole)
 	if err != nil {
 		return err
@@ -48,8 +48,8 @@ func muteUser(config *Config, targetID string, duration time.Duration) error {
 	}
 
 	var unmuteTime time.Time
-	if duration > 0 {
-		unmuteTime = time.Now().Add(duration)
+	if duration != nil {
+		unmuteTime = time.Now().Add(*duration)
 	}
 
 	muteEntry := models.ModerationMute{
@@ -61,7 +61,7 @@ func muteUser(config *Config, targetID string, duration time.Duration) error {
 
 	muteEntry.Upsert(context.Background(), common.PQ, true, []string{models.ModerationMuteColumns.GuildID, models.ModerationMuteColumns.UserID}, boil.Whitelist(models.ModerationMuteColumns.UnmuteAt), boil.Infer())
 
-	if duration > 0 {
+	if duration != nil {
 		scheduleUnmute(config, targetID, unmuteTime)
 	}
 
@@ -93,8 +93,8 @@ func unmuteUser(config *Config, authorID, targetID string) error {
 
 	if authorID == common.Bot.ID {
 		botUser, _ := functions.GetUser(common.Bot.ID)
-		createCase(config, botUser, targetUser, logUnmute, config.ModerationLogChannel, "Automatic unmute")
-		muteEmbed := buildDMEmbed(config, targetUser, logMute, "Automatic unmute")
+		createCase(config, botUser, targetUser, logUnmute, config.ModerationLogChannel, "Automatic unmute", nil)
+		muteEmbed := buildDMEmbed(config, targetUser, logMute, "Automatic unmute", nil)
 		functions.SendDM(targetID, &discordgo.MessageSend{Embed: muteEmbed})
 	}
 
@@ -120,7 +120,7 @@ func RefreshMuteSettings(config *Config) {
 
 // refreshMuteSettingsOnChannel refreshes the mute settings on a channel that is missing the permission
 func refreshMuteSettingsOnChannel(config *Config, channel *discordgo.Channel) {
-	if hasPerms := util.HasPerms(config.GuildID, channel.ID, common.Bot.ID, discordgo.PermissionManageChannels); !hasPerms {
+	if hasPerms := command.HasPerms(config.GuildID, channel.ID, common.Bot.ID, discordgo.PermissionManageChannels); !hasPerms {
 		return
 	}
 
@@ -211,7 +211,7 @@ func kickUser(config *Config, author, target *discordgo.User, reason string) err
 }
 
 // banUser bans the user from the current guild and adds an entry to the banned entry list
-func banUser(config *Config, author, target *discordgo.User, reason string, duration time.Duration) error {
+func banUser(config *Config, author, target *discordgo.User, reason string, duration *time.Duration) error {
 	auditLogReason := fmt.Sprintf("%s: %s", author.Username, reason)
 
 	err := functions.GuildBanMember(config.GuildID, target.ID, auditLogReason)
@@ -220,8 +220,8 @@ func banUser(config *Config, author, target *discordgo.User, reason string, dura
 	}
 
 	var unbanTime time.Time
-	if duration > 0 {
-		unbanTime = time.Now().Add(duration)
+	if duration != nil {
+		unbanTime = time.Now().Add(*duration)
 	}
 
 	banEntry := models.ModerationBan{
@@ -252,7 +252,7 @@ func unbanUser(config *Config, authorID, targetID string) error {
 
 	if authorID == common.Bot.ID {
 		botUser, _ := functions.GetUser(common.Bot.ID)
-		createCase(config, botUser, targetUser, logUnban, config.ModerationLogChannel, "Automatic unban")
+		createCase(config, botUser, targetUser, logUnban, config.ModerationLogChannel, "Automatic unban", nil)
 	}
 
 	return nil

@@ -2,7 +2,7 @@ package moderation
 
 import (
 	"github.com/RhykerWells/Summit/common"
-	"github.com/RhykerWells/Summit/common/dcommand"
+	"github.com/RhykerWells/dispatch"
 )
 
 //go:generate sqlboiler --no-hooks psql
@@ -13,7 +13,7 @@ import (
 //   - Initialises the web plugin
 //   - Initialises any other required middlewares
 //   - Registration of the moderation commands & their pagination
-func ModerationSetup(cmdHandler *dcommand.CommandHandler) {
+func ModerationSetup(cmdHandler *dispatch.CommandHandler) {
 	common.InitSchema("Moderation", GuildModerationSchema...)
 
 	initEvents()

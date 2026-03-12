@@ -4,22 +4,23 @@ import (
 	"errors"
 
 	"github.com/RhykerWells/Summit/bot/functions"
-	"github.com/RhykerWells/Summit/commands/util"
+	"github.com/RhykerWells/Summit/command"
 	"github.com/RhykerWells/Summit/common"
-	"github.com/RhykerWells/Summit/common/dcommand"
+	"github.com/RhykerWells/dispatch"
 	"github.com/bwmarrin/discordgo"
 )
 
-var Command = &dcommand.SummitCommand{
+var Command = &dispatch.Command{
 	Command:      "createinvite",
-	Category:     dcommand.CategoryOwner,
+	Category:     command.CategoryOwner,
 	Description:  "Creates an invite to the specified guild",
 	ArgsRequired: 1,
-	Args: []*dcommand.Arg{
-		{Name: "GuildID", Type: dcommand.String},
+	Args: []*dispatch.Arg{
+		{Name: "GuildID", Type: dispatch.String},
 	},
-	Run: util.OwnerCommand(func(data *dcommand.Data) error {
-		channels, _ := common.Session.GuildChannels(data.ParsedArgs[0].String())
+	Run: command.OwnerCommand(func(data *dispatch.Data) error {
+		guildID := data.ParsedArgs[0].Value.(string)
+		channels, _ := common.Session.GuildChannels(guildID)
 		var channelID string
 		for _, v := range channels {
 			if v.Type == discordgo.ChannelTypeGuildText {
@@ -37,7 +38,7 @@ var Command = &dcommand.SummitCommand{
 			Temporary: true,
 			Unique:    true,
 		})
-		functions.SendBasicMessage(data.ChannelID, "discord.gg/"+invite.Code)
+		functions.SendBasicMessage(data.Channel.ID, "discord.gg/"+invite.Code)
 
 		return nil
 	}),

@@ -1,4 +1,4 @@
-package util
+package command
 
 import (
 	"context"
@@ -6,29 +6,15 @@ import (
 
 	"github.com/RhykerWells/Summit/bot/core/models"
 	"github.com/RhykerWells/Summit/common"
-	"github.com/RhykerWells/Summit/common/dcommand"
-	"github.com/bwmarrin/discordgo"
+	"github.com/RhykerWells/dispatch"
 )
 
-func OwnerCommand(inner dcommand.Run) dcommand.Run {
-	return func(data *dcommand.Data) error {
+func OwnerCommand(inner dispatch.Run) dispatch.Run {
+	return func(data *dispatch.Data) error {
 		if data.Author.ID == common.ConfigBotOwner {
 			inner(data)
 		} else {
 			return errors.New("This is a bot-owner only command.")
-		}
-
-		return nil
-	}
-}
-
-func AdminOrManageServerCommand(inner dcommand.Run) dcommand.Run {
-	return func(data *dcommand.Data) error {
-		perms, _ := data.Session.State.UserChannelPermissions(data.Author.ID, data.ChannelID)
-		if perms&discordgo.PermissionAdministrator == 8 || perms&discordgo.PermissionManageServer == 32 {
-			inner(data)
-		} else {
-			return errors.New("You need `Administrator` or `ManageServer` permissions to use this command.")
 		}
 
 		return nil

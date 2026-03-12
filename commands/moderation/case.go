@@ -57,7 +57,7 @@ func removeFailedCase(caseData models.ModerationCase) {
 }
 
 // buildLogEmbed constructs and returns the embed object to be sent within the case log
-func buildLogEmbed(caseNumber int64, author, target *discordgo.User, action logAction, channelID, reason string, duration ...time.Duration) *discordgo.MessageEmbed {
+func buildLogEmbed(caseNumber int64, author, target *discordgo.User, action logAction, channelID, reason string, duration *time.Duration) *discordgo.MessageEmbed {
 	humanReadableCaseNumber := humanize.Comma(caseNumber)
 
 	embed := &discordgo.MessageEmbed{
@@ -73,19 +73,14 @@ func buildLogEmbed(caseNumber int64, author, target *discordgo.User, action logA
 		return embed
 	}
 
-	if len(duration) > 0 {
-		d := duration[0]
-		if d > 0 {
-			embed.Footer = &discordgo.MessageEmbedFooter{
-				Text: fmt.Sprintf("Duration: %s", durationutil.HumanizeDuration(d)),
-			}
-		} else {
-			embed.Footer = &discordgo.MessageEmbedFooter{
-				Text: "Duration: Indefinite",
-			}
-		}
+	footerText := "Indefinite"
+	if duration != nil {
+		footerText = fmt.Sprintf("%s", durationutil.HumanizeDuration(*duration))
 	}
 
+	embed.Footer = &discordgo.MessageEmbedFooter{
+		Text: fmt.Sprintf("Duration: `%s`", footerText),
+	}
 	return embed
 }
 
@@ -95,7 +90,7 @@ func generateLogLink(guildID, channelID, messageID string) string {
 }
 
 // createCase generates the moderationc case for the database and saves it, then attempts to build and log the Discord case log, if this fails the case will be removed
-func createCase(config *Config, author, target *discordgo.User, action logAction, channelID, reason string, duration ...time.Duration) error {
+func createCase(config *Config, author, target *discordgo.User, action logAction, channelID, reason string, duration *time.Duration) error {
 	caseID := getNewCaseID(config)
 
 	caseData := models.ModerationCase{
@@ -113,7 +108,7 @@ func createCase(config *Config, author, target *discordgo.User, action logAction
 		return err
 	}
 
-	embed := buildLogEmbed(caseID, author, target, action, channelID, reason, duration...)
+	embed := buildLogEmbed(caseID, author, target, action, channelID, reason, duration)
 	msg, err := functions.SendMessage(config.ModerationLogChannel, &discordgo.MessageSend{Embed: embed})
 	if err != nil {
 		removeFailedCase(caseData)
@@ -136,11 +131,10 @@ func createCase(config *Config, author, target *discordgo.User, action logAction
 	return nil
 }
 
-func buildDMEmbed(config *Config, target *discordgo.User, action logAction, reason string, duration ...time.Duration) *discordgo.MessageEmbed {
+func buildDMEmbed(config *Config, target *discordgo.User, action logAction, reason string, duration *time.Duration) *discordgo.MessageEmbed {
 	embedDuration := ""
-	if len(duration) > 0 {
-		d := duration[0]
-		embedDuration = fmt.Sprintf("\n\n**Duration:** %s", durationutil.HumanizeDuration(d))
+	if duration != nil {
+		embedDuration = fmt.Sprintf("\n\n**Duration:** %s", durationutil.HumanizeDuration(*duration))
 	}
 
 	embed := &discordgo.MessageEmbed{
