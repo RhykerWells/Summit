@@ -4,6 +4,8 @@ github.com/RhykerWells/dispatch v1.1.0 h1:tC8MC0Da7qY7z6TM/EqLQMsU8tnJ93QNjr6SXQ
 github.com/RhykerWells/dispatch v1.1.0/go.mod h1:7noqzXwjkHzn9nKlXswm97x31AjgM5ufLW9e5oF+xC4=
 github.com/RhykerWells/dispatch v1.2.0 h1:kJfomSto5ACp/1KFJLCCB12P4V9C0udR8zwki0Dr558=
 github.com/RhykerWells/dispatch v1.2.0/go.mod h1:7noqzXwjkHzn9nKlXswm97x31AjgM5ufLW9e5oF+xC4=
+github.com/RhykerWells/dispatch v1.2.1 h1:NpJb34CCJBCzvuQcBqJv0M3EEdlX1mXJnSulRHtc4zw=
+github.com/RhykerWells/dispatch v1.2.1/go.mod h1:7noqzXwjkHzn9nKlXswm97x31AjgM5ufLW9e5oF+xC4=
 github.com/RhykerWells/durationutil v1.0.1 h1:n1hy8qn3nLf2pqUc9JjtC/bAIKFmY1l2JIZt602ArmM=
 github.com/RhykerWells/durationutil v1.0.1/go.mod h1:95xR3TRo9RJrZd0dxX088jCsLxJHuLDA6RO5eWzAiKY=
 github.com/aarondl/inflect v0.0.2 h1:XvH8K5g1wKS921tMmDOUsZ3zS1Eo8WwK5RHC0IGGT2s=
