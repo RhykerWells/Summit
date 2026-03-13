@@ -91,8 +91,10 @@
 												{{roleOptionsMulti $.CurrentGuild.Roles $.ModerationConfig.MuteRequiredRoles (printf "%sRequiredRoles"  $moderationAction) -1}}
 												<p class="card-text">Role given when a user is muted.</p>
 												{{roleOptionsSingle $.CurrentGuild.Roles $.ModerationConfig.MuteRole "MuteRole" $.CurrentGuild.BotHighestRolePosition}}
-												<p class="card-text">Enable the bot to manage the mute role.</p>
-												{{toggleSwitch $.ModerationConfig.MuteManageRole "MuteManageRole"}}
+												<div class="input-group mb-3">
+													<p class="card-text">Enable the bot to manage the mute role.</p>
+													{{toggleSwitch $.ModerationConfig.MuteManageRole "MuteManageRole"}}
+												</div>
 												<p class="card-text">Remove and re-add the following roles on <code>mute</code> and <code>unmute</code>.</p>
 												{{roleOptionsMulti $.CurrentGuild.Roles $.ModerationConfig.MuteUpdateRoles "MuteUpdateRoles" $.CurrentGuild.BotHighestRolePosition}}
 												{{else if eq $moderationAction "Kick"}}
