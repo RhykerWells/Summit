@@ -6,6 +6,7 @@ import (
 	"github.com/RhykerWells/Summit/bot/core"
 	"github.com/RhykerWells/Summit/bot/events"
 	"github.com/RhykerWells/Summit/command"
+	"github.com/RhykerWells/Summit/commands"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -31,5 +32,6 @@ func Run(s *discordgo.Session, db *sql.DB) {
 	events.InitEvents(s, db)
 	core.Init()
 	command.InitCommandHandler(s)
+	commands.InitCommands(s)
 	s.Identify.Intents = gatewayIntentsUsed
 }
