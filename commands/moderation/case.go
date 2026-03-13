@@ -79,7 +79,7 @@ func buildLogEmbed(caseNumber int64, author, target *discordgo.User, action logA
 	}
 
 	embed.Footer = &discordgo.MessageEmbedFooter{
-		Text: fmt.Sprintf("Duration: `%s`", footerText),
+		Text: fmt.Sprintf("Duration: %s", footerText),
 	}
 	return embed
 }
