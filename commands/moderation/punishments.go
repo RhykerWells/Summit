@@ -132,8 +132,6 @@ func refreshMuteSettingsOnChannel(config *Config, channel *discordgo.Channel) {
 		return
 	}
 
-	channel, _ = common.Session.Channel(channel.ID)
-
 	var existingOverwrite *discordgo.PermissionOverwrite
 
 	for _, v := range channel.PermissionOverwrites {
