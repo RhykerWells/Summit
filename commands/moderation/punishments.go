@@ -103,7 +103,7 @@ func unmuteUser(config *Config, authorID, targetID string) error {
 
 // RefreshMuteSettings ensures that the configured mute role has correct
 // permissions applied across all channels in the guild. It
-func RefreshMuteSettings(config *Config) {
+func refreshMuteSettings(config *Config) {
 	channels, err := common.Session.GuildChannels(config.GuildID)
 	if err != nil {
 		return
@@ -131,8 +131,6 @@ func refreshMuteSettingsOnChannel(config *Config, channel *discordgo.Channel) {
 	if !config.MuteManageRole {
 		return
 	}
-
-	channel, _ = common.Session.Channel(channel.ID)
 
 	var existingOverwrite *discordgo.PermissionOverwrite
 
@@ -224,14 +222,13 @@ func banUser(config *Config, author, target *discordgo.User, reason string, dura
 		unbanTime = time.Now().Add(*duration)
 	}
 
-	banEntry := models.ModerationBan{
-		GuildID: config.GuildID,
-		UserID:  target.ID,
-		UnbanAt: unbanTime,
-	}
-	banEntry.Upsert(context.Background(), common.PQ, true, []string{models.ModerationBanColumns.GuildID, models.ModerationBanColumns.UserID}, boil.Whitelist(models.ModerationBanColumns.UnbanAt), boil.Infer())
-
 	if duration != nil {
+		banEntry := models.ModerationBan{
+			GuildID: config.GuildID,
+			UserID:  target.ID,
+			UnbanAt: unbanTime,
+		}
+		banEntry.Upsert(context.Background(), common.PQ, true, []string{models.ModerationBanColumns.GuildID, models.ModerationBanColumns.UserID}, boil.Whitelist(models.ModerationBanColumns.UnbanAt), boil.Infer())
 		scheduleUnban(config, target.ID, unbanTime)
 	}
 	return nil
