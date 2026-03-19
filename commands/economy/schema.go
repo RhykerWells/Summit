@@ -15,12 +15,17 @@ CREATE TABLE IF NOT EXISTS economy_config (
 
 	-- Custom responses
 	economy_custom_work_responses_enabled BOOL DEFAULT FALSE NOT NULL,
-	economy_custom_work_responses TEXT[] DEFAULT '{}' NOT NULL,
-	economy_custom_crime_responses_enabled BOOL DEFAULT FALSE NOT NULL,
-	economy_custom_crime_responses TEXT[] DEFAULT '{}' NOT NULL
+	economy_custom_crime_responses_enabled BOOL DEFAULT FALSE NOT NULL
 );
 `, `
-
+CREATE TABLE IF NOT EXISTS economy_responses (
+	id SERIAL PRIMARY KEY,
+	guild_id TEXT NOT NULL,
+	type TEXT NOT NULL,
+	response TEXT NOT NULL,
+	CONSTRAINT fk_guild_responses FOREIGN KEY (guild_id)
+		REFERENCES economy_config (guild_id) ON DELETE CASCADE
+);
 `, `
 CREATE TABLE IF NOT EXISTS economy_users (
 	guild_id TEXT NOT NULL,
@@ -80,7 +85,7 @@ CREATE TABLE IF NOT EXISTS economy_shop (
 );
 `, `
 CREATE INDEX IF NOT EXISTS idx_item_name
-    ON economy_shop (name)
+    ON economy_shop (name);
 `, `
 CREATE TABLE IF NOT EXISTS economy_createitem (
 	guild_id TEXT NOT NULL,
