@@ -13,7 +13,7 @@ import (
 type Config struct {
 	// General
 	GuildID     string
-	GuildPrefix string
+	GuildPrefix string `valid:","` // Ensure not-empty. It's a "hacky" way of doing it but it works -- for now
 }
 
 // ConfigToSQLModel converts a Config struct to the relevant SQLBoiler model
