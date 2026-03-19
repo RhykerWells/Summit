@@ -222,14 +222,13 @@ func banUser(config *Config, author, target *discordgo.User, reason string, dura
 		unbanTime = time.Now().Add(*duration)
 	}
 
-	banEntry := models.ModerationBan{
-		GuildID: config.GuildID,
-		UserID:  target.ID,
-		UnbanAt: unbanTime,
-	}
-	banEntry.Upsert(context.Background(), common.PQ, true, []string{models.ModerationBanColumns.GuildID, models.ModerationBanColumns.UserID}, boil.Whitelist(models.ModerationBanColumns.UnbanAt), boil.Infer())
-
 	if duration != nil {
+		banEntry := models.ModerationBan{
+			GuildID: config.GuildID,
+			UserID:  target.ID,
+			UnbanAt: unbanTime,
+		}
+		banEntry.Upsert(context.Background(), common.PQ, true, []string{models.ModerationBanColumns.GuildID, models.ModerationBanColumns.UserID}, boil.Whitelist(models.ModerationBanColumns.UnbanAt), boil.Infer())
 		scheduleUnban(config, target.ID, unbanTime)
 	}
 	return nil
