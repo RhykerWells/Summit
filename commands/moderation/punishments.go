@@ -103,7 +103,7 @@ func unmuteUser(config *Config, authorID, targetID string) error {
 
 // RefreshMuteSettings ensures that the configured mute role has correct
 // permissions applied across all channels in the guild. It
-func RefreshMuteSettings(config *Config) {
+func refreshMuteSettings(config *Config) {
 	channels, err := common.Session.GuildChannels(config.GuildID)
 	if err != nil {
 		return
