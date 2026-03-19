@@ -6,9 +6,11 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"html/template"
 	"net/http"
 	"net/url"
+	"reflect"
 	"sort"
 	"strconv"
 	"time"
@@ -17,6 +19,7 @@ import (
 	"github.com/RhykerWells/Summit/common"
 	"github.com/bwmarrin/discordgo"
 	"github.com/google/uuid"
+	"github.com/gorilla/schema"
 	"github.com/patrickmn/go-cache"
 	"goji.io/v3/pat"
 	"golang.org/x/oauth2"
@@ -28,6 +31,7 @@ type CtxKey int
 
 const (
 	CtxKeyTmplData CtxKey = iota
+	CtxKeyFormParsed
 )
 
 // createCSRF generates a CSRF token to be used for validating requests such as logins
@@ -356,6 +360,7 @@ func urlDataMW(inner http.Handler) http.Handler {
 	return http.HandlerFunc(middleware)
 }
 
+// getPopulatedGuildList returns a list of guilds with their ID, name and avatar URL to be used for template data
 func getPopulatedGuildList(guilds map[string]string, defaultIcon string, useGuildIcon bool) []map[string]interface{} {
 	guildList := make([]map[string]interface{}, 0)
 	for guildID, guildName := range guilds {
@@ -378,6 +383,7 @@ func getPopulatedGuildList(guilds map[string]string, defaultIcon string, useGuil
 	return guildList
 }
 
+// tokenToUser converts an OAuth token to a valid discordgo.User object
 func tokenToUser(w http.ResponseWriter, r *http.Request, ctx context.Context, token *oauth2.Token) *discordgo.User {
 	client := OauthConf.Client(ctx, token)
 	resp, err := client.Get("https://discord.com/api/v10/users/@me")
@@ -399,4 +405,62 @@ func tokenToUser(w http.ResponseWriter, r *http.Request, ctx context.Context, to
 	}
 
 	return user
+}
+
+func GetForm[T any](r *http.Request) *T {
+	if v, ok := r.Context().Value(CtxKeyFormParsed).(*T); ok {
+		return v
+	}
+	return nil
+}
+
+// ParseForm parses the request into the provided form struct, validates
+// field with a `valid` tag and stores the result in the request context.
+// The parsed form can be accesed via web.CtxKeyFormParsed if validation succeeds.
+//
+// The form parameter should be a struct or a pointer to a struct with fields matching HTML inputs.
+//
+// # ParseForm does not save forms, and that must be done manually through a config handler
+//
+// Fields not present in the form (e.g guild IDs, or internal config values)
+// are NOT automatically populated and MUST be set manually.
+//
+// Example:
+//
+//	oldCfg := GetConfig(guild)
+//	newCfg.GuildID = oldCfg.GuildID
+func ParseForm(inner http.Handler, form interface{}) http.Handler {
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		r.ParseForm()
+
+		guildID := pat.Param(r, "server")
+		guild := functions.GetGuild(guildID)
+
+		// Ensure we retrieve the underlying type instead of potentially having a pointer-to-pointer
+		formType := reflect.TypeOf(form)
+		if formType.Kind() == reflect.Ptr {
+			formType = formType.Elem()
+		}
+
+		// Decode the sent form into the struct
+		decoded := reflect.New(formType).Interface()
+		decoder := schema.NewDecoder()
+		decoder.IgnoreUnknownKeys(true)
+
+		if err := decoder.Decode(decoded, r.PostForm); err != nil {
+			SendErrorToast(w, fmt.Sprintf("Failed to decode form: %s", err.Error()))
+			return
+		}
+
+		if err := validateForm(guild, decoded); err != nil {
+			SendErrorToast(w, err.Error())
+			return
+		}
+
+		// Add to context
+		ctx := context.WithValue(r.Context(), CtxKeyFormParsed, decoded)
+		inner.ServeHTTP(w, r.WithContext(ctx))
+	}
+
+	return http.HandlerFunc(handler)
 }
