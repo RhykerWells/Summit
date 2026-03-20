@@ -71,6 +71,7 @@ CREATE INDEX IF NOT EXISTS idx_guild_user_cooldowns
 	ON economy_cooldowns (guild_id, user_id);
 `, `
 CREATE TABLE IF NOT EXISTS economy_shop (
+	id SERIAL PRIMARY KEY,
     guild_id TEXT NOT NULL,
     name TEXT NOT NULL,
     description TEXT NOT NULL,
@@ -78,28 +79,12 @@ CREATE TABLE IF NOT EXISTS economy_shop (
     quantity BIGINT NOT NULL,
     role TEXT NOT NULL,
     reply TEXT NOT NULL,
-    soldby TEXT,
-    PRIMARY KEY (guild_id, name, soldby),
+    UNIQUE (guild_id, name),
 	CONSTRAINT fk_guild_shop FOREIGN KEY (guild_id)
 		REFERENCES economy_config (guild_id) ON DELETE CASCADE
 );
 `, `
 CREATE INDEX IF NOT EXISTS idx_item_name
     ON economy_shop (name);
-`, `
-CREATE TABLE IF NOT EXISTS economy_createitem (
-	guild_id TEXT NOT NULL,
-	user_id TEXT NOT NULL,
-	name TEXT,
-	description TEXT,
-	price BIGINT,
-	quantity BIGINT,
-	role TEXT,
-	reply TEXT,
-	msg_id TEXT NOT NULL UNIQUE,
-	PRIMARY KEY (guild_id, user_id),
-	CONSTRAINT fk_guild_createitem FOREIGN KEY (guild_id)
-        REFERENCES economy_config (guild_id) ON DELETE CASCADE
-);
 `,
 }

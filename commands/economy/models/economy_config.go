@@ -207,14 +207,12 @@ var EconomyConfigWhere = struct {
 // EconomyConfigRels is where relationship names are stored.
 var EconomyConfigRels = struct {
 	GuildEconomyCooldowns       string
-	GuildEconomyCreateitems     string
 	GuildEconomyResponses       string
 	GuildEconomyShops           string
 	GuildEconomyUserInventories string
 	GuildEconomyUsers           string
 }{
 	GuildEconomyCooldowns:       "GuildEconomyCooldowns",
-	GuildEconomyCreateitems:     "GuildEconomyCreateitems",
 	GuildEconomyResponses:       "GuildEconomyResponses",
 	GuildEconomyShops:           "GuildEconomyShops",
 	GuildEconomyUserInventories: "GuildEconomyUserInventories",
@@ -224,7 +222,6 @@ var EconomyConfigRels = struct {
 // economyConfigR is where relationships are stored.
 type economyConfigR struct {
 	GuildEconomyCooldowns       EconomyCooldownSlice      `boil:"GuildEconomyCooldowns" json:"GuildEconomyCooldowns" toml:"GuildEconomyCooldowns" yaml:"GuildEconomyCooldowns"`
-	GuildEconomyCreateitems     EconomyCreateitemSlice    `boil:"GuildEconomyCreateitems" json:"GuildEconomyCreateitems" toml:"GuildEconomyCreateitems" yaml:"GuildEconomyCreateitems"`
 	GuildEconomyResponses       EconomyResponseSlice      `boil:"GuildEconomyResponses" json:"GuildEconomyResponses" toml:"GuildEconomyResponses" yaml:"GuildEconomyResponses"`
 	GuildEconomyShops           EconomyShopSlice          `boil:"GuildEconomyShops" json:"GuildEconomyShops" toml:"GuildEconomyShops" yaml:"GuildEconomyShops"`
 	GuildEconomyUserInventories EconomyUserInventorySlice `boil:"GuildEconomyUserInventories" json:"GuildEconomyUserInventories" toml:"GuildEconomyUserInventories" yaml:"GuildEconomyUserInventories"`
@@ -250,22 +247,6 @@ func (r *economyConfigR) GetGuildEconomyCooldowns() EconomyCooldownSlice {
 	}
 
 	return r.GuildEconomyCooldowns
-}
-
-func (o *EconomyConfig) GetGuildEconomyCreateitems() EconomyCreateitemSlice {
-	if o == nil {
-		return nil
-	}
-
-	return o.R.GetGuildEconomyCreateitems()
-}
-
-func (r *economyConfigR) GetGuildEconomyCreateitems() EconomyCreateitemSlice {
-	if r == nil {
-		return nil
-	}
-
-	return r.GuildEconomyCreateitems
 }
 
 func (o *EconomyConfig) GetGuildEconomyResponses() EconomyResponseSlice {
@@ -468,20 +449,6 @@ func (o *EconomyConfig) GuildEconomyCooldowns(mods ...qm.QueryMod) economyCooldo
 	return EconomyCooldowns(queryMods...)
 }
 
-// GuildEconomyCreateitems retrieves all the economy_createitem's EconomyCreateitems with an executor via guild_id column.
-func (o *EconomyConfig) GuildEconomyCreateitems(mods ...qm.QueryMod) economyCreateitemQuery {
-	var queryMods []qm.QueryMod
-	if len(mods) != 0 {
-		queryMods = append(queryMods, mods...)
-	}
-
-	queryMods = append(queryMods,
-		qm.Where("\"economy_createitem\".\"guild_id\"=?", o.GuildID),
-	)
-
-	return EconomyCreateitems(queryMods...)
-}
-
 // GuildEconomyResponses retrieves all the economy_response's EconomyResponses with an executor via guild_id column.
 func (o *EconomyConfig) GuildEconomyResponses(mods ...qm.QueryMod) economyResponseQuery {
 	var queryMods []qm.QueryMod
@@ -634,112 +601,6 @@ func (economyConfigL) LoadGuildEconomyCooldowns(ctx context.Context, e boil.Cont
 				local.R.GuildEconomyCooldowns = append(local.R.GuildEconomyCooldowns, foreign)
 				if foreign.R == nil {
 					foreign.R = &economyCooldownR{}
-				}
-				foreign.R.Guild = local
-				break
-			}
-		}
-	}
-
-	return nil
-}
-
-// LoadGuildEconomyCreateitems allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for a 1-M or N-M relationship.
-func (economyConfigL) LoadGuildEconomyCreateitems(ctx context.Context, e boil.ContextExecutor, singular bool, maybeEconomyConfig any, mods queries.Applicator) error {
-	var slice []*EconomyConfig
-	var object *EconomyConfig
-
-	if singular {
-		var ok bool
-		object, ok = maybeEconomyConfig.(*EconomyConfig)
-		if !ok {
-			object = new(EconomyConfig)
-			ok = queries.SetFromEmbeddedStruct(&object, &maybeEconomyConfig)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeEconomyConfig))
-			}
-		}
-	} else {
-		s, ok := maybeEconomyConfig.(*[]*EconomyConfig)
-		if ok {
-			slice = *s
-		} else {
-			ok = queries.SetFromEmbeddedStruct(&slice, maybeEconomyConfig)
-			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeEconomyConfig))
-			}
-		}
-	}
-
-	args := make(map[any]struct{})
-	if singular {
-		if object.R == nil {
-			object.R = &economyConfigR{}
-		}
-		args[object.GuildID] = struct{}{}
-	} else {
-		for _, obj := range slice {
-			if obj.R == nil {
-				obj.R = &economyConfigR{}
-			}
-			args[obj.GuildID] = struct{}{}
-		}
-	}
-
-	if len(args) == 0 {
-		return nil
-	}
-
-	argsSlice := make([]any, len(args))
-	i := 0
-	for arg := range args {
-		argsSlice[i] = arg
-		i++
-	}
-
-	query := NewQuery(
-		qm.From(`economy_createitem`),
-		qm.WhereIn(`economy_createitem.guild_id in ?`, argsSlice...),
-	)
-	if mods != nil {
-		mods.Apply(query)
-	}
-
-	results, err := query.QueryContext(ctx, e)
-	if err != nil {
-		return errors.Wrap(err, "failed to eager load economy_createitem")
-	}
-
-	var resultSlice []*EconomyCreateitem
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice economy_createitem")
-	}
-
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results in eager load on economy_createitem")
-	}
-	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for economy_createitem")
-	}
-
-	if singular {
-		object.R.GuildEconomyCreateitems = resultSlice
-		for _, foreign := range resultSlice {
-			if foreign.R == nil {
-				foreign.R = &economyCreateitemR{}
-			}
-			foreign.R.Guild = object
-		}
-		return nil
-	}
-
-	for _, foreign := range resultSlice {
-		for _, local := range slice {
-			if local.GuildID == foreign.GuildID {
-				local.R.GuildEconomyCreateitems = append(local.R.GuildEconomyCreateitems, foreign)
-				if foreign.R == nil {
-					foreign.R = &economyCreateitemR{}
 				}
 				foreign.R.Guild = local
 				break
@@ -1236,68 +1097,6 @@ func (o *EconomyConfig) AddGuildEconomyCooldowns(ctx context.Context, exec boil.
 	return nil
 }
 
-// AddGuildEconomyCreateitemsG adds the given related objects to the existing relationships
-// of the economy_config, optionally inserting them as new records.
-// Appends related to o.R.GuildEconomyCreateitems.
-// Sets related.R.Guild appropriately.
-// Uses the global database handle.
-func (o *EconomyConfig) AddGuildEconomyCreateitemsG(ctx context.Context, insert bool, related ...*EconomyCreateitem) error {
-	return o.AddGuildEconomyCreateitems(ctx, boil.GetContextDB(), insert, related...)
-}
-
-// AddGuildEconomyCreateitems adds the given related objects to the existing relationships
-// of the economy_config, optionally inserting them as new records.
-// Appends related to o.R.GuildEconomyCreateitems.
-// Sets related.R.Guild appropriately.
-func (o *EconomyConfig) AddGuildEconomyCreateitems(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*EconomyCreateitem) error {
-	var err error
-	for _, rel := range related {
-		if insert {
-			rel.GuildID = o.GuildID
-			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
-				return errors.Wrap(err, "failed to insert into foreign table")
-			}
-		} else {
-			updateQuery := fmt.Sprintf(
-				"UPDATE \"economy_createitem\" SET %s WHERE %s",
-				strmangle.SetParamNames("\"", "\"", 1, []string{"guild_id"}),
-				strmangle.WhereClause("\"", "\"", 2, economyCreateitemPrimaryKeyColumns),
-			)
-			values := []any{o.GuildID, rel.GuildID, rel.UserID}
-
-			if boil.IsDebug(ctx) {
-				writer := boil.DebugWriterFrom(ctx)
-				fmt.Fprintln(writer, updateQuery)
-				fmt.Fprintln(writer, values)
-			}
-			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
-				return errors.Wrap(err, "failed to update foreign table")
-			}
-
-			rel.GuildID = o.GuildID
-		}
-	}
-
-	if o.R == nil {
-		o.R = &economyConfigR{
-			GuildEconomyCreateitems: related,
-		}
-	} else {
-		o.R.GuildEconomyCreateitems = append(o.R.GuildEconomyCreateitems, related...)
-	}
-
-	for _, rel := range related {
-		if rel.R == nil {
-			rel.R = &economyCreateitemR{
-				Guild: o,
-			}
-		} else {
-			rel.R.Guild = o
-		}
-	}
-	return nil
-}
-
 // AddGuildEconomyResponsesG adds the given related objects to the existing relationships
 // of the economy_config, optionally inserting them as new records.
 // Appends related to o.R.GuildEconomyResponses.
@@ -1387,7 +1186,7 @@ func (o *EconomyConfig) AddGuildEconomyShops(ctx context.Context, exec boil.Cont
 				strmangle.SetParamNames("\"", "\"", 1, []string{"guild_id"}),
 				strmangle.WhereClause("\"", "\"", 2, economyShopPrimaryKeyColumns),
 			)
-			values := []any{o.GuildID, rel.GuildID, rel.Name, rel.Soldby}
+			values := []any{o.GuildID, rel.ID}
 
 			if boil.IsDebug(ctx) {
 				writer := boil.DebugWriterFrom(ctx)

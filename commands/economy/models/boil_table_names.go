@@ -6,7 +6,6 @@ package models
 var TableNames = struct {
 	EconomyConfig          string
 	EconomyCooldowns       string
-	EconomyCreateitem      string
 	EconomyResponses       string
 	EconomyShop            string
 	EconomyUserInventories string
@@ -14,7 +13,6 @@ var TableNames = struct {
 }{
 	EconomyConfig:          "economy_config",
 	EconomyCooldowns:       "economy_cooldowns",
-	EconomyCreateitem:      "economy_createitem",
 	EconomyResponses:       "economy_responses",
 	EconomyShop:            "economy_shop",
 	EconomyUserInventories: "economy_user_inventories",
