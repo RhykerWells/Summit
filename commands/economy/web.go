@@ -103,12 +103,6 @@ func saveConfigHandler(w http.ResponseWriter, r *http.Request) {
 	web.SendSuccessToast(w, "Successfully saved")
 }
 
-type Response struct {
-	GuildID  string
-	Type     string
-	Response string
-}
-
 func saveNewResponseHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
@@ -121,7 +115,7 @@ func saveNewResponseHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var response Response
+	var response models.EconomyResponse
 
 	decoder := schema.NewDecoder()
 	decoder.IgnoreUnknownKeys(true)
@@ -145,8 +139,7 @@ func saveNewResponseHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responseEntry := models.EconomyResponse{GuildID: guild.ID, Type: response.Type, Response: response.Response}
-	err = responseEntry.Insert(context.Background(), common.PQ, boil.Infer())
+	err = response.Insert(context.Background(), common.PQ, boil.Infer())
 	if err != nil {
 		web.SendErrorToast(w, fmt.Sprintf("Failed to save response: %s", err.Error()))
 		return
@@ -176,21 +169,16 @@ func editResponseHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var response Response
-
 	decoder := schema.NewDecoder()
 	decoder.IgnoreUnknownKeys(true)
-	err = decoder.Decode(&response, r.PostForm)
+	err = decoder.Decode(&responseEntry, r.PostForm)
 	if err != nil {
 		web.SendErrorToast(w, fmt.Sprintf("Failed to decode form: %s", err.Error()))
 		return
 	}
 
-	response.GuildID = guild.ID
-	response.Type = responseType
-
 	// Validate the response contains the literal string (amount)
-	match, err := regexp.MatchString(`\(amount\)`, response.Response)
+	match, err := regexp.MatchString(`\(amount\)`, responseEntry.Response)
 	if err != nil {
 		web.SendErrorToast(w, fmt.Sprintf("Failed to validate response: %s", err.Error()))
 		return
@@ -199,8 +187,6 @@ func editResponseHandler(w http.ResponseWriter, r *http.Request) {
 		web.SendErrorToast(w, "Response must contain the literal string (amount).")
 		return
 	}
-
-	responseEntry.Response = response.Response
 
 	responseEntry.Update(context.Background(), common.PQ, boil.Infer())
 	web.SendSuccessToast(w, "Successfully saved.")
