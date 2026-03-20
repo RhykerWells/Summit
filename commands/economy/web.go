@@ -3,6 +3,7 @@ package economy
 import (
 	"context"
 	"embed"
+	"errors"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -13,6 +14,7 @@ import (
 	"github.com/RhykerWells/Summit/common"
 	"github.com/RhykerWells/Summit/web"
 	"github.com/aarondl/sqlboiler/v4/boil"
+	"github.com/gorilla/schema"
 	"goji.io/v3"
 	"goji.io/v3/pat"
 )
@@ -36,8 +38,17 @@ func registerEconomyRoutes(dashboard *goji.Mux) {
 	economyMux.HandleFunc(pat.Get(""), web.RenderPage("economy.html"))
 	economyMux.HandleFunc(pat.Get("/"), web.RenderPage("economy.html"))
 
-	economyMux.HandleFunc(pat.Post(""), saveConfigHandler)
-	economyMux.HandleFunc(pat.Post("/"), saveConfigHandler)
+	economyMux.Handle(pat.Post(""), web.ParseForm(http.HandlerFunc(saveConfigHandler), Config{}))
+	economyMux.Handle(pat.Post("/"), web.ParseForm(http.HandlerFunc(saveConfigHandler), Config{}))
+
+	economyMux.HandleFunc(pat.Post("/responses/:type/new"), saveNewResponseHandler)
+	economyMux.HandleFunc(pat.Post("/responses/:type/new/"), saveNewResponseHandler)
+
+	economyMux.HandleFunc(pat.Post("/responses/:type/:id/edit"), editResponseHandler)
+	economyMux.HandleFunc(pat.Post("/responses/:type/:id/edit/"), editResponseHandler)
+
+	economyMux.HandleFunc(pat.Post("/responses/:type/:id/delete"), deleteResponseHandler)
+	economyMux.HandleFunc(pat.Post("/responses/:type/:id/delete/"), deleteResponseHandler)
 
 	economyMux.HandleFunc(pat.Get("/shop"), web.RenderPage("shop.html"))
 	economyMux.HandleFunc(pat.Get("/shop/"), web.RenderPage("shop.html"))
@@ -57,6 +68,12 @@ func economyMW(inner http.Handler) http.Handler {
 		tmplData, _ := ctx.Value(web.CtxKeyTmplData).(web.TmplContextData)
 		tmplData["EconomyConfig"] = config
 
+		workResponses, _ := models.EconomyResponses(models.EconomyResponseWhere.GuildID.EQ(guildID), models.EconomyResponseWhere.Type.EQ("work")).All(ctx, common.PQ)
+		tmplData["WorkResponses"] = workResponses
+
+		crimeResponses, _ := models.EconomyResponses(models.EconomyResponseWhere.GuildID.EQ(guildID), models.EconomyResponseWhere.Type.EQ("crime")).All(ctx, common.PQ)
+		tmplData["CrimeResponses"] = crimeResponses
+
 		store := getGuildShop(guildID)
 		tmplData["Store"] = store
 
@@ -68,94 +85,150 @@ func economyMW(inner http.Handler) http.Handler {
 }
 
 func saveConfigHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	r.ParseForm()
-
 	guildID := pat.Param(r, "server")
-	config := GetConfig(guildID)
+	oldCfg := GetConfig(guildID)
 
-	formType := r.FormValue("form_type")
-	switch formType {
-	case "Core":
-		economyEnabledBool, _ := strconv.ParseBool(r.FormValue("EconomyEnabled"))
-		economyStartbalance, _ := strconv.ParseInt(r.FormValue("EconomyStartBalance"), 10, 64)
-		economyMinimumReturn, _ := strconv.ParseInt(r.FormValue("EconomyMinReturn"), 10, 64)
-		economyMaximumReturn, _ := strconv.ParseInt(r.FormValue("EconomyMaxReturn"), 10, 64)
-		economyMaximumBet, _ := strconv.ParseInt(r.FormValue("EconomyMaxBet"), 10, 64)
-		economyCustomWorkResponsesEnabled, _ := strconv.ParseBool(r.FormValue("EconomyCustomWorkResponsesEnabled"))
-		economyCustomCrimeResponsesEnabled, _ := strconv.ParseBool(r.FormValue("EconomyCustomCrimeResponsesEnabled"))
+	newCfg := web.GetForm[Config](r)
+	// Ensure these non-editable fields are still present in the new form
+	newCfg.GuildID = oldCfg.GuildID
+	newCfg.EconomyCustomWorkResponses = oldCfg.EconomyCustomWorkResponses
+	newCfg.EconomyCustomCrimeResponses = oldCfg.EconomyCustomCrimeResponses
 
-		config.EconomyEnabled = economyEnabledBool
-		config.EconomySymbol = r.FormValue("EconomySymbol")
-		config.EconomyStartBalance = economyStartbalance
-		config.EconomyMinReturn = economyMinimumReturn
-		config.EconomyMaxReturn = economyMaximumReturn
-		config.EconomyMaxBet = economyMaximumBet
-		config.EconomyCustomWorkResponsesEnabled = economyCustomWorkResponsesEnabled
-		config.EconomyCustomCrimeResponsesEnabled = economyCustomCrimeResponsesEnabled
-	case "newWorkResponse":
-		response, ok := parseCustomResponse(w, r, "workResponse")
-		if !ok {
-			return
-		}
-		config.EconomyCustomWorkResponses = append(config.EconomyCustomWorkResponses, response)
-	case "editWorkResponse":
-		index := functions.ToInt64(r.FormValue("index"))
-		formKey := fmt.Sprintf("%dWorkResponse", index)
-
-		if index < 0 || int(index) >= len(config.EconomyCustomWorkResponses) {
-			web.SendErrorToast(w, "This response doesn't exist/")
-			return
-		}
-
-		response, ok := parseCustomResponse(w, r, formKey)
-		if !ok {
-			return
-		}
-		config.EconomyCustomWorkResponses[index] = response
-	case "deleteWorkResponse":
-		index := functions.ToInt64(r.FormValue("index"))
-
-		config.EconomyCustomWorkResponses = append(
-			config.EconomyCustomWorkResponses[:index],
-			config.EconomyCustomWorkResponses[index+1:]...,
-		)
-	case "newCrimeResponse":
-		response, ok := parseCustomResponse(w, r, "crimeResponse")
-		if !ok {
-			return
-		}
-		config.EconomyCustomCrimeResponses = append(config.EconomyCustomCrimeResponses, response)
-	case "editCrimeResponse":
-		index := functions.ToInt64(r.FormValue("index"))
-		formKey := fmt.Sprintf("%dCrimeResponse", index)
-
-		if index < 0 || int(index) >= len(config.EconomyCustomWorkResponses) {
-			web.SendErrorToast(w, "This response doesn't exist/")
-			return
-		}
-
-		response, ok := parseCustomResponse(w, r, formKey)
-		if !ok {
-			return
-		}
-		config.EconomyCustomWorkResponses[index] = response
-	case "deleteCrimeResponse":
-		index := functions.ToInt64(r.FormValue("index"))
-
-		config.EconomyCustomCrimeResponses = append(
-			config.EconomyCustomCrimeResponses[:index],
-			config.EconomyCustomCrimeResponses[index+1:]...,
-		)
-	}
-
-	err := SaveConfig(config)
+	err := SaveConfig(newCfg)
 	if err != nil {
 		web.SendErrorToast(w, err.Error())
 		return
 	}
 
 	web.SendSuccessToast(w, "Successfully saved")
+}
+
+type Response struct {
+	GuildID  string
+	Type     string
+	Response string
+}
+
+func saveNewResponseHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+
+	guildID := pat.Param(r, "server")
+	guild := functions.GetGuild(guildID)
+
+	responseType := pat.Param(r, "type")
+	if responseType != "work" && responseType != "crime" {
+		web.SendErrorToast(w, "Invalid response type.")
+		return
+	}
+
+	var response Response
+
+	decoder := schema.NewDecoder()
+	decoder.IgnoreUnknownKeys(true)
+	err := decoder.Decode(&response, r.PostForm)
+	if err != nil {
+		web.SendErrorToast(w, fmt.Sprintf("Failed to decode form: %s", err.Error()))
+		return
+	}
+
+	response.GuildID = guild.ID
+	response.Type = responseType
+
+	// Validate the response contains the literal string (amount)
+	match, err := regexp.MatchString(`\(amount\)`, response.Response)
+	if err != nil {
+		web.SendErrorToast(w, fmt.Sprintf("Failed to validate response: %s", err.Error()))
+		return
+	}
+	if !match {
+		web.SendErrorToast(w, "Response must contain the literal string (amount).")
+		return
+	}
+
+	responseEntry := models.EconomyResponse{GuildID: guild.ID, Type: response.Type, Response: response.Response}
+	err = responseEntry.Insert(context.Background(), common.PQ, boil.Infer())
+	if err != nil {
+		web.SendErrorToast(w, fmt.Sprintf("Failed to save response: %s", err.Error()))
+		return
+	}
+
+	web.SendSuccessToast(w, "Successfully saved.")
+}
+
+func editResponseHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+
+	guildID := pat.Param(r, "server")
+	guild := functions.GetGuild(guildID)
+
+	responseType := pat.Param(r, "type")
+	if responseType != "work" && responseType != "crime" {
+		web.SendErrorToast(w, "Invalid response type.")
+		return
+	}
+
+	responseID := pat.Param(r, "id")
+	responseIDInt, _ := strconv.Atoi(responseID)
+
+	responseEntry, err := models.EconomyResponses(models.EconomyResponseWhere.GuildID.EQ(guild.ID), models.EconomyResponseWhere.ID.EQ(responseIDInt)).One(context.Background(), common.PQ)
+	if err != nil {
+		web.SendErrorToast(w, "Response not found.")
+		return
+	}
+
+	var response Response
+
+	decoder := schema.NewDecoder()
+	decoder.IgnoreUnknownKeys(true)
+	err = decoder.Decode(&response, r.PostForm)
+	if err != nil {
+		web.SendErrorToast(w, fmt.Sprintf("Failed to decode form: %s", err.Error()))
+		return
+	}
+
+	response.GuildID = guild.ID
+	response.Type = responseType
+
+	// Validate the response contains the literal string (amount)
+	match, err := regexp.MatchString(`\(amount\)`, response.Response)
+	if err != nil {
+		web.SendErrorToast(w, fmt.Sprintf("Failed to validate response: %s", err.Error()))
+		return
+	}
+	if !match {
+		web.SendErrorToast(w, "Response must contain the literal string (amount).")
+		return
+	}
+
+	responseEntry.Response = response.Response
+
+	responseEntry.Update(context.Background(), common.PQ, boil.Infer())
+	web.SendSuccessToast(w, "Successfully saved.")
+}
+
+func deleteResponseHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+
+	guildID := pat.Param(r, "server")
+	guild := functions.GetGuild(guildID)
+
+	responseType := pat.Param(r, "type")
+	if responseType != "work" && responseType != "crime" {
+		web.SendErrorToast(w, "Invalid response type.")
+		return
+	}
+
+	responseID := pat.Param(r, "id")
+	responseIDInt, _ := strconv.Atoi(responseID)
+
+	responseEntry, err := models.EconomyResponses(models.EconomyResponseWhere.GuildID.EQ(guild.ID), models.EconomyResponseWhere.ID.EQ(responseIDInt)).One(context.Background(), common.PQ)
+	if err != nil {
+		web.SendErrorToast(w, "Response not found.")
+		return
+	}
+
+	responseEntry.Delete(context.Background(), common.PQ)
+	web.SendSuccessToast(w, "Successfully deleted.")
 }
 
 func saveItemHandler(w http.ResponseWriter, r *http.Request) {
@@ -277,17 +350,16 @@ func saveItemHandler(w http.ResponseWriter, r *http.Request) {
 	web.SendSuccessToast(w, "Successfully saved")
 }
 
-func parseCustomResponse(w http.ResponseWriter, r *http.Request, fieldName string) (string, bool) {
+func parseCustomResponse(w http.ResponseWriter, r *http.Request, fieldName string) (string, error) {
 	response := r.FormValue(fieldName)
 
 	re := regexp.MustCompile(`\(amount\)`)
 	match := re.MatchString(response)
 
 	if !match {
-		web.SendErrorToast(w, "Response did not contain literal string <code style=\"color: white;\">(amount)</code>")
-		return "", false
+		return "", errors.New("Response did not contain literal string <code style=\"color: white;\">(amount)</code>")
 	}
-	return response, true
+	return response, nil
 }
 
 func newItemNameOk(w http.ResponseWriter, guildID string, newName string) bool {
@@ -296,5 +368,6 @@ func newItemNameOk(w http.ResponseWriter, guildID string, newName string) bool {
 		web.SendErrorToast(w, "Item with this name already exists.")
 		return false
 	}
+
 	return true
 }

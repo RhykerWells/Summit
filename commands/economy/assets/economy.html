@@ -8,14 +8,13 @@
 	<main id="main" class="d-flex m-4" style="background-color: var(--baseGrey); border-radius: 0.5rem">
 		<div class="m-4 w-100">
 			<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage" class="btn text-light w-100" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Home</a>
-			<form id="CoreForm" method="POST">
-				<input type="hidden" name="form_type" value="Core">
+			<form id="CoreForm" method="POST" action="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage/economy">
 				<div class="d-flex flex-column justify-content-between align-items-sm-center mt-1 mb-0">
 					<div class="order-2 w-100 mt-2">
 						<div class="d-flex justify-content-between align-items-center flex-wrap w-100">
 							<div class="d-flex align-items-center">
 								{{toggleSwitch .EconomyConfig.EconomyEnabled "EconomyEnabled"}}
-								<h2 class="mb-0">Economy</h2>
+								<h2 class="mb-0">Economy {{currentTime}}</h2>
 							</div>
 							<button type="submit" class="btn btn-success">Save changes</button>
 						</div>
@@ -29,7 +28,7 @@
 									<h5>Currency symbol</h5>
 								</div>
 								<div class="card-body">
-									<p class="card-text">Note: To use an emoji, use the full name & code and ensure the bot has access to the emoji, for example: <code>&lt;NAME:IDXXXX&gt;</code></p>
+									<p class="card-text">Note: To use an emoji, use the full name & code and ensure the bot has access to the emoji, for example: <code>&lt;NAME:IDXXXX&gt;</code>.</p>
 									{{textInput .EconomyConfig.EconomySymbol "EconomySymbol"}}
 								</div>
 							</div>
@@ -52,7 +51,7 @@
 									<h5>Minimum payout</h5>
 								</div>
 								<div class="card-body">
-									<p class="card-text">Note: This only affects <code>work</code> &amp; <code>crime</code></p>
+									<p class="card-text">Note: This only affects <code>work</code> &amp; <code>crime</code>.</p>
 									{{numberSelect 1 .EconomyConfig.EconomyMaxReturn .EconomyConfig.EconomyMinReturn "EconomyMinReturn" (stringDict "label" true "labelContent" .EconomyConfig.EconomySymbol "labelSide" "left")}}
 								</div>
 							</div>
@@ -63,7 +62,7 @@
 									<h5>Maximum payout</h5>
 								</div>
 								<div class="card-body">
-									<p class="card-text">Note: This only affects <code>work</code> &amp; <code>crime</code></p>
+									<p class="card-text">Note: This only affects <code>work</code> &amp; <code>crime</code>.</p>
 									{{numberSelect .EconomyConfig.EconomyMinReturn 0 .EconomyConfig.EconomyMaxReturn "EconomyMaxReturn" (stringDict "label" true "labelContent" .EconomyConfig.EconomySymbol "labelSide" "left")}}
 								</div>
 							</div>
@@ -74,7 +73,7 @@
 									<h5>Maximum bet amount</h5>
 								</div>
 								<div class="card-body">
-									<p class="card-text">Note: This affects gambling related command</p>
+									<p class="card-text">Note: This affects gambling related commands.</p>
 									{{numberSelect 0 0 .EconomyConfig.EconomyMaxBet "EconomyMaxBet" (stringDict "label" true "labelContent" .EconomyConfig.EconomySymbol "labelSide" "left")}}
 								</div>
 							</div>
@@ -82,106 +81,135 @@
 					</div>
 				</div>
 				<h2 style="margin-top: 2px; margin-bottom: 0px;">Custom responses</h2>
-				<div id="responses" class="container-fluid my-4 px-0">
-					<div class="row">
-						{{range $_, $customResponse := dict 1 "Work" 2 "Crime"}}
-						{{$responses := $.EconomyConfig.EconomyCustomWorkResponses}}{{if eq $customResponse "Crime"}}{{$responses = $.EconomyConfig.EconomyCustomCrimeResponses}}{{end}}
-						<div class="col">
-							<div class="card">
-								<div class="d-flex align-items-center card-header">
-									{{if eq $customResponse "Work"}}
-									{{toggleSwitch $.EconomyConfig.EconomyCustomWorkResponsesEnabled "EconomyCustomWorkResponsesEnabled"}}
-									{{else}}
-									{{toggleSwitch $.EconomyConfig.EconomyCustomCrimeResponsesEnabled "EconomyCustomCrimeResponsesEnabled"}}
-									{{end}}
-									<h5>Custom {{lower $customResponse}} responses</h5>
-								</div>
-								<div class="card-body">
-									<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#{{lower $customResponse}}ResponsesModal">View & edit {{lower $customResponse}} responses</button>
-								</div>
-								<div class="modal fade" id="{{lower $customResponse}}ResponsesModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-									<div class="modal-dialog modal-dialog-centered modal-xl">
-										<div class="modal-content">
-											<div class="modal-header">
-												<h5>{{$customResponse}} responses</h5>
-												<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-											</div>
-											<div class="modal-body">
-												<p class="card-text">Note: the bot will automatically use custom responses instead of the in-built one if there are any present.</p>
-												<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#new{{$customResponse}}Response">Add new response</button>
-												<div class="table-responsive">
-													<table class="table table-striped" id="{{lower $customResponse}}Table" style="--bs-table-color: white; --bs-table-striped-color: white; --bs-table-striped-bg: rgb(30 30 30 / 50%); --bs-table-bg: transparent;">
-														<thead>
-															<tr>
-																<th style="width: 10%; white-space: nowrap;">Edit, view & delete response</th>
-																<th>Response</th>
-															</tr>
-														</thead>
-														<tbody>
-															{{range $i, $response := $responses}}
-															<tr>
-																<td>
-																	<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#edit{{$customResponse}}Response{{$i}}Modal" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);"><i class="fa-solid fa-pen-to-square"></i></button>
-																	<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#delete{{$customResponse}}Response{{$i}}Modal" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);"><i class="fa-solid fa-trash"></i></button>
-																</td>
-																<td class="text-truncate">{{$response}}</td>
-															</tr>
-															{{end}}
-															<tr id="{{lower $customResponse}}NoResultsRow" class="text-center" colspan="3" {{if $responses}} style=" display:none;" {{end}}><td colspan="4">No responses found.</td></tr>
-														</tbody>
-													</table>
-													<div id="{{lower $customResponse}}Table-pagination" class="mb-0 mt-2 d-flex justify-content-center"></div>
-												</div>
-											</div>
+				<p>This section allows you to add custom responses to the <code>work</code> and <code>crime</code> commands<br>Note: The bot will automatically use custom responses instead of the in-built one if there are any present.</p>
+				<div id="responses" class="container-fluid px-0">
+					<ul class="nav nav-tabs" id="myTab" role="tablist" style="border-bottom: none;">
+						<li class="nav-item" role="presentation">
+							<button class="tab-head nav-link active" id="work-tab" data-bs-toggle="tab" data-bs-target="#work-tab-pane" type="button" role="tab" aria-controls="work-tab-pane" aria-selected="true">Work</button>
+						</li>
+						<li class="nav-item" role="presentation">
+							<button class="tab-head nav-link" id="crime-tab" data-bs-toggle="tab" data-bs-target="#crime-tab-pane" type="button" role="tab" aria-controls="crime-tab-pane" aria-selected="false">Crime</button>
+						</li>
+					</ul>
+					<div class="tab-content" id="myTabContent" style="background-color: var(--accentGrey); padding: .5rem; border-radius: 0px 10px 10px 10px !important;">
+						<div class="tab-pane fade show active" id="work-tab-pane" role="tabpanel" aria-labelledby="work-tab" tabindex="0">
+							<div class="row">
+								<div class="col-sm">
+									<div class="form-group">
+										<div class="input-group mb-3" style="align-items: center;">
+											{{toggleSwitch .EconomyConfig.EconomyCustomWorkResponsesEnabled "EconomyCustomWorkResponsesEnabled"}}
+											<label>Enable custom work responses.</label>
 										</div>
+									</div>
+									<button type="button" style="background-color: var(--basePurple); border-color: var(--accentGrey);" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newWorkResponse">Add new response</button>
+								</div>
+								<div class="col-sm">
+									{{$workResponses := .WorkResponses}}
+									<div class="table-responsive">
+										<table class="table table-striped" id="workTable" style="--bs-table-color: white; --bs-table-striped-color: white; --bs-table-striped-bg: rgb(30 30 30 / 50%); --bs-table-bg: transparent;">
+											<thead>
+												<tr>
+													<th style="width: 10%; white-space: nowrap;">Edit, view & delete response</th>
+													<th>Response</th>
+												</tr>
+											</thead>
+											<tbody>
+												{{range $workResponses}}
+												<tr>
+													<td>
+														<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editWorkResponse{{.ID}}Modal" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);"><i class="fa-solid fa-pen-to-square"></i></button>
+														<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deleteWorkResponse{{.ID}}Modal" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);"><i class="fa-solid fa-trash"></i></button>
+													</td>
+													<td class="text-truncate">{{.Response}}</td>
+												</tr>
+												{{end}}
+												<tr id="workNoResultsRow" class="text-center" colspan="3" {{if $workResponses}} style=" display:none;" {{end}}><td colspan="4">No responses found.</td></tr>
+											</tbody>
+										</table>
+										<div id="workTable-pagination" class="mb-0 mt-2 d-flex justify-content-center"></div>
 									</div>
 								</div>
 							</div>
 						</div>
-						{{end}}
+						<div class="tab-pane fade" id="crime-tab-pane" role="tabpanel" aria-labelledby="crime-tab" tabindex="0">
+							<div class="row">
+								<div class="col-sm">
+									<div class="form-group">
+										<div class="input-group mb-3" style="align-items: center;">
+											{{toggleSwitch .EconomyConfig.EconomyCustomCrimeResponsesEnabled "EconomyCustomCrimeResponsesEnabled"}}
+											<label>Enable custom crime responses.</label>
+										</div>
+									</div>
+									<button type="button" style="background-color: var(--basePurple); border-color: var(--accentGrey);" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newCrimeResponse">Add new response</button>
+								</div>
+								<div class="col-sm">
+									{{$crimeResponses := .CrimeResponses}}
+									<div class="table-responsive">
+										<table class="table table-striped" id="crimeTable" style="--bs-table-color: white; --bs-table-striped-color: white; --bs-table-striped-bg: rgb(30 30 30 / 50%); --bs-table-bg: transparent;">
+											<thead>
+												<tr>
+													<th style="width: 10%; white-space: nowrap;">Edit, view & delete response</th>
+													<th>Response</th>
+												</tr>
+											</thead>
+											<tbody>
+												{{range $crimeResponses}}
+												<tr>
+													<td>
+														<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editCrimeResponse{{.ID}}Modal" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);"><i class="fa-solid fa-pen-to-square"></i></button>
+														<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deleteCrimeResponse{{.ID}}Modal" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);"><i class="fa-solid fa-trash"></i></button>
+													</td>
+													<td class="text-truncate">{{.Response}}</td>
+												</tr>
+												{{end}}
+												<tr id="crimeNoResultsRow" class="text-center" colspan="3" {{if $crimeResponses}} style=" display:none;" {{end}}><td colspan="4">No responses found.</td></tr>
+											</tbody>
+										</table>
+										<div id="crimeTable-pagination" class="mb-0 mt-2 d-flex justify-content-center"></div>
+									</div>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
+				<div class="d-flex m-2"></div>
 			</form>
 			{{range $_, $customResponse := dict 1 "Work" 2 "Crime"}}
-			{{$responses := $.EconomyConfig.EconomyCustomWorkResponses}}{{if eq $customResponse "Crime"}}{{$responses = $.EconomyConfig.EconomyCustomCrimeResponses}}{{end}}
-			{{range $i, $response := $responses}}
-			<div class="modal fade" id="edit{{$customResponse}}Response{{$i}}Modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+			{{$responses := $.WorkResponses}}{{if eq $customResponse "Crime"}}{{$responses = $.CrimeResponses}}{{end}}
+			{{range $responses}}
+			<div class="modal fade" id="edit{{$customResponse}}Response{{.ID}}Modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
 				<div class="modal-dialog modal-dialog-centered modal-lg">
 					<div class="modal-content">
 						<div class="modal-header">
-							<h5>Response #{{add $i 1}}</h5>
+							<h5>Edit response #{{.ID}}</h5>
 							<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
 						</div>
-						<form id="edit{{$customResponse}}Response{{$i}}Form" method="POST">
-							<input type="hidden" name="form_type" value="edit{{$customResponse}}Response">
-							<input type="hidden" name="index" value="{{$i}}">
+						<form id="edit{{$customResponse}}Response{{.ID}}Form" method="POST" action="{{$.HomeURL}}/dashboard/{{$.CurrentGuild.ID}}/manage/economy/responses/{{lower $customResponse}}/{{.ID}}/edit">
 							<div class="modal-body">
 								<p class="card-text">To add the payout to the response, include the literal string: <code>(amount)</code></p>
-								<span>{{textInput $response (printf "%d%sResponse" $i $customResponse)}}</span>
+								<span>{{textInput .Response "Response"}}</span>
 							</div>
 							<div class="modal-footer justify-content-between">
 								<div>
-									<button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close without saving</button>
-									<button type="submit" class="btn btn-success">Save changes</button>
+									<button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+									<button type="submit" class="btn btn-success">Save</button>
 								</div>
 							</div>
 						</form>
 					</div>
 				</div>
 			</div>
-			<div class="modal fade" id="delete{{$customResponse}}Response{{$i}}Modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+			<div class="modal fade" id="delete{{$customResponse}}Response{{.ID}}Modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
 				<div class="modal-dialog modal-dialog-centered modal-lg">
 					<div class="modal-content">
 						<div class="modal-header">
-							<h5>Response #{{add $i 1}}</h5>
+							<h5>Delete response #{{.ID}}</h5>
 							<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
 						</div>
-						<form id="delete{{$customResponse}}Response{{$i}}Form" method="POST">
-							<input type="hidden" name="form_type" value="delete{{$customResponse}}Response">
-							<input type="hidden" name="index" value="{{$i}}">
+						<form id="delete{{$customResponse}}Response{{.ID}}Form" method="POST" action="{{$.HomeURL}}/dashboard/{{$.CurrentGuild.ID}}/manage/economy/responses/{{lower $customResponse}}/{{.ID}}/delete">
 							<div class="modal-body">
 								<p class="card-text">This cannot be undone!</p>
-								<span>You are deleting: "<code>{{$response}}</code>"</span>
+								<span>You are deleting: "<code>{{.Response}}</code>"</span>
 							</div>
 							<div class="modal-footer justify-content-between">
 								<div>
@@ -201,15 +229,14 @@
 							<h5>New response</h5>
 							<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
 						</div>
-						<form id="new{{$customResponse}}ResponseForm" method="POST">
-							<input type="hidden" name="form_type" value="new{{$customResponse}}Response">
+						<form method="POST" action="{{$.HomeURL}}/dashboard/{{$.CurrentGuild.ID}}/manage/economy/responses/{{lower $customResponse}}/new">
 							<div class="modal-body">
-								<p class="card-text">To add the payout to the response, include the literal string: <code>(amount)</code></p>
-								{{textInput "" (printf "%sResponse" (lower $customResponse))}}
+								<p class="card-text">To add the payout to the response, include the literal string: <code>(amount)</code>.</p>
+								{{textInput "" "Response"}}
 							</div>
 							<div class="modal-footer justify-content-between">
-								<button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close without saving</button>
-								<button type="submit" class="btn btn-success">Save changes</button>
+								<button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+								<button type="submit" class="btn btn-success">Save</button>
 							</div>
 						</form>
 					</div>
