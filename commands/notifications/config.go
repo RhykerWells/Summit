@@ -12,10 +12,10 @@ type Config struct {
 	GuildID string
 
 	JoinServerChannel string `valid:"channel,allowEmpty"`
-	JoinServerMessage string `valid:",allowEmpty"`
+	JoinServerMessage string `valid:"template,allowEmpty"`
 
 	LeaveServerChannel string `valid:"channel,allowEmpty"`
-	LeaveServerMessage string `valid:",allowEmpty"`
+	LeaveServerMessage string `valid:"template,allowEmpty"`
 }
 
 // ConfigToSQLModel converts a Config struct to the relevant SQLBoiler model
