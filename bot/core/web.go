@@ -36,21 +36,30 @@ func registerCoreRoute(dashboard *goji.Mux) {
 	coreMux.HandleFunc(pat.Get("/"), web.RenderPage("core.html"))
 
 	// Data saving routes
-	coreMux.Handle(pat.Post(""), web.ParseForm(http.HandlerFunc(saveConfigHandler), Config{}))
-	coreMux.Handle(pat.Post("/"), web.ParseForm(http.HandlerFunc(saveConfigHandler), Config{}))
+	coreMux.HandleFunc(pat.Post(""), saveConfigHandler)
+	coreMux.HandleFunc(pat.Post("/"), saveConfigHandler)
 }
 
-// saveConfigHandler saves the parsed form data and saves it if possible.
+// saveConfigHandler parses form data sent to the server, validates and saves it if possible.
+// sends either an error or success toast response to the server
 func saveConfigHandler(w http.ResponseWriter, r *http.Request) {
-	newCfg := web.GetForm[Config](r)
+	w.Header().Set("Content-Type", "application/json")
+	r.ParseForm()
 
 	guildID := pat.Param(r, "server")
-	oldCfg := GetConfig(guildID)
+	config := GetConfig(guildID)
 
-	// Ensure these non-editable fields are still present in the new form
-	newCfg.GuildID = oldCfg.GuildID
+	formType := r.FormValue("form_type")
+	switch formType {
+	case "Core":
+		if r.FormValue("GuildPrefix") == "" {
+			web.SendErrorToast(w, "Prefix cannot be empty.")
+			return
+		}
+		config.GuildPrefix = r.FormValue("GuildPrefix")
+	}
 
-	err := SaveConfig(newCfg)
+	err := SaveConfig(config)
 	if err != nil {
 		web.SendErrorToast(w, err.Error())
 		return

@@ -17,7 +17,7 @@
 								{{toggleSwitch .ModerationConfig.ModerationEnabled "ModerationEnabled"}}
 								<h2 class="mb-0">Moderation</h2>
 							</div>
-							<button type="submit" class="btn btn-success">Save changes</button>
+							<button type="submit" class="btn btn-success">Save core changes</button>
 						</div>
 					</div>
 				</div>
@@ -60,87 +60,61 @@
 						</div>
 					</div>
 				</div>
-				<h2 style="margin-top: 2px; margin-bottom: 0px;">Command settings</h2>
-				<div id="restrictions" class="container-fluid my-4 px-0">
-					<ul class="nav nav-tabs" id="myTab" role="tablist" style="border-bottom: none;">
-						<li class="nav-item" role="presentation">
-							<button class="tab-head nav-link active" id="warn-tab" data-bs-toggle="tab" data-bs-target="#warn-tab-pane" type="button" role="tab" aria-controls="warn-tab-pane" aria-selected="true">Warn</button>
-						</li>
-						<li class="nav-item" role="presentation">
-							<button class="tab-head nav-link" id="mute-tab" data-bs-toggle="tab" data-bs-target="#mute-tab-pane" type="button" role="tab" aria-controls="mute-tab-pane" aria-selected="false">Mute/Unmute</button>
-						</li>
-						<li class="nav-item" role="presentation">
-							<button class="tab-head nav-link" id="kick-tab" data-bs-toggle="tab" data-bs-target="#kick-tab-pane" type="button" role="tab" aria-controls="kick-tab-pane" aria-selected="false">Kick</button>
-						</li>
-						<li class="nav-item" role="presentation">
-							<button class="tab-head nav-link" id="ban-tab" data-bs-toggle="tab" data-bs-target="#ban-tab-pane" type="button" role="tab" aria-controls="ban-tab-pane" aria-selected="false">Ban/Unban</button>
-						</li>
-					</ul>
-					<div class="tab-content" id="myTabContent">
-						<div class="tab-pane fade show active" id="warn-tab-pane" role="tabpanel" aria-labelledby="warn-tab" tabindex="0">
-							<p>Allows you to add warnings to a users profile. Cases can be accessed through <code>-cases @user [page] -type warn</code></p>
-							<div class="row">
-								<div class="col-sm">
-									<div class="form-group">
-										<label>Users with any of the following roles will have permission to use warning related commands</label>
-										{{roleOptionsMulti .CurrentGuild.Roles .ModerationConfig.WarnRequiredRoles "WarnRequiredRoles" -1}}
-									</div>
-								</div>
-								<div class="col-sm"></div>
+			</form>
+			<h2 style="margin-top: 2px; margin-bottom: 0px;">Command settings</h2>
+			<div id="restrictions" class="container-fluid my-4 px-0">
+				<div class="row">
+				{{range $_, $moderationAction := dict 1 "Warn" 2 "Mute" 3 "Kick" 4 "Ban"}}
+					<div class="col">
+						<div class="card {{$moderationAction}}">
+							<div class="card-header">
+								<h5>{{$moderationAction}}s</h5>
 							</div>
-						</div>
-						<div class="tab-pane fade" id="mute-tab-pane" role="tabpanel" aria-labelledby="mute-tab" tabindex="0">
-							<p>Allows you to add punish users by removing their ability to talk. Cases can be accessed through <code>-cases @user [page] -type mute</code></p>
-							<div class="row">
-								<div class="col-sm">
-									<div class="form-group">
-										<label>Role given when a user is muted</label>
-										{{roleOptionsSingle .CurrentGuild.Roles .ModerationConfig.MuteRole "MuteRole" .CurrentGuild.BotHighestRolePosition}}
-									</div>
-									<div class="form-group">
-										<div class="input-group mb-3">
-											{{toggleSwitch .ModerationConfig.MuteManageRole "MuteManageRole"}}
-											<label>Enable the bot to manage the mute role.</label>
+							<div class="card-body">
+								<p class="card-text">Core {{lower $moderationAction}} settings</p>
+								<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#{{lower $moderationAction}}Modal">Edit {{lower $moderationAction}} config</button>
+							</div>
+							<div class="modal fade" id="{{lower $moderationAction}}Modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+								<div class="modal-dialog modal-dialog-centered modal-lg">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h5>{{$moderationAction}} settings</h5>
+											<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
 										</div>
-									</div>
-									<div class="form-group">
-										<label>Remove and re-add the following roles on <code>mute</code> and <code>unmute</code>.</label>
-										{{roleOptionsMulti .CurrentGuild.Roles .ModerationConfig.MuteUpdateRoles "MuteUpdateRoles" .CurrentGuild.BotHighestRolePosition}}
-									</div>
-									<div class="form-group">
-										<label>Users with any of the following roles will have permission to use mute related commands</label>
-										{{roleOptionsMulti .CurrentGuild.Roles .ModerationConfig.MuteRequiredRoles "MuteRequiredRoles" -1}}
-									</div>
-								</div>
-								<div class="col-sm"></div>
-							</div>
-						</div>
-						<div class="tab-pane fade" id="kick-tab-pane" role="tabpanel" aria-labelledby="kick-tab" tabindex="0">
-							<p>Allows you to kick users from the server. Cases can be accessed through <code>-cases @user [page] -type kick</code></p>
-							<div class="row">
-								<div class="col-sm">
-									<div class="form-group">
-										<label>Users with any of the following roles will have permission to use kick related commands</label>
-										{{roleOptionsMulti .CurrentGuild.Roles .ModerationConfig.KickRequiredRoles "KickRequiredRoles" -1}}
-									</div>
-								</div>
-								<div class="col-sm"></div>
-							</div>
-						</div>
-						<div class="tab-pane fade" id="ban-tab-pane" role="tabpanel" aria-labelledby="ban-tab" tabindex="0">
-							<p>Allows you to ban users from the server. Cases can be accessed through <code>-cases @user [page] -type ban</code></p>
-							<div class="row">
-								<div class="col-sm">
-									<div class="form-group">
-										<label>Users with any of the following roles will have permission to use ban related commands</label>
-										{{roleOptionsMulti .CurrentGuild.Roles .ModerationConfig.BanRequiredRoles "BanRequiredRoles" -1}}
+										<form id="{{$moderationAction}}Form" method="POST">
+											<input type="hidden" name="form_type" value="{{$moderationAction}}">
+											<div class="modal-body">
+												<p class="card-text">Required moderator roles</p>
+												{{if eq $moderationAction "Warn"}}
+												{{roleOptionsMulti $.CurrentGuild.Roles $.ModerationConfig.WarnRequiredRoles (printf "%sRequiredRoles"  $moderationAction) -1}}
+												{{else if eq $moderationAction "Mute"}}
+												{{roleOptionsMulti $.CurrentGuild.Roles $.ModerationConfig.MuteRequiredRoles (printf "%sRequiredRoles"  $moderationAction) -1}}
+												<p class="card-text">Role given when a user is muted.</p>
+												{{roleOptionsSingle $.CurrentGuild.Roles $.ModerationConfig.MuteRole "MuteRole" $.CurrentGuild.BotHighestRolePosition}}
+												<div class="input-group mb-3">
+													<p class="card-text">Enable the bot to manage the mute role.</p>
+													{{toggleSwitch $.ModerationConfig.MuteManageRole "MuteManageRole"}}
+												</div>
+												<p class="card-text">Remove and re-add the following roles on <code>mute</code> and <code>unmute</code>.</p>
+												{{roleOptionsMulti $.CurrentGuild.Roles $.ModerationConfig.MuteUpdateRoles "MuteUpdateRoles" $.CurrentGuild.BotHighestRolePosition}}
+												{{else if eq $moderationAction "Kick"}}
+												{{roleOptionsMulti $.CurrentGuild.Roles $.ModerationConfig.KickRequiredRoles (printf "%sRequiredRoles"  $moderationAction) -1}}
+												{{else if eq $moderationAction "Ban"}}
+												{{roleOptionsMulti $.CurrentGuild.Roles $.ModerationConfig.BanRequiredRoles (printf "%sRequiredRoles"  $moderationAction) -1}}
+												{{end}}
+											</div>
+											<div class="modal-footer">
+												<button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close without saving</button>
+												<button type="submit" class="btn btn-success">Save changes</button>
+											</div>
+										</form>
 									</div>
 								</div>
-								<div class="col-sm"></div>
 							</div>
 						</div>
 					</div>
-				</form>
+				{{end}}
+				</div>
 			</div>
 		</div>
 	</main>

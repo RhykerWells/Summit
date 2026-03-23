@@ -4,9 +4,19 @@ document.addEventListener('DOMContentLoaded', () => {
 			e.preventDefault();
 
 			const formData = new FormData(form);
+			form.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+				if (!formData.has(cb.name)) {
+					formData.append(cb.name, "false");
+				} else {
+					formData.set(cb.name, "true");
+				}
+			});
+			/*for (const [key, value] of formData.entries()) {
+				console.log(key, value); // debug
+			}*/
 
 			const body = new URLSearchParams(formData);
-			const postURL = form.action;
+			const postURL = window.location.origin + window.location.pathname;
 
 			try {
 				disableScreenPassthrough();

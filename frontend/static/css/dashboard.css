@@ -169,24 +169,6 @@ nav.navbar .selectServerDropDown::after, nav.navbar .userDropDown::after {
 	animation: none !important;
 }
 
-.tab-content {
-	background-color: var(--accentGrey);
-	padding: .5rem;
-	border-radius: 0px 10px 10px 10px !important;
-}
-
-.nav-tabs .nav-link {
-	color: white;
-}
-.nav-tabs .nav-link.active {
-	background-color: var(--accentGrey);
-	border-color: transparent;
-	color: inherit;
-}
-.nav-tabs .nav-link:not(.active):hover {
-	border-color: var(--accentGrey);
-}
-
 .toast {
 	color: white;
 	border: 0.1rem solid var(--accentGrey);

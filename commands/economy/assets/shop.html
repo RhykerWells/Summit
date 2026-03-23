@@ -44,32 +44,36 @@
 				</table>
 				<div id="itemTable-pagination" class="mb-0 mt-2 d-flex justify-content-center"></div>
 			</div>
-			{{range .Store}}
-			<div class="modal fade" id="editItem{{.ID}}Modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+			{{range $i, $item := .Store}}
+			<div class="modal fade" id="editItem{{$i}}Modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
 				<div class="modal-dialog modal-dialog-centered modal-lg">
 					<div class="modal-content">
 						<div class="modal-header">
 							<h5 class="modal-title">Edit item</h5>
 							<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
 						</div>
-						<form id="editItemForm" method="POST" action="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage/economy/shop/{{.ID}}/edit">
+						<form id="editItemForm" method="POST">
+							<input type="hidden" name="form_type" value="editItem">
+							<input type="hidden" name="item" value="{{$item.Name}}">
+							<input type="hidden" name="index" value="{{$i}}">
 							<div class="modal-body">
+								{{$item}}
 								<p class="card-text">Item name</p>
-								{{textInput .Name "Name" (stringDict "maxlength" 30 "label" true "labelContent" (printf "%d/30" (len .Name)) "labelSide" "right")}}
+								{{textInput $item.Name (printf "editItem%dName" $i) (stringDict "maxlength" 30 "label" true "labelContent" (printf "%d/30" (len $item.Name)) "labelSide" "right")}}
 								<p class="card-text">Description</p>
-								{{textInput .Description "Description" (stringDict "maxlength" 200 "label" true "labelContent" (printf "%d/200" (len .Description)) "labelSide" "right")}}
+								{{textInput $item.Description (printf "editItem%dDescription" $i) (stringDict "maxlength" 200 "label" true "labelContent" (printf "%d/200" (len $item.Description)) "labelSide" "right")}}
 								<p class="card-text">Price</p>
-								{{numberSelect 0 0 .Price "Price" (stringDict "label" true "labelContent" $.EconomyConfig.EconomySymbol "labelSide" "left")}}
+								{{numberSelect 0 0 $item.Price (printf "editItem%dPrice" $i) (stringDict "label" true "labelContent" $.EconomyConfig.EconomySymbol "labelSide" "left")}}
 								<p class="card-text">Quantity</p>
-								{{numberSelect 0 0 .Quantity "Quantity"}}
+								{{numberSelect 0 0 $item.Quantity (printf "editItem%dQuantity" $i)}}
 								<p class="card-text">Role given</p>
-								{{roleOptionsSingle $.CurrentGuild.Roles .Role "Role" $.CurrentGuild.BotHighestRolePosition}}
+								{{roleOptionsSingle $.CurrentGuild.Roles $item.Role (printf "editItem%dRole" $i) $.CurrentGuild.BotHighestRolePosition}}
 								<p class="card-text">Reply</p>
-								{{textInput .Reply "Reply" (stringDict "maxlength" 200 "label" true "labelContent" (printf "%d/200" (len .Reply)) "labelSide" "right")}}
+								{{textInput $item.Reply (printf "editItem%dDescription" $i) (stringDict "maxlength" 200 "label" true "labelContent" (printf "%d/200" (len $item.Reply)) "labelSide" "right")}}
 							</div>
 							<div class="modal-footer justify-content-between">
 								<div>
-									<button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+									<button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close without saving</button>
 									<button type="submit" class="btn btn-success">Save changes</button>
 								</div>
 							</div>
@@ -77,17 +81,20 @@
 					</div>
 				</div>
 			</div>
-			<div class="modal fade" id="deleteItem{{.ID}}Modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+			<div class="modal fade" id="deleteItem{{$i}}Modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
 				<div class="modal-dialog modal-dialog-centered modal-lg">
 					<div class="modal-content">
 						<div class="modal-header">
 							<h5 class="modal-title">Delete item</h5>
 							<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
 						</div>
-						<form id="deleteItem{{.ID}}Form" method="POST" action="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage/economy/shop/{{.ID}}/delete">
+						<form id="deleteItem{{$i}}Form" method="POST">
+							<input type="hidden" name="form_type" value="deleteItem">
+							<input type="hidden" name="item" value="{{$item.Name}}">
+							<input type="hidden" name="index" value="{{$i}}">
 							<div class="modal-body">
 								<p class="card-text">This cannot be undone!</p>
-								<span>You are deleting: "<code>{{.Name}}</code>"</span>
+								<span>You are deleting: "<code>{{$item.Name}}</code>"</span>
 							</div>
 							<div class="modal-footer justify-content-between">
 								<div>
@@ -107,25 +114,26 @@
 							<h5 class="modal-title">New item</h5>
 							<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
 						</div>
-						<form id="newItemForm" method="POST" action="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage/economy/shop/new">
+						<form id="newItemForm" method="POST">
+							<input type="hidden" name="form_type" value="newItem">
 							<div class="modal-body">
 								<p class="card-text">Item name</p>
-								{{textInput "" "Name" (stringDict "maxlength" 30 "label" true "labelContent" "0/30" "labelSide" "right")}}
+								{{textInput "" "newItemName" (stringDict "maxlength" 30 "label" true "labelContent" "0/30" "labelSide" "right")}}
 								<p class="card-text">Description</p>
-								{{textInput "" "Description" (stringDict "maxlength" 200 "label" true "labelContent" "0/200" "labelSide" "right")}}
+								{{textInput "" "newItemDescription" (stringDict "maxlength" 200 "label" true "labelContent" "0/200" "labelSide" "right")}}
 								<p class="card-text">Price</p>
-								{{numberSelect 0 0 0 "Price" (stringDict "label" true "labelContent" $.EconomyConfig.EconomySymbol "labelSide" "left")}}
+								{{numberSelect 0 0 0 "newItemPrice" (stringDict "label" true "labelContent" $.EconomyConfig.EconomySymbol "labelSide" "left")}}
 								<p class="card-text">Quantity</p>
-								{{numberSelect 0 0 0 "Quantity"}}
+								{{numberSelect 0 0 0 "newItemQuantity"}}
 								<p class="card-text">Role given</p>
-								{{roleOptionsSingle $.CurrentGuild.Roles "" "Role" $.CurrentGuild.BotHighestRolePosition}}
+								{{roleOptionsSingle $.CurrentGuild.Roles "" "newItemRole" $.CurrentGuild.BotHighestRolePosition}}
 								<p class="card-text">Reply</p>
-								{{textInput "" "Reply" (stringDict "maxlength" 200 "label" true "labelContent" "0/200" "labelSide" "right")}}
+								{{textInput "" "newItemDescription" (stringDict "maxlength" 200 "label" true "labelContent" "0/200" "labelSide" "right")}}
 							</div>
 							<div class="modal-footer justify-content-between">
 								<div>
-									<button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
-									<button type="submit" class="btn btn-success">Save</button>
+									<button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close without saving</button>
+									<button type="submit" class="btn btn-success">Save changes</button>
 								</div>
 							</div>
 						</form>

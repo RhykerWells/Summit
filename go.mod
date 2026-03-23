@@ -32,7 +32,6 @@ require (
 	github.com/dustin/go-humanize v1.0.1
 	github.com/gofrs/uuid v4.2.0+incompatible // indirect
 	github.com/google/uuid v1.6.0
-	github.com/gorilla/schema v1.4.1
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/spf13/cast v1.7.1 // indirect
 	golang.org/x/crypto v0.45.0 // indirect

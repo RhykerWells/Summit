@@ -1,6 +1,7 @@
 package web
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"net/url"
@@ -110,7 +111,7 @@ func toggleSwitch(currentState bool, uniqueID string) template.HTML {
 
 	var menu strings.Builder
 	menu.WriteString(`<label class="switch">`)
-	menu.WriteString(`<input type="checkbox" name="` + uniqueID + `" id="` + uniqueID + `" value="true"` + checked + `/>`)
+	menu.WriteString(`<input type="checkbox" name="` + uniqueID + `" id="` + uniqueID + `"` + checked + `/>`)
 	menu.WriteString(`<span class="slider" style="left: 5px;"></span>`)
 	menu.WriteString(`<span class="knob" style="left: 7px;"></span>`)
 	menu.WriteString(`</label>`)
@@ -217,7 +218,7 @@ func roleOptionsSingle(roles []*discordgo.Role, selectedRoleID string, uniqueID 
 // roleOptionsMulti generates HTML options for multiple role selection
 // roles: slice of Discord role objects
 // selectedRoleIDs: slice of string IDs of currently selected roles
-// uniqueID: string for the input name values (used to retrieve and store changed data)
+// uniqueID: string for the hidden input ID (used to retrieve and store changed data)
 // highestBotRolePosition: the position of the bots highest role. Use -1 to enable roles above the bot
 func roleOptionsMulti(roles []*discordgo.Role, selectedRoleIDs interface{}, uniqueID string, highestBotRolePosition int) template.HTML {
 	selectedMap := make(map[string]bool)
@@ -281,11 +282,13 @@ func roleOptionsMulti(roles []*discordgo.Role, selectedRoleIDs interface{}, uniq
 
 		menu.WriteString(`<li>`)
 		menu.WriteString(`<label class="dropdown-item` + disabled + `">`)
-		menu.WriteString(`<input type="checkbox" class="dropDownRoleCheckbox me-2" name="` + uniqueID + `" value="` + role.ID + `"` + checked + disabled + `>`)
+		menu.WriteString(`<input type="checkbox" class="dropDownRoleCheckbox me-2" value="` + role.ID + `"` + checked + disabled + `>`)
 		menu.WriteString(template.HTMLEscapeString(role.Name) + disabledMsg)
 		menu.WriteString(`</label></li>`)
 	}
 	menu.WriteString(`</ul>`)
+	jsonVal, _ := json.Marshal(selectedRoleIDs)
+	menu.WriteString(`<input type="hidden" id="` + uniqueID + `" name="` + uniqueID + `" value="` + template.HTMLEscapeString(string(jsonVal)) + `">`)
 	menu.WriteString(`</div>`)
 	return template.HTML(menu.String())
 }

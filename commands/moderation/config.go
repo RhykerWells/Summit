@@ -14,25 +14,25 @@ type Config struct {
 	GuildID                           string
 	ModerationEnabled                 bool
 	ModerationTriggerDeletionEnabled  bool
-	ModerationTriggerDeletionSeconds  int64 `valid:"0,60"`
+	ModerationTriggerDeletionSeconds  int64
 	ModerationResponseDeletionEnabled bool
-	ModerationResponseDeletionSeconds int64  `valid:"0,60"`
-	ModerationLogChannel              string `valid:"channel,allowEmpty"`
+	ModerationResponseDeletionSeconds int64
+	ModerationLogChannel              string
 
 	// Warn
-	WarnRequiredRoles []string `valid:"role,allowEmpty"`
+	WarnRequiredRoles []string
 
 	// Mutes/Unmute
-	MuteRequiredRoles []string `valid:"role,allowEmpty"`
-	MuteRole          string   `valid:"role,allowEmpty"`
+	MuteRequiredRoles []string
+	MuteRole          string
 	MuteManageRole    bool
-	MuteUpdateRoles   []string `valid:"role,allowEmpty"`
+	MuteUpdateRoles   []string
 
 	// Kick
-	KickRequiredRoles []string `valid:"role,allowEmpty"`
+	KickRequiredRoles []string
 
 	// Bans/Unbans
-	BanRequiredRoles []string `valid:"role,allowEmpty"`
+	BanRequiredRoles []string
 
 	LastCaseID int64
 }
