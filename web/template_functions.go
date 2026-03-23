@@ -29,6 +29,7 @@ var (
 		"stringDict": stringDict,
 		// Forms content
 		"textInput":            textInput,
+		"textInputLong":        textInputLong,
 		"toggleSwitch":         toggleSwitch,
 		"numberSelect":         numberSelection,
 		"roleOptionsSingle":    roleOptionsSingle,
@@ -91,6 +92,35 @@ func textInput(currentInput, uniqueID string, opts ...map[string]interface{}) te
 	menu.WriteString(`<input type="text" class="textInput form-control text-light" style="background-color: var(--basePurple); border: 1px solid var(--accentGrey);" name="` + uniqueID + `" id="` + uniqueID + `" autocomplete="off" value="` + currentInput + `" maxlength="` + maxCharacters + `">`)
 	menu.WriteString(rightLabel)
 
+	menu.WriteString("</div>")
+
+	return template.HTML(menu.String())
+}
+
+// textInputLong generates a HTML element for a textarea input field.
+//
+// Parameters:
+//   - currentInput: the current input of the input
+//   - uniqueID: unique identifier for the input's ID (used to retrieve and store changed data)
+//   - opts: An optional key/value map of additional parameters.
+func textInputLong(currentInput, uniqueID string, opts ...map[string]interface{}) template.HTML {
+	var menu strings.Builder
+
+	var rows int = 1
+	if len(opts) > 0 {
+		if value, ok := opts[0]["rows"]; ok {
+			if _, ok := value.(int); !ok {
+				rows = 1
+			}
+			rows = value.(int)
+			if rows < 1 {
+				rows = 1
+			}
+		}
+	}
+
+	menu.WriteString(`<div class="input-group mb-3">`)
+	menu.WriteString(`<textarea class="textInput form-control text-light" style="background-color: var(--basePurple); border: 1px solid var(--accentGrey);" name="` + uniqueID + `" id="` + uniqueID + `" autocomplete="off" rows="` + strconv.Itoa(rows) + `">` + currentInput + `</textarea>`)
 	menu.WriteString("</div>")
 
 	return template.HTML(menu.String())
