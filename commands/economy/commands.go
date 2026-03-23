@@ -1101,10 +1101,6 @@ var shopCommands = []*dispatch.Command{
 				fieldName := fmt.Sprintf("%s%s - %s - %s", guildConfig.EconomySymbol, price, item.Name, quantity)
 				fieldDesc := item.Description
 
-				if item.Soldby != "0" {
-					fieldDesc = fmt.Sprintf("%s\nSold by: <@%s>", item.Description, item.Soldby)
-				}
-
 				itemField := &discordgo.MessageEmbedField{Name: fieldName, Value: fieldDesc, Inline: false}
 				fields = append(fields, itemField)
 			}
@@ -1282,10 +1278,6 @@ func shopPagination(s *discordgo.Session, b *discordgo.InteractionCreate) {
 
 		fieldName := fmt.Sprintf("%s%s - %s - %s", guildConfig.EconomySymbol, price, item.Name, quantity)
 		fieldDesc := item.Description
-
-		if item.Soldby != "0" {
-			fieldDesc = fmt.Sprintf("%s\nSold by: <@%s>", item.Description, item.Soldby)
-		}
 
 		itemField := &discordgo.MessageEmbedField{Name: fieldName, Value: fieldDesc, Inline: false}
 		fields = append(fields, itemField)

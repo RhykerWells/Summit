@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			const formData = new FormData(form);
 
 			const body = new URLSearchParams(formData);
-			const postURL = window.location.origin + window.location.pathname;
+			const postURL = form.action;
 
 			try {
 				disableScreenPassthrough();
