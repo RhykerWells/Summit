@@ -53,8 +53,14 @@ func registerEconomyRoutes(dashboard *goji.Mux) {
 	economyMux.HandleFunc(pat.Get("/shop"), web.RenderPage("shop.html"))
 	economyMux.HandleFunc(pat.Get("/shop/"), web.RenderPage("shop.html"))
 
-	economyMux.HandleFunc(pat.Post("/shop"), saveItemHandler)
-	economyMux.HandleFunc(pat.Post("/shop/"), saveItemHandler)
+	economyMux.HandleFunc(pat.Post("/shop/new"), saveNewItemHandler)
+	economyMux.HandleFunc(pat.Post("/shop/new/"), saveNewItemHandler)
+
+	economyMux.HandleFunc(pat.Post("/shop/:id/edit"), editItemHandler)
+	economyMux.HandleFunc(pat.Post("/shop/:id/edit/"), editItemHandler)
+
+	economyMux.HandleFunc(pat.Post("/shop/:id/delete"), deleteItemHandler)
+	economyMux.HandleFunc(pat.Post("/shop/:id/delete/"), deleteItemHandler)
 }
 
 // economyMW provides middleware to parse all the economy data to the template data
@@ -217,143 +223,145 @@ func deleteResponseHandler(w http.ResponseWriter, r *http.Request) {
 	web.SendSuccessToast(w, "Successfully deleted.")
 }
 
-func saveItemHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+type ItemField string
+
+const (
+	DescriptionField ItemField = "Description"
+	ReplyField       ItemField = "Reply"
+)
+
+func saveNewItemHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
 	guildID := pat.Param(r, "server")
+	guild := functions.GetGuild(guildID)
 
-	item, _ := models.EconomyShops(models.EconomyShopWhere.GuildID.EQ(guildID), models.EconomyShopWhere.Name.EQ(r.FormValue("item"))).One(context.Background(), common.PQ)
-	index := r.FormValue("index")
+	var item *models.EconomyShop
 
-	var err error
-
-	formType := r.FormValue("form_type")
-	switch formType {
-	case "editItem":
-		htmlInput := fmt.Sprintf("editItem%s", index)
-
-		name := r.FormValue(htmlInput + "Name")
-		description := r.FormValue(htmlInput + "Description")
-		price := r.FormValue(htmlInput + "Price")
-		quantity := r.FormValue(htmlInput + "Quantity")
-		role := r.FormValue(htmlInput + "Role")
-		reply := r.FormValue(htmlInput + "Reply")
-
-		if r.FormValue("item") != name {
-			if !newItemNameOk(w, guildID, name) {
-				return
-			}
-		}
-
-		nameMaxLength, _ := strconv.Atoi(r.FormValue(htmlInput + "NameMaxLength"))
-		if len(name) > nameMaxLength {
-			web.SendErrorToast(w, fmt.Sprintf("The name must be less than %d characters.", nameMaxLength))
-			return
-		}
-
-		descriptionMaxLength, _ := strconv.Atoi(r.FormValue(htmlInput + "NameMaxLength"))
-		if len(description) > descriptionMaxLength {
-			web.SendErrorToast(w, fmt.Sprintf("The description must be less than %d characters.", descriptionMaxLength))
-			return
-		}
-
-		replyMaxLength, _ := strconv.Atoi(r.FormValue(htmlInput + "ReplyMaxLength"))
-		if len(reply) > replyMaxLength {
-			web.SendErrorToast(w, fmt.Sprintf("The reply must be less than %d characters.", replyMaxLength))
-			return
-		}
-
-		item.Description = description
-		item.Price = functions.ToInt64(price)
-		item.Quantity = functions.ToInt64(quantity)
-
-		// Replace empty role ID via modification
-		if _, err := functions.GetRole(guildID, role); err != nil {
-			role = ""
-		}
-		item.Role = role
-
-		item.Reply = reply
-
-		if name != r.FormValue("item") {
-			_, err := common.PQ.ExecContext(context.Background(), `UPDATE economy_shop SET name = $1 WHERE guild_id = $2 AND name = $3`, name, guildID, r.FormValue("item"))
-			if err != nil {
-				web.SendErrorToast(w, err.Error())
-				return
-			}
-		}
-
-		_, err = item.Update(context.Background(), common.PQ, boil.Infer())
-		if err == nil {
-			item.Reload(context.Background(), common.PQ)
-		}
-	case "deleteItem":
-		item.Delete(context.Background(), common.PQ)
-	case "newItem":
-		htmlInput := "newItem"
-
-		name := r.FormValue(htmlInput + "Name")
-		description := r.FormValue(htmlInput + "Description")
-		price := r.FormValue(htmlInput + "Price")
-		quantity := r.FormValue(htmlInput + "Quantity")
-		role := r.FormValue(htmlInput + "Role")
-		reply := r.FormValue(htmlInput + "Reply")
-		if r.FormValue("item") != name {
-			if !newItemNameOk(w, guildID, name) {
-				return
-			}
-		}
-
-		nameMaxLength, _ := strconv.Atoi(r.FormValue(htmlInput + "NameMaxLength"))
-		if len(name) > nameMaxLength {
-			web.SendErrorToast(w, fmt.Sprintf("The name must be less than %d characters.", nameMaxLength))
-			return
-		}
-
-		// Replace empty role ID via creation
-		if _, err := functions.GetRole(guildID, role); err != nil {
-			role = ""
-		}
-
-		item := models.EconomyShop{
-			GuildID:     guildID,
-			Name:        name,
-			Description: description,
-			Price:       functions.ToInt64(price),
-			Quantity:    functions.ToInt64(quantity),
-			Role:        role,
-			Reply:       reply,
-		}
-		err = item.Insert(context.Background(), common.PQ, boil.Infer())
+	decoder := schema.NewDecoder()
+	decoder.IgnoreUnknownKeys(true)
+	err := decoder.Decode(&item, r.PostForm)
+	if err != nil {
+		web.SendErrorToast(w, fmt.Sprintf("Failed to decode form: %s", err.Error()))
+		return
 	}
 
-	if err != nil {
+	item.GuildID = guild.ID
+
+	ok, err := isItemOk(item, false)
+	if !ok {
 		web.SendErrorToast(w, err.Error())
 		return
 	}
 
-	web.SendSuccessToast(w, "Successfully saved")
-}
-
-func parseCustomResponse(w http.ResponseWriter, r *http.Request, fieldName string) (string, error) {
-	response := r.FormValue(fieldName)
-
-	re := regexp.MustCompile(`\(amount\)`)
-	match := re.MatchString(response)
-
-	if !match {
-		return "", errors.New("Response did not contain literal string <code style=\"color: white;\">(amount)</code>")
-	}
-	return response, nil
-}
-
-func newItemNameOk(w http.ResponseWriter, guildID string, newName string) bool {
-	currentItem, _ := models.EconomyShops(models.EconomyShopWhere.GuildID.EQ(guildID), models.EconomyShopWhere.Name.EQ(newName)).One(context.Background(), common.PQ)
-	if currentItem != nil {
-		web.SendErrorToast(w, "Item with this name already exists.")
-		return false
+	err = item.Insert(context.Background(), common.PQ, boil.Infer())
+	if err != nil {
+		web.SendErrorToast(w, fmt.Sprintf("Failed to save item: %s", err.Error()))
+		return
 	}
 
-	return true
+	web.SendSuccessToast(w, "Successfully saved item.")
+}
+
+func editItemHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+
+	guildID := pat.Param(r, "server")
+	guild := functions.GetGuild(guildID)
+
+	itemID := pat.Param(r, "id")
+	itemIDInt, _ := strconv.Atoi(itemID)
+
+	itemEntry, err := models.EconomyShops(models.EconomyShopWhere.GuildID.EQ(guild.ID), models.EconomyShopWhere.ID.EQ(itemIDInt)).One(context.Background(), common.PQ)
+	if err != nil {
+		web.SendErrorToast(w, "Item not found.")
+		return
+	}
+
+	decoder := schema.NewDecoder()
+	decoder.IgnoreUnknownKeys(true)
+	err = decoder.Decode(&itemEntry, r.PostForm)
+	if err != nil {
+		web.SendErrorToast(w, fmt.Sprintf("Failed to decode form: %s", err.Error()))
+		return
+	}
+
+	itemEntry.GuildID = guild.ID
+
+	ok, err := isItemOk(itemEntry, true)
+	if !ok {
+		web.SendErrorToast(w, err.Error())
+		return
+	}
+
+	err = itemEntry.Insert(context.Background(), common.PQ, boil.Infer())
+	if err != nil {
+		web.SendErrorToast(w, fmt.Sprintf("Failed to save item: %s", err.Error()))
+		return
+	}
+
+	web.SendSuccessToast(w, "Successfully saved item.")
+}
+
+func deleteItemHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+
+	guildID := pat.Param(r, "server")
+	guild := functions.GetGuild(guildID)
+
+	itemID := pat.Param(r, "id")
+	itemIDInt, _ := strconv.Atoi(itemID)
+
+	itemEntry, err := models.EconomyShops(models.EconomyShopWhere.GuildID.EQ(guild.ID), models.EconomyShopWhere.ID.EQ(itemIDInt)).One(context.Background(), common.PQ)
+	if err != nil {
+		web.SendErrorToast(w, "Item not found.")
+		return
+	}
+
+	itemEntry.Delete(context.Background(), common.PQ)
+	web.SendSuccessToast(w, "Successfully deleted.")
+}
+
+func isItemOk(item *models.EconomyShop, ignoreCurrentName bool) (bool, error) {
+	ok, err := itemNameOk(item.GuildID, item.Name, ignoreCurrentName)
+	if !ok {
+		return ok, err
+	}
+
+	ok, err = itemDescReplyOkay(DescriptionField, item.Description)
+	if !ok {
+		return ok, err
+	}
+
+	ok, err = itemDescReplyOkay(ReplyField, item.Reply)
+	if !ok {
+		return ok, err
+	}
+
+	return true, nil
+}
+
+func itemNameOk(guildID string, newName string, ignoreCurrentName bool) (bool, error) {
+	if !ignoreCurrentName {
+		currentItem, _ := models.EconomyShops(models.EconomyShopWhere.GuildID.EQ(guildID), models.EconomyShopWhere.Name.EQ(newName)).One(context.Background(), common.PQ)
+		if currentItem != nil {
+			return false, errors.New("Item with this name already exists.")
+		}
+	}
+
+	maxLength := 30
+	if len(newName) > maxLength {
+		return false, fmt.Errorf("The name must be less than %d characters.", maxLength)
+	}
+
+	return true, nil
+}
+
+func itemDescReplyOkay(t ItemField, s string) (bool, error) {
+	maxLength := 200
+	if len(s) > maxLength {
+		return false, fmt.Errorf("The %s must be less than %d characters", t, maxLength)
+	}
+
+	return true, nil
 }
