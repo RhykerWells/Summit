@@ -3,10 +3,7 @@ package moderation
 import (
 	"context"
 	"embed"
-	"encoding/json"
-	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/RhykerWells/Summit/web"
 	"goji.io/v3"
@@ -32,96 +29,31 @@ func registerModerationRoutes(dashboard *goji.Mux) {
 	moderationMux.HandleFunc(pat.Get(""), web.RenderPage("moderation.html"))
 	moderationMux.HandleFunc(pat.Get("/"), web.RenderPage("moderation.html"))
 
-	moderationMux.HandleFunc(pat.Post(""), saveConfigHandler)
-	moderationMux.HandleFunc(pat.Post("/"), saveConfigHandler)
+	moderationMux.Handle(pat.Post(""), web.ParseForm(http.HandlerFunc(saveConfigHandler), Config{}))
+	moderationMux.Handle(pat.Post("/"), web.ParseForm(http.HandlerFunc(saveConfigHandler), Config{}))
 
 	moderationMux.HandleFunc(pat.Get("/cases"), web.RenderPage("cases.html"))
 	moderationMux.HandleFunc(pat.Get("/cases/"), web.RenderPage("cases.html"))
 }
 
+// saveConfigHandler saves the parsed form data and saves it if possible.
 func saveConfigHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	r.ParseForm()
+	newCfg := web.GetForm[Config](r)
 
 	guildID := pat.Param(r, "server")
-	config := GetConfig(guildID)
+	oldCfg := GetConfig(guildID)
 
-	formType := r.FormValue("form_type")
-	switch formType {
-	case "Core":
-		moderationEnabledBool, _ := strconv.ParseBool(r.FormValue("ModerationEnabled"))
-		moderationTriggerDeletionEnabled, _ := strconv.ParseBool(r.FormValue("ModerationTriggerDeletionEnabled"))
-		moderationTriggerDeletionSeconds, _ := strconv.ParseInt(r.FormValue("ModerationTriggerDeletionSeconds"), 10, 64)
-		moderationResponseDeletionEnabled, _ := strconv.ParseBool(r.FormValue("ModerationResponseDeletionEnabled"))
-		moderationResponseDeletionSeconds, _ := strconv.ParseInt(r.FormValue("ModerationResponseDeletionSeconds"), 10, 64)
+	// Ensure these non-editable fields are still present in the new form
+	newCfg.GuildID = oldCfg.GuildID
+	newCfg.LastCaseID = oldCfg.LastCaseID
 
-		config.ModerationEnabled = moderationEnabledBool
-		config.ModerationLogChannel = r.FormValue("ModerationLogChannel")
-		config.ModerationTriggerDeletionEnabled = moderationTriggerDeletionEnabled
-		config.ModerationTriggerDeletionSeconds = moderationTriggerDeletionSeconds
-		config.ModerationResponseDeletionEnabled = moderationResponseDeletionEnabled
-		config.ModerationResponseDeletionSeconds = moderationResponseDeletionSeconds
-	case "Warn":
-		roleArray, ok := parseRoleArray(w, r, "WarnRequiredRoles")
-		if !ok {
-			return
-		}
-		config.WarnRequiredRoles = roleArray
-	case "Mute":
-		roleArray, ok := parseRoleArray(w, r, "MuteRequiredRoles")
-		if !ok {
-			return
-		}
-		config.MuteRequiredRoles = roleArray
-
-		config.MuteRole = r.FormValue("MuteRole")
-		config.MuteManageRole = r.FormValue("MuteManageRole") == "true"
-
-		roleArray, ok = parseRoleArray(w, r, "MuteUpdateRoles")
-		if !ok {
-			return
-		}
-		config.MuteUpdateRoles = roleArray
-	case "Kick":
-		roleArray, ok := parseRoleArray(w, r, "KickRequiredRoles")
-		if !ok {
-			return
-		}
-		config.KickRequiredRoles = roleArray
-	case "Ban":
-		roleArray, ok := parseRoleArray(w, r, "BanRequiredRoles")
-		if !ok {
-			return
-		}
-		config.BanRequiredRoles = roleArray
-	}
-
-	err := SaveConfig(config)
+	err := SaveConfig(newCfg)
 	if err != nil {
 		web.SendErrorToast(w, err.Error())
 		return
 	}
 
 	web.SendSuccessToast(w, "Successfully saved")
-}
-
-func parseRoleArray(w http.ResponseWriter, r *http.Request, fieldName string) ([]string, bool) {
-	value := r.FormValue(fieldName)
-	roleArray, err := unmarshalJsonArrayToGoArray(value)
-	if err != nil {
-		web.SendErrorToast(w, fmt.Sprintf("Invalid JSON data for %s", fieldName))
-		return nil, false
-	}
-	return roleArray, true
-}
-
-func unmarshalJsonArrayToGoArray(jsonStr string) ([]string, error) {
-	var result []string
-	err := json.Unmarshal([]byte(jsonStr), &result)
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
 }
 
 // moderationMW provides middleware to parse all the moderation data to the template data
