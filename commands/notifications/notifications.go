@@ -13,4 +13,6 @@ import (
 //   - Initialises the web plugin
 func NotificationSetup(cmdHandler *dispatch.CommandHandler) {
 	common.InitSchema("Notifications", GuildNotificationSchema...)
+	initEvents()
+	initWeb()
 }
