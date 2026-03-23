@@ -89,9 +89,6 @@ func textInput(currentInput, uniqueID string, opts ...map[string]interface{}) te
 
 	menu.WriteString(leftLable)
 	menu.WriteString(`<input type="text" class="textInput form-control text-light" style="background-color: var(--basePurple); border: 1px solid var(--accentGrey);" name="` + uniqueID + `" id="` + uniqueID + `" autocomplete="off" value="` + currentInput + `" maxlength="` + maxCharacters + `">`)
-	if maxCharacters != "" {
-		menu.WriteString(`<input type="hidden" name="` + uniqueID + `MaxLength" value="` + maxCharacters + `"></input>`)
-	}
 	menu.WriteString(rightLabel)
 
 	menu.WriteString("</div>")
@@ -348,9 +345,26 @@ func channelOptionsSingle(channels []*discordgo.Channel, selectedChannelID strin
 }
 
 func inputLabel(labelFor string, opts map[string]interface{}) (string, string) {
-	labelEnabled := opts["label"].(bool)
-	labelContent := opts["labelContent"].(string)
-	labelSide := opts["labelSide"].(string)
+	var labelEnabled bool
+	var labelContent, labelSide string
+
+	if v, ok := opts["label"]; ok {
+		if b, ok := v.(bool); ok {
+			labelEnabled = b
+		}
+	}
+
+	if v, ok := opts["labelContent"]; ok {
+		if s, ok := v.(string); ok {
+			labelContent = s
+		}
+	}
+
+	if v, ok := opts["labelSide"]; ok {
+		if s, ok := v.(string); ok {
+			labelSide = s
+		}
+	}
 
 	if !labelEnabled || (labelSide != "left" && labelSide != "right") {
 		return "", ""
