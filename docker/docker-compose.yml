@@ -23,7 +23,7 @@ services:
   db:
     container_name: summit-postgres-db
     image: postgres:16
-    restart: no
+    restart: unless-stopped
     volumes:
       - db:/var/lib/postgresql/data
     networks:
