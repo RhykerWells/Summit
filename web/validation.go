@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/RhykerWells/Summit/bot/functions"
+	"github.com/RhykerWells/Summit/common/templates"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -14,6 +15,7 @@ var (
 	ErrInvalidChannel       = errors.New("Invalid channel")
 	ErrInvalidValdationType = errors.New("Invalid validation type")
 	ErrEmptyValue           = errors.New("Value cannot be empty")
+	ErrTmplFailedSave       = errors.New("Failed to save template")
 )
 
 func validateForm(guild *discordgo.Guild, form interface{}) error {
@@ -112,6 +114,12 @@ func validateString(guild *discordgo.Guild, validation []string, value string) (
 	}
 
 	switch validationType {
+	case "template":
+		err := templates.Validate(value)
+		if err != nil {
+			return "", errors.Join(ErrTmplFailedSave, err)
+		}
+		return value, nil
 	case "role":
 		return value, validateRoleField(value, guild.Roles, allowEmpty)
 	case "channel":
