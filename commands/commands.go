@@ -11,6 +11,7 @@ import (
 	setstatus "github.com/RhykerWells/Summit/commands/maintenance/setStatus"
 	unbanserver "github.com/RhykerWells/Summit/commands/maintenance/unbanServer"
 	"github.com/RhykerWells/Summit/commands/moderation"
+	"github.com/RhykerWells/Summit/commands/notifications"
 	"github.com/RhykerWells/Summit/commands/standard/help"
 	"github.com/RhykerWells/Summit/commands/standard/invite"
 	"github.com/RhykerWells/Summit/commands/standard/ping"
@@ -39,5 +40,6 @@ func InitCommands(session *discordgo.Session) {
 
 	economy.EconomySetup(command.CommandHandler)
 	moderation.ModerationSetup(command.CommandHandler)
+	notifications.NotificationSetup(command.CommandHandler)
 	session.AddHandler(command.CommandHandler.HandleMessageCreate)
 }
