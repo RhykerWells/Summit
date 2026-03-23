@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/RhykerWells/Summit/bot/functions"
+	"github.com/RhykerWells/Summit/common"
 	"github.com/RhykerWells/Summit/common/templates"
 	"github.com/bwmarrin/discordgo"
 )
@@ -123,7 +124,8 @@ func validateString(guild *discordgo.Guild, validation []string, value string) (
 	case "role":
 		return value, validateRoleField(value, guild.Roles, allowEmpty)
 	case "channel":
-		return value, validateChannelField(value, guild.Channels, allowEmpty)
+		guildChannels, _ := common.Session.GuildChannels(guild.ID)
+		return value, validateChannelField(value, guildChannels, allowEmpty)
 	case "":
 		if !allowEmpty && value == "" {
 			return "", ErrEmptyValue
