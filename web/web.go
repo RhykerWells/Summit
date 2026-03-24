@@ -126,16 +126,17 @@ func setupWebRoutes() *goji.Mux {
 	runRootMultiplexer()
 
 	// Handle dashboard page
-	RootMultiplexer.Handle(pat.Get("/dashboard"), userAndManagedGuildsInfoMW(RenderPage("dashboard.html")))
-	RootMultiplexer.Handle(pat.Get("/dashboard/"), userAndManagedGuildsInfoMW(RenderPage("dashboard.html")))
+	RootMultiplexer.Handle(pat.Get("/dashboard"), CurrentUserMW(RenderPage("dashboard.html")))
+	RootMultiplexer.Handle(pat.Get("/dashboard/"), CurrentUserMW(RenderPage("dashboard.html")))
 
 	// Create a sub-mux for dashboard-related routes
 	DashboardMultiplexer = goji.SubMux()
 
 	// Middlewares
-	DashboardMultiplexer.Use(validateGuild)
-	DashboardMultiplexer.Use(userAndManagedGuildsInfoMW)
-	DashboardMultiplexer.Use(currentGuildDataMW)
+	DashboardMultiplexer.Use(CurrentUserMW)
+	DashboardMultiplexer.Use(RequireUserMW)
+	DashboardMultiplexer.Use(CurrentGuildMW)
+	DashboardMultiplexer.Use(RequireGuildMW)
 
 	// Server manage pages
 	RootMultiplexer.Handle(pat.New("/dashboard/:server/manage"), DashboardMultiplexer)
@@ -158,7 +159,7 @@ func runRootMultiplexer() {
 	RootMultiplexer = mux
 
 	// Middlewares
-	mux.Use(baseTemplateDataMW)
+	mux.Use(BaseTemplateDataMW)
 	mux.Use(urlDataMW)
 
 	// Static files
