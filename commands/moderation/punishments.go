@@ -165,7 +165,7 @@ func refreshMuteSettingsOnChannel(config *Config, channel *discordgo.Channel) {
 	}
 
 	if channelPermsChanged {
-		common.Session.ChannelPermissionSet(channel.ID, config.MuteRole, discordgo.PermissionOverwriteTypeRole, existingOverwrite.Allow, int64(muteDenyPerms))
+		common.Session.ChannelPermissionSet(channel.ID, config.MuteRole, discordgo.PermissionOverwriteTypeRole, channelPermsAllow, int64(muteDenyPerms))
 	}
 }
 
