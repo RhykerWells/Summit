@@ -9,3 +9,5 @@ cmd/summit/summit
 !build.sh
 
 docker-compose*.yml
+
+*.code-workspace
