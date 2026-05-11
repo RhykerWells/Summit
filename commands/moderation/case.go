@@ -114,6 +114,8 @@ func createCase(config *Config, author, target *discordgo.User, action logAction
 		return err
 	}
 
+	createMessageLog(config, channel, author, caseID)
+
 	embed := buildLogEmbed(caseID, author, target, action, channel, reason, duration)
 	msg, err := functions.SendMessage(config.ModerationLogChannel, &discordgo.MessageSend{Embed: embed})
 	if err != nil {
