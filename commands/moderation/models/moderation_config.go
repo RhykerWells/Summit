@@ -35,10 +35,11 @@ type ModerationConfig struct {
 	MuteRequiredRoles                 types.StringArray `boil:"mute_required_roles" json:"mute_required_roles" toml:"mute_required_roles" yaml:"mute_required_roles"`
 	MuteRole                          string            `boil:"mute_role" json:"mute_role" toml:"mute_role" yaml:"mute_role"`
 	MuteManageRole                    bool              `boil:"mute_manage_role" json:"mute_manage_role" toml:"mute_manage_role" yaml:"mute_manage_role"`
-	MuteUpdateRoles                   types.StringArray `boil:"mute_update_roles" json:"mute_update_roles,omitempty" toml:"mute_update_roles" yaml:"mute_update_roles,omitempty"`
+	MuteUpdateRoles                   types.StringArray `boil:"mute_update_roles" json:"mute_update_roles" toml:"mute_update_roles" yaml:"mute_update_roles"`
 	KickRequiredRoles                 types.StringArray `boil:"kick_required_roles" json:"kick_required_roles" toml:"kick_required_roles" yaml:"kick_required_roles"`
 	BanRequiredRoles                  types.StringArray `boil:"ban_required_roles" json:"ban_required_roles" toml:"ban_required_roles" yaml:"ban_required_roles"`
 	LastCaseID                        int64             `boil:"last_case_id" json:"last_case_id" toml:"last_case_id" yaml:"last_case_id"`
+	ModerationMessageLogEnabled       bool              `boil:"moderation_message_log_enabled" json:"moderation_message_log_enabled" toml:"moderation_message_log_enabled" yaml:"moderation_message_log_enabled"`
 
 	R *moderationConfigR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L moderationConfigL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -60,6 +61,7 @@ var ModerationConfigColumns = struct {
 	KickRequiredRoles                 string
 	BanRequiredRoles                  string
 	LastCaseID                        string
+	ModerationMessageLogEnabled       string
 }{
 	GuildID:                           "guild_id",
 	ModerationEnabled:                 "moderation_enabled",
@@ -76,6 +78,7 @@ var ModerationConfigColumns = struct {
 	KickRequiredRoles:                 "kick_required_roles",
 	BanRequiredRoles:                  "ban_required_roles",
 	LastCaseID:                        "last_case_id",
+	ModerationMessageLogEnabled:       "moderation_message_log_enabled",
 }
 
 var ModerationConfigTableColumns = struct {
@@ -94,6 +97,7 @@ var ModerationConfigTableColumns = struct {
 	KickRequiredRoles                 string
 	BanRequiredRoles                  string
 	LastCaseID                        string
+	ModerationMessageLogEnabled       string
 }{
 	GuildID:                           "moderation_config.guild_id",
 	ModerationEnabled:                 "moderation_config.moderation_enabled",
@@ -110,6 +114,7 @@ var ModerationConfigTableColumns = struct {
 	KickRequiredRoles:                 "moderation_config.kick_required_roles",
 	BanRequiredRoles:                  "moderation_config.ban_required_roles",
 	LastCaseID:                        "moderation_config.last_case_id",
+	ModerationMessageLogEnabled:       "moderation_config.moderation_message_log_enabled",
 }
 
 // Generated where
@@ -144,11 +149,6 @@ func (w whereHelpertypes_StringArray) GTE(x types.StringArray) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
-func (w whereHelpertypes_StringArray) IsNull() qm.QueryMod { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpertypes_StringArray) IsNotNull() qm.QueryMod {
-	return qmhelper.WhereIsNotNull(w.field)
-}
-
 var ModerationConfigWhere = struct {
 	GuildID                           whereHelperstring
 	ModerationEnabled                 whereHelperbool
@@ -165,6 +165,7 @@ var ModerationConfigWhere = struct {
 	KickRequiredRoles                 whereHelpertypes_StringArray
 	BanRequiredRoles                  whereHelpertypes_StringArray
 	LastCaseID                        whereHelperint64
+	ModerationMessageLogEnabled       whereHelperbool
 }{
 	GuildID:                           whereHelperstring{field: "\"moderation_config\".\"guild_id\""},
 	ModerationEnabled:                 whereHelperbool{field: "\"moderation_config\".\"moderation_enabled\""},
@@ -181,6 +182,7 @@ var ModerationConfigWhere = struct {
 	KickRequiredRoles:                 whereHelpertypes_StringArray{field: "\"moderation_config\".\"kick_required_roles\""},
 	BanRequiredRoles:                  whereHelpertypes_StringArray{field: "\"moderation_config\".\"ban_required_roles\""},
 	LastCaseID:                        whereHelperint64{field: "\"moderation_config\".\"last_case_id\""},
+	ModerationMessageLogEnabled:       whereHelperbool{field: "\"moderation_config\".\"moderation_message_log_enabled\""},
 }
 
 // ModerationConfigRels is where relationship names are stored.
@@ -258,9 +260,9 @@ func (r *moderationConfigR) GetGuildModerationMutes() ModerationMuteSlice {
 type moderationConfigL struct{}
 
 var (
-	moderationConfigAllColumns            = []string{"guild_id", "moderation_enabled", "moderation_trigger_deletion_enabled", "moderation_trigger_deletion_seconds", "moderation_response_deletion_enabled", "moderation_response_deletion_seconds", "moderation_log_channel", "warn_required_roles", "mute_required_roles", "mute_role", "mute_manage_role", "mute_update_roles", "kick_required_roles", "ban_required_roles", "last_case_id"}
+	moderationConfigAllColumns            = []string{"guild_id", "moderation_enabled", "moderation_trigger_deletion_enabled", "moderation_trigger_deletion_seconds", "moderation_response_deletion_enabled", "moderation_response_deletion_seconds", "moderation_log_channel", "warn_required_roles", "mute_required_roles", "mute_role", "mute_manage_role", "mute_update_roles", "kick_required_roles", "ban_required_roles", "last_case_id", "moderation_message_log_enabled"}
 	moderationConfigColumnsWithoutDefault = []string{"guild_id"}
-	moderationConfigColumnsWithDefault    = []string{"moderation_enabled", "moderation_trigger_deletion_enabled", "moderation_trigger_deletion_seconds", "moderation_response_deletion_enabled", "moderation_response_deletion_seconds", "moderation_log_channel", "warn_required_roles", "mute_required_roles", "mute_role", "mute_manage_role", "mute_update_roles", "kick_required_roles", "ban_required_roles", "last_case_id"}
+	moderationConfigColumnsWithDefault    = []string{"moderation_enabled", "moderation_trigger_deletion_enabled", "moderation_trigger_deletion_seconds", "moderation_response_deletion_enabled", "moderation_response_deletion_seconds", "moderation_log_channel", "warn_required_roles", "mute_required_roles", "mute_role", "mute_manage_role", "mute_update_roles", "kick_required_roles", "ban_required_roles", "last_case_id", "moderation_message_log_enabled"}
 	moderationConfigPrimaryKeyColumns     = []string{"guild_id"}
 	moderationConfigGeneratedColumns      = []string{}
 )
@@ -1277,7 +1279,7 @@ func (o *ModerationConfig) Upsert(ctx context.Context, exec boil.ContextExecutor
 
 	value := reflect.Indirect(reflect.ValueOf(o))
 	vals := queries.ValuesFromMapping(value, cache.valueMapping)
-	var returns []interface{}
+	var returns []any
 	if len(cache.retMapping) != 0 {
 		returns = queries.PtrsFromMapping(value, cache.retMapping)
 	}
