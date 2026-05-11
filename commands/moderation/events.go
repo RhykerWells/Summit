@@ -69,11 +69,11 @@ func logGuildModerationNotByBot(g *discordgo.GuildAuditLogEntryCreate) {
 
 	switch *entry.ActionType {
 	case discordgo.AuditLogActionMemberBanAdd:
-		createCase(config, author, target, logBan, config.ModerationLogChannel, entry.Reason, nil)
+		createCase(config, author, target, logBan, nil, entry.Reason, nil)
 	case discordgo.AuditLogActionMemberBanRemove:
-		createCase(config, author, target, logUnban, config.ModerationLogChannel, entry.Reason, nil)
+		createCase(config, author, target, logUnban, nil, entry.Reason, nil)
 	case discordgo.AuditLogActionMemberKick:
-		createCase(config, author, target, logKick, config.ModerationLogChannel, entry.Reason, nil)
+		createCase(config, author, target, logKick, nil, entry.Reason, nil)
 	}
 }
 

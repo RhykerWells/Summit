@@ -93,7 +93,7 @@ func unmuteUser(config *Config, authorID, targetID string) error {
 
 	if authorID == common.Bot.ID {
 		botUser, _ := functions.GetUser(common.Bot.ID)
-		createCase(config, botUser, targetUser, logUnmute, config.ModerationLogChannel, "Automatic unmute", nil)
+		createCase(config, botUser, targetUser, logUnmute, nil, "Automatic unmute", nil)
 		muteEmbed := buildDMEmbed(config, targetUser, logMute, "Automatic unmute", nil)
 		functions.SendDM(targetID, &discordgo.MessageSend{Embed: muteEmbed})
 	}
@@ -251,7 +251,7 @@ func unbanUser(config *Config, authorID, targetID string) error {
 
 	if authorID == common.Bot.ID {
 		botUser, _ := functions.GetUser(common.Bot.ID)
-		createCase(config, botUser, targetUser, logUnban, config.ModerationLogChannel, "Automatic unban", nil)
+		createCase(config, botUser, targetUser, logUnban, nil, "Automatic unban", nil)
 	}
 
 	return nil

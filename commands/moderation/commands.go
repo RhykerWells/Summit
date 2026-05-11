@@ -126,7 +126,7 @@ var moderationCommands = []*dispatch.Command{
 
 			warnReason := data.ParsedArgs[1].Value.(string)
 
-			err = createCase(config, data.Author, target, logWarn, data.Channel.ID, warnReason, nil)
+			err = createCase(config, data.Author, target, logWarn, data.Channel, warnReason, nil)
 			if err != nil {
 				return fmt.Errorf("Something went wrong creating the case: %s", err.Error())
 			}
@@ -209,7 +209,7 @@ var moderationCommands = []*dispatch.Command{
 				return errors.New("Something went wrong. Is the bot role above the mute role?")
 			}
 
-			err = createCase(config, data.Author, target, logMute, data.Channel.ID, muteReason, durationPtr)
+			err = createCase(config, data.Author, target, logMute, data.Channel, muteReason, durationPtr)
 			if err != nil {
 				unmuteUser(config, data.Author.ID, target.ID)
 				return fmt.Errorf("Something went wrong creating the case: %s", err.Error())
@@ -280,7 +280,7 @@ var moderationCommands = []*dispatch.Command{
 				unmuteReason = data.ParsedArgs[1].Value.(string)
 			}
 
-			err = createCase(config, data.Author, target, logUnmute, data.Channel.ID, unmuteReason, nil)
+			err = createCase(config, data.Author, target, logUnmute, data.Channel, unmuteReason, nil)
 			if err != nil {
 				return fmt.Errorf("Something went wrong creating the case: %s", err.Error())
 			}
@@ -339,7 +339,7 @@ var moderationCommands = []*dispatch.Command{
 				kickReason = data.ParsedArgs[1].Value.(string)
 			}
 
-			err = createCase(config, data.Author, target, logKick, data.Channel.ID, kickReason, nil)
+			err = createCase(config, data.Author, target, logKick, data.Channel, kickReason, nil)
 			if err != nil {
 				return fmt.Errorf("Something went wrong creating the case: %s", err.Error())
 			}
@@ -427,7 +427,7 @@ var moderationCommands = []*dispatch.Command{
 				return fmt.Errorf("Something went wrong: %s", err.Error())
 			}
 
-			err = createCase(config, data.Author, target, logBan, data.Channel.ID, banReason, durationPtr)
+			err = createCase(config, data.Author, target, logBan, data.Channel, banReason, durationPtr)
 			if err != nil {
 				return fmt.Errorf("Something went wrong creating the case: %s", err.Error())
 			}
@@ -477,7 +477,7 @@ var moderationCommands = []*dispatch.Command{
 				return fmt.Errorf("Something went wrong: %s", err.Error())
 			}
 
-			err = createCase(config, data.Author, target, logUnban, data.Channel.ID, unbanReason, nil)
+			err = createCase(config, data.Author, target, logUnban, data.Channel, unbanReason, nil)
 			if err != nil {
 				return fmt.Errorf("Something went wrong creating the case: %s", err.Error())
 			}
