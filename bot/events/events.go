@@ -32,6 +32,8 @@ func InitEvents(s *discordgo.Session, database *sql.DB) {
 
 	// Message events
 	s.AddHandler(messageCreate)
+	s.AddHandler(messageUpdate)
+	s.AddHandler(messageDelete)
 
 	// Guild member events
 	s.AddHandler(guildMemberAdd)
