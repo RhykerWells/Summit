@@ -7,8 +7,7 @@
 	{{template "dashboard_nav" .}}
 	<main id="main" class="d-flex m-4" style="background-color: var(--baseGrey); border-radius: 0.5rem">
 		<div class="p-4 w-100">
-			<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage" class="btn text-light w-100"
-				style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Home</a>
+			<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage" class="btn text-light w-100" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Home</a>
 			<input type="hidden" name="form_type" value="Core">
 			<div class="d-flex flex-column justify-content-between align-items-sm-center mt-1 mb-0">
 				<div class="order-2 w-100 mt-2">
@@ -22,8 +21,7 @@
 				</div>
 			</div>
 			<div class="table-responsive">
-				<table class="table table-striped" id="logsTable"
-					style="--bs-table-color: white; --bs-table-striped-color: white; --bs-table-striped-bg: rgb(30 30 30 / 50%); --bs-table-bg: transparent">
+				<table class="table table-striped" id="logsTable" style="--bs-table-color: white; --bs-table-striped-color: white; --bs-table-striped-bg: rgb(30 30 30 / 50%); --bs-table-bg: transparent">
 					<thead>
 						<tr>
 							<th>Case ID</th>
@@ -59,5 +57,4 @@
 	</main>
 </body>
 {{template "javascript" .}}
-
 </html>
