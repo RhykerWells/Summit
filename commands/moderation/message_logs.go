@@ -83,3 +83,23 @@ func createMessageLog(config *Config, channel *discordgo.Channel, author *discor
 		return
 	}
 }
+
+// getGuildMessageLogs returns the guild message logs
+func getGuildMessageLogs(guildID string) models.ModerationMessageLogSlice {
+	models, err := models.ModerationMessageLogs(models.ModerationMessageLogWhere.GuildID.EQ(guildID)).All(context.Background(), common.PQ)
+	if err != nil {
+		return nil
+	}
+
+	return models
+}
+
+// getMessageLogByID returns the guild message log messages
+func getMessageLogByID(logID int64) (*models.ModerationMessageLog, error) {
+	log, err := models.FindModerationMessageLogG(context.Background(), logID)
+	if err != nil {
+		return nil, err
+	}
+
+	return log, nil
+}
