@@ -7,6 +7,7 @@ import (
 	"sort"
 
 	"github.com/RhykerWells/Summit/bot/functions"
+	"github.com/RhykerWells/Summit/commands/moderation/models"
 	"github.com/RhykerWells/Summit/common"
 	"github.com/RhykerWells/Summit/web"
 	"goji.io/v3"
@@ -107,6 +108,12 @@ func handleMessageLogs(w http.ResponseWriter, r *http.Request) {
 	})
 
 	tmplData, _ := r.Context().Value(web.CtxKeyTmplData).(web.TmplContextData)
+
+	caseData, err := models.FindModerationCaseG(context.Background(), log.GuildID, log.CaseID)
+	if err == nil {
+		tmplData["MessageCase"] = caseData
+	}
+
 	tmplData["MessageLog"] = log
 
 	web.RenderPage("log.html")(w, r)
