@@ -12,34 +12,9 @@
 			<div class="d-flex flex-column justify-content-between align-items-sm-center mt-1 mb-0">
 				<div class="order-2 w-100 mt-2">
 					<div class="d-flex justify-content-between align-items-center flex-wrap w-100">
-						<div class="d-flex align-items-center">
+						<div class="d-flex align-items-center" style="gap: 0.5rem;">
 							<h2 class="mb-0">Cases</h2>
-						</div>
-						<div class="row gx-2 gy-1">
-							<div class="col-12 col-md-4">
-								<div class="input-group">
-									<input id="searchOffender" type="text" name="user" class="form-control text-light" placeholder="User ID/Name" value="" style="background-color: var(--basePurple); border: 1px solid var(--accentGrey);">
-								</div>
-							</div>
-							<div class="col-12 col-md-4">
-								<div class="input-group">
-									<input id="searchModerator" type="text" name="moderator" class="form-control text-light" placeholder="Moderator ID/Name" value="" style="background-color: var(--basePurple); border: 1px solid var(--accentGrey);">
-								</div>
-							</div>
-							<div class="col-12 col-md-4">
-								<div class="input-group">
-									<button class="btn dropdown-toggle text-start flex-grow-1 text-white show" type="button" data-bs-toggle="dropdown" style="background-color: var(--basePurple); border: 1px solid var(--accentGrey); border-top-right-radius: var(--bs-btn-border-radius); border-bottom-right-radius: var(--bs-btn-border-radius);" aria-expanded="true">
-										<span id="ModerationActionLabel">Select case type</span>
-									</button>
-									<ul class="dropdown-menu w-100 overflow-auto" style="max-height: 250px;">
-										<li><a class="dropdown-item caseListItem" data-value="">All</a></li>
-										{{range $_, $moderationAction := dict 1 "Warn" 2 "Mute" 3 "Kick" 4 "Ban"}}
-										<li><a class="dropdown-item caseListItem" data-value="{{$moderationAction}}">{{$moderationAction}}</a></li>
-										{{end}}
-									</ul>
-									<input type="hidden" id="moderationAction" name="ModerationAction" value="">
-								</div>
-							</div>
+							<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage" class="btn text-light" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Back</a>
 						</div>
 					</div>
 				</div>
@@ -48,19 +23,32 @@
 				<table class="table table-striped" id="casesTable" style="--bs-table-color: white; --bs-table-striped-color: white; --bs-table-striped-bg: rgb(30 30 30 / 50%); --bs-table-bg: transparent">
 					<thead>
 						<tr>
-							<th>Case number</th>
+							<th style="white-space: nowrap;">Case ID</th>
 							<th>Offender</th>
 							<th>Moderator</th>
 							<th>Action</th>
+							<th>Reason</th>
+							<th></th>
 						</tr>
 					</thead>
 					<tbody>
 						{{range .Cases}}
 						<tr>
-							<td><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#{{.CaseID}}Modal" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">{{.CaseID}}</button>
-							<td>{{.OffenderUsername}} (<code>{{.OffenderID}}</code>)</td>
-							<td>{{.StaffUsername}} (<code>{{.StaffID}}</code>)</td>
-							<td>{{.Action}}</td>
+							<td style="text-align: center;"><small>{{.CaseID}}</small></td>
+							<td>@{{.OffenderUsername}} <small style="opacity: 0.7;">({{.OffenderID}})</small></td>
+							<td>@{{.StaffUsername}} <small style="opacity: 0.7;">({{.StaffID}})</small></td>
+							<td><span class="mod-action mod-action-{{lower .Action}}">{{.Action}}</span></td>
+							<td class="text-truncate w-50" style="max-width: 220px;" title="{{.Reason}}"><span>{{.Reason}}</span></td>
+							<td style="text-align: center;">
+								<a type="button" class="log-link" data-bs-toggle="modal" data-bs-target="#{{.CaseID}}Modal">
+									<i class="fas fa-eye"></i>
+								</a>
+								{{if index $.CaseLogMap .CaseID}}
+									<a href="{{$.HomeURL}}/dashboard/{{$.CurrentGuild.ID}}/manage/moderation/logs/{{index $.CaseLogMap .CaseID}}" class="log-link">
+										<i class="fa-solid fa-envelope-open-text"></i>
+									</a>
+								{{end}}
+							</td>
 						</tr>
 						{{end}}
 						<tr id="noResultsRow" class="text-center" colspan="4" {{if .Cases}} style=" display:none;" {{end}}><td colspan="4">No cases found.</td></tr>
