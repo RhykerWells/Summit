@@ -83,6 +83,15 @@ func moderationMW(inner http.Handler) http.Handler {
 		messageLogs := getGuildMessageLogs(guildID)
 		tmplData["MessageLogs"] = messageLogs
 
+		// Create a map of CaseID to MessageLogID for linking
+		caseLogMap := make(map[int64]int64)
+		for _, log := range messageLogs {
+			if log.CaseID != 0 {
+				caseLogMap[log.CaseID] = log.ID
+			}
+		}
+		tmplData["CaseLogMap"] = caseLogMap
+
 		ctx = context.WithValue(ctx, web.CtxKeyTmplData, tmplData)
 		inner.ServeHTTP(w, r.WithContext(ctx))
 	}
