@@ -316,3 +316,51 @@ ul.dropdown-menu::-webkit-scrollbar-track {
 .form-control:-ms-input-placeholder { /* Internet Explorer 10-11 */
             color: white !important;
 }
+
+.row-danger {
+    background-color: rgba(255, 0, 0, 0.08);
+}
+
+.row-danger:hover {
+    background-color: rgba(255, 0, 0, 0.12);
+}
+
+.row-danger td:not(:nth-child(1)) {
+    color: #d64848;
+    font-weight: 500;
+}
+
+.row-danger td:nth-child(4) {
+    text-decoration: line-through;
+    opacity: 0.9;
+}
+
+.mod-action {
+    padding: 5px;
+    border-radius: 10px;
+    font-family: monospace;
+}
+
+.mod-action.mod-action-warn {
+    background-color: color-mix(in srgb, var(--logWarn) 25%, transparent);
+}
+
+.mod-action.mod-action-mute {
+    background-color: color-mix(in srgb, var(--logMute) 25%, transparent);
+}
+
+.mod-action.mod-action-unmute {
+    background-color: color-mix(in srgb, var(--logUnmute) 25%, transparent);
+}
+
+.mod-action.mod-action-kick {
+    background-color: color-mix(in srgb, var(--logKick) 25%, transparent);
+}
+
+.mod-action.mod-action-ban {
+    background-color: color-mix(in srgb, var(--logBan) 25%, transparent);
+}
+
+.mod-action.mod-action-unban {
+    background-color: color-mix(in srgb, var(--logUnban) 25%, transparent);
+}
