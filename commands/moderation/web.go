@@ -5,6 +5,8 @@ import (
 	"embed"
 	"net/http"
 
+	"github.com/RhykerWells/Summit/bot/functions"
+	"github.com/RhykerWells/Summit/common"
 	"github.com/RhykerWells/Summit/web"
 	"goji.io/v3"
 	"goji.io/v3/pat"
@@ -34,6 +36,12 @@ func registerModerationRoutes(dashboard *goji.Mux) {
 
 	moderationMux.HandleFunc(pat.Get("/cases"), web.RenderPage("cases.html"))
 	moderationMux.HandleFunc(pat.Get("/cases/"), web.RenderPage("cases.html"))
+
+	moderationMux.HandleFunc(pat.Get("/logs"), web.RenderPage("logs.html"))
+	moderationMux.HandleFunc(pat.Get("/logs/"), web.RenderPage("logs.html"))
+
+	moderationMux.HandleFunc(pat.Get("/logs/:id"), handleMessageLogs)
+	moderationMux.HandleFunc(pat.Get("/logs/:id/"), handleMessageLogs)
 }
 
 // saveConfigHandler saves the parsed form data and saves it if possible.
@@ -70,9 +78,30 @@ func moderationMW(inner http.Handler) http.Handler {
 		cases := getGuildCases(guildID)
 		tmplData["Cases"] = cases
 
+		messageLogs := getGuildMessageLogs(guildID)
+		tmplData["MessageLogs"] = messageLogs
+
 		ctx = context.WithValue(ctx, web.CtxKeyTmplData, tmplData)
 		inner.ServeHTTP(w, r.WithContext(ctx))
 	}
 
 	return http.HandlerFunc(middleware)
+}
+
+func handleMessageLogs(w http.ResponseWriter, r *http.Request) {
+	logID := pat.Param(r, "id")
+	logIDInt64 := functions.ToInt64(logID)
+
+	log, err := getMessageLogByID(logIDInt64)
+	if err != nil {
+		web.SendErrorToast(w, "Message log not found")
+		return
+	}
+
+	log.L.LoadLogModerationMessageLogsMessages(context.Background(), common.PQ, true, log, nil)
+
+	tmplData, _ := r.Context().Value(web.CtxKeyTmplData).(web.TmplContextData)
+	tmplData["MessageLog"] = log
+
+	web.RenderPage("log.html")(w, r)
 }
