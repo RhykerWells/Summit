@@ -4,6 +4,7 @@ import (
 	"context"
 	"embed"
 	"net/http"
+	"sort"
 
 	"github.com/RhykerWells/Summit/bot/functions"
 	"github.com/RhykerWells/Summit/common"
@@ -99,6 +100,11 @@ func handleMessageLogs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.L.LoadLogModerationMessageLogsMessages(context.Background(), common.PQ, true, log, nil)
+
+	// Sort messages by creation date (ascending - oldest first)
+	sort.Slice(log.R.LogModerationMessageLogsMessages, func(i, j int) bool {
+		return log.R.LogModerationMessageLogsMessages[i].CreatedAt.Before(log.R.LogModerationMessageLogsMessages[j].CreatedAt)
+	})
 
 	tmplData, _ := r.Context().Value(web.CtxKeyTmplData).(web.TmplContextData)
 	tmplData["MessageLog"] = log
