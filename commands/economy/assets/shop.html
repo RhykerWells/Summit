@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-{{template "head" .}}
+	{{template "head" .}}
 </head>
+
 <body class="text-light">
 	{{template "dashboard_nav" .}}
 	<main id="main" class="d-flex m-4" style="background-color: var(--baseGrey); border-radius: 0.5rem">
 		<div class="p-4 w-100">
-			<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage" class="btn text-light w-100" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Home</a>
+			<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage" class="btn text-light w-100"
+				style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Home</a>
 			<input type="hidden" name="form_type" value="Core">
 			<div class="d-flex flex-column justify-content-between align-items-sm-center mt-1 mb-0">
 				<div class="order-2 w-100 mt-2">
@@ -16,56 +19,75 @@
 							<h2 class="mb-0">Shop</h2>
 						</div>
 						<div class="row gx-2 gy-1">
-							<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newItemModal" style="background-color: var(--basePurple); border-color: var(--accentGrey); text-wrap: nowrap;">Add new item</button>
+							<button type="button" class="btn btn-primary" data-bs-toggle="modal"
+								data-bs-target="#newItemModal"
+								style="background-color: var(--basePurple); border-color: var(--accentGrey); text-wrap: nowrap;">Add
+								new item</button>
 						</div>
 					</div>
 				</div>
 			</div>
 			<div class="table-responsive">
-				<table class="table table-striped" id="itemTable" style="--bs-table-color: white; --bs-table-striped-color: white; --bs-table-striped-bg: rgb(30 30 30 / 50%); --bs-table-bg: transparent;">
+				<table class="table table-striped" id="itemTable"
+					style="--bs-table-color: white; --bs-table-striped-color: white; --bs-table-striped-bg: rgb(30 30 30 / 50%); --bs-table-bg: transparent;">
 					<thead>
 						<tr>
-							<th style="width: 10%; white-space: nowrap;">Edit, view & delete item</th>
+							<th style="width: 10%; white-space: nowrap;"></th>
 							<th>Item</th>
 						</tr>
 					</thead>
 					<tbody>
 						{{range $i, $item := .Store}}
-							<tr>
-								<td>
-									<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editItem{{$i}}Modal" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);"><i class="fa-solid fa-pen-to-square"></i></button>
-									<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deleteItem{{$i}}Modal" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);"><i class="fa-solid fa-trash"></i></button>
-								</td>
-								<td class="text-truncate">{{$item.Name}}</td>
-							</tr>
+						<tr>
+							<td>
+								<button type="button" class="btn btn-primary" data-bs-toggle="modal"
+									data-bs-target="#editItem{{$item.ID}}Modal"
+									style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);"><i
+										class="fa-solid fa-pen-to-square"></i></button>
+								<button type="button" class="btn btn-primary" data-bs-toggle="modal"
+									data-bs-target="#deleteItem{{$item.ID}}Modal"
+									style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);"><i
+										class="fa-solid fa-trash"></i></button>
+							</td>
+							<td class="text-truncate">{{$item.Name}}</td>
+						</tr>
 						{{end}}
-						<tr id="noResultsRow" class="text-center" colspan="4" {{if .Store}} style=" display:none;" {{end}}><td colspan="4">No items found.</td></tr>
+						<tr id="noResultsRow" class="text-center" {{if .Store}}style="display: none;" {{end}}>
+							<td colspan="2">No items found.</td>
+						</tr>
 					</tbody>
 				</table>
 				<div id="itemTable-pagination" class="mb-0 mt-2 d-flex justify-content-center"></div>
 			</div>
 			{{range .Store}}
-			<div class="modal fade" id="editItem{{.ID}}Modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+			<div class="modal fade" id="editItem{{.ID}}Modal" tabindex="-1" data-bs-backdrop="static"
+				data-bs-keyboard="false">
 				<div class="modal-dialog modal-dialog-centered modal-lg">
 					<div class="modal-content">
 						<div class="modal-header">
 							<h5 class="modal-title">Edit item</h5>
 							<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
 						</div>
-						<form id="editItemForm" method="POST" action="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage/economy/shop/{{.ID}}/edit">
+						<form id="editItemForm" method="POST"
+							action="{{$.HomeURL}}/dashboard/{{$.CurrentGuild.ID}}/manage/economy/shop/{{.ID}}/edit">
 							<div class="modal-body">
 								<p class="card-text">Item name</p>
-								{{textInput .Name "Name" (stringDict "maxlength" 30 "label" true "labelContent" (printf "%d/30" (len .Name)) "labelSide" "right")}}
+								{{textInput .Name "Name" (stringDict "maxlength" 30 "label" true "labelContent" (printf
+								"%d/30" (len .Name)) "labelSide" "right")}}
 								<p class="card-text">Description</p>
-								{{textInput .Description "Description" (stringDict "maxlength" 200 "label" true "labelContent" (printf "%d/200" (len .Description)) "labelSide" "right")}}
+								{{textInput .Description "Description" (stringDict "maxlength" 200 "label" true
+								"labelContent" (printf "%d/200" (len .Description)) "labelSide" "right")}}
 								<p class="card-text">Price</p>
-								{{numberSelect 0 0 .Price "Price" (stringDict "label" true "labelContent" $.EconomyConfig.EconomySymbol "labelSide" "left")}}
+								{{numberSelect 0 0 .Price "Price" (stringDict "label" true "labelContent"
+								$.EconomyConfig.EconomySymbol "labelSide" "left")}}
 								<p class="card-text">Quantity</p>
 								{{numberSelect 0 0 .Quantity "Quantity"}}
 								<p class="card-text">Role given</p>
-								{{roleOptionsSingle $.CurrentGuild.Roles .Role "Role" $.CurrentGuild.BotHighestRolePosition}}
+								{{roleOptionsSingle $.CurrentGuild.Roles .Role "Role"
+								$.CurrentGuild.BotHighestRolePosition}}
 								<p class="card-text">Reply</p>
-								{{textInput .Reply "Reply" (stringDict "maxlength" 200 "label" true "labelContent" (printf "%d/200" (len .Reply)) "labelSide" "right")}}
+								{{textInput .Reply "Reply" (stringDict "maxlength" 200 "label" true "labelContent"
+								(printf "%d/200" (len .Reply)) "labelSide" "right")}}
 							</div>
 							<div class="modal-footer justify-content-between">
 								<div>
@@ -77,21 +99,24 @@
 					</div>
 				</div>
 			</div>
-			<div class="modal fade" id="deleteItem{{.ID}}Modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+			<div class="modal fade" id="deleteItem{{.ID}}Modal" tabindex="-1" data-bs-backdrop="static"
+				data-bs-keyboard="false">
 				<div class="modal-dialog modal-dialog-centered modal-lg">
 					<div class="modal-content">
 						<div class="modal-header">
 							<h5 class="modal-title">Delete item</h5>
 							<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
 						</div>
-						<form id="deleteItem{{.ID}}Form" method="POST" action="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage/economy/shop/{{.ID}}/delete">
+						<form id="deleteItem{{.ID}}Form" method="POST"
+							action="{{$.HomeURL}}/dashboard/{{$.CurrentGuild.ID}}/manage/economy/shop/{{.ID}}/delete">
 							<div class="modal-body">
 								<p class="card-text">This cannot be undone!</p>
 								<span>You are deleting: "<code>{{.Name}}</code>"</span>
 							</div>
 							<div class="modal-footer justify-content-between">
 								<div>
-									<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+									<button type="button" class="btn btn-secondary"
+										data-bs-dismiss="modal">Close</button>
 									<button type="submit" class="btn btn-danger">Delete response</button>
 								</div>
 							</div>
@@ -107,20 +132,25 @@
 							<h5 class="modal-title">New item</h5>
 							<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
 						</div>
-						<form id="newItemForm" method="POST" action="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage/economy/shop/new">
+						<form id="newItemForm" method="POST"
+							action="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage/economy/shop/new">
 							<div class="modal-body">
 								<p class="card-text">Item name</p>
-								{{textInput "" "Name" (stringDict "maxlength" 30 "label" true "labelContent" "0/30" "labelSide" "right")}}
+								{{textInput "" "Name" (stringDict "maxlength" 30 "label" true "labelContent" "0/30"
+								"labelSide" "right")}}
 								<p class="card-text">Description</p>
-								{{textInput "" "Description" (stringDict "maxlength" 200 "label" true "labelContent" "0/200" "labelSide" "right")}}
+								{{textInput "" "Description" (stringDict "maxlength" 200 "label" true "labelContent"
+								"0/200" "labelSide" "right")}}
 								<p class="card-text">Price</p>
-								{{numberSelect 0 0 0 "Price" (stringDict "label" true "labelContent" $.EconomyConfig.EconomySymbol "labelSide" "left")}}
+								{{numberSelect 0 0 0 "Price" (stringDict "label" true "labelContent"
+								.EconomyConfig.EconomySymbol "labelSide" "left")}}
 								<p class="card-text">Quantity</p>
 								{{numberSelect 0 0 0 "Quantity"}}
 								<p class="card-text">Role given</p>
-								{{roleOptionsSingle $.CurrentGuild.Roles "" "Role" $.CurrentGuild.BotHighestRolePosition}}
+								{{roleOptionsSingle .CurrentGuild.Roles "" "Role" .CurrentGuild.BotHighestRolePosition}}
 								<p class="card-text">Reply</p>
-								{{textInput "" "Reply" (stringDict "maxlength" 200 "label" true "labelContent" "0/200" "labelSide" "right")}}
+								{{textInput "" "Reply" (stringDict "maxlength" 200 "label" true "labelContent" "0/200"
+								"labelSide" "right")}}
 							</div>
 							<div class="modal-footer justify-content-between">
 								<div>
@@ -136,24 +166,6 @@
 	</main>
 	<div id="toastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1100;"></div>
 </body>
-<script>
-	document.addEventListener("DOMContentLoaded", () => {
-		filterShop("itemTable", "noResultsRow", [], true);
-	});
-
-	document.querySelectorAll(".textInput").forEach(input => {
-		if (input.maxLength > 0) {
-        const group = input.closest(".input-group");
-        const label = group.querySelector("label");
-        const max = input.maxLength;
-
-			input.addEventListener("input", () => {
-			label.textContent = `${input.value.length}/${max}`;
-		});
-
-		label.textContent = `${input.value.length}/${max}`;
-		}
-	});
-</script>
 {{template "javascript" .}}
+
 </html>
