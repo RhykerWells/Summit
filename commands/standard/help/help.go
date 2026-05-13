@@ -22,7 +22,7 @@ var Command = &dispatch.Command{
 	Description: "Displays bot help",
 	Run: func(data *dispatch.Data) error {
 		command := ""
-		if len(data.ParsedArgs) > 0 {
+		if len(data.ParsedArgs) > 0 && data.ParsedArgs[0].Value != nil {
 			command = data.ParsedArgs[0].Value.(string)
 		}
 
