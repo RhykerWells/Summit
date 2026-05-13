@@ -20,6 +20,11 @@
 					<p class="mt-2 mb-0">View the last 100 messages captured during moderation actions.</p>
 				</div>
 			</div>
+			<div class="row g-2 mt-2 mb-1 justify-content-end">
+				<div class="col-md-3 col-sm-6">
+					<input type="text" class="form-control" placeholder="Search Case" data-table-id="logsTable" data-filter-column-index="0" data-no-row-id="noResultsRow">
+				</div>
+			</div>
 			<div class="table-responsive">
 				<table class="table table-striped" id="logsTable" style="--bs-table-color: white; --bs-table-striped-color: white; --bs-table-striped-bg: rgb(30 30 30 / 50%); --bs-table-bg: transparent">
 					<thead>
@@ -45,13 +50,9 @@
 							</td>
 						</tr>
 						{{end}}
-						{{if not .MessageLogs}}
-						<tr id="noResultsRow" class="text-center">
-							<td colspan="5">No message logs found.</td>
-						</tr>
-						{{end}}
 					</tbody>
 				</table>
+				<div id="logsTable-pagination" class="mb-0 mt-2 d-flex justify-content-center"></div>
 			</div>
 		</div>
 	</main>

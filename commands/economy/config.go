@@ -44,9 +44,7 @@ func (c *Config) ConfigToSQLModel() *models.EconomyConfig {
 
 		// Custom responses
 		EconomyCustomWorkResponsesEnabled:  c.EconomyCustomWorkResponsesEnabled,
-		EconomyCustomWorkResponses:         c.EconomyCustomWorkResponses,
 		EconomyCustomCrimeResponsesEnabled: c.EconomyCustomCrimeResponsesEnabled,
-		EconomyCustomCrimeResponses:        c.EconomyCustomCrimeResponses,
 	}
 }
 
@@ -66,9 +64,7 @@ func ConfigFromModel(m *models.EconomyConfig) *Config {
 
 		// Custom responses
 		EconomyCustomWorkResponsesEnabled:  m.EconomyCustomWorkResponsesEnabled,
-		EconomyCustomWorkResponses:         m.EconomyCustomWorkResponses,
 		EconomyCustomCrimeResponsesEnabled: m.EconomyCustomCrimeResponsesEnabled,
-		EconomyCustomCrimeResponses:        m.EconomyCustomCrimeResponses,
 	}
 }
 
@@ -79,9 +75,20 @@ func GetConfig(guildID string) *Config {
 		return ConfigFromModel(model)
 	}
 
-	return &Config{
-		GuildID: guildID,
+	defaultConfig := &Config{
+		GuildID:                            guildID,
+		EconomyEnabled:                     false,
+		EconomySymbol:                      "£",
+		EconomyStartBalance:                200,
+		EconomyMinReturn:                   200,
+		EconomyMaxReturn:                   500,
+		EconomyMaxBet:                      5000,
+		EconomyCustomWorkResponsesEnabled:  false,
+		EconomyCustomCrimeResponsesEnabled: false,
 	}
+	defaultConfig.ConfigToSQLModel().InsertG(context.Background(), boil.Infer())
+
+	return defaultConfig
 }
 
 // SaveConfig saves the passed Config struct via SQLBoiler

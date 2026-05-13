@@ -109,7 +109,7 @@
 										<table class="table table-striped" id="workTable" style="--bs-table-color: white; --bs-table-striped-color: white; --bs-table-striped-bg: rgb(30 30 30 / 50%); --bs-table-bg: transparent;">
 											<thead>
 												<tr>
-													<th style="width: 10%; white-space: nowrap;">Edit, view & delete response</th>
+													<th style="width: 10%; white-space: nowrap;"></th>
 													<th>Response</th>
 												</tr>
 											</thead>
@@ -148,7 +148,7 @@
 										<table class="table table-striped" id="crimeTable" style="--bs-table-color: white; --bs-table-striped-color: white; --bs-table-striped-bg: rgb(30 30 30 / 50%); --bs-table-bg: transparent;">
 											<thead>
 												<tr>
-													<th style="width: 10%; white-space: nowrap;">Edit, view & delete response</th>
+													<th style="width: 10%; white-space: nowrap;"></th>
 													<th>Response</th>
 												</tr>
 											</thead>
@@ -246,17 +246,6 @@
 		</div>
 	</main>
 	<div id="toastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1100;"></div>
-</body>
-<script>
-	document.addEventListener("DOMContentLoaded", () => {
-		const tables = ["workTable", "crimeTable"];
-		const noResponseRows = ["workNoResultsRow", "crimeNoResultsRow"];
-
-		tables.forEach((tableID, index) => {
-			// Initial load
-			filterResponses(tableID, noResponseRows[index], [], true);
-		});
-	});
-</script>
+</body>h
 {{template "javascript" .}}
 </html>
