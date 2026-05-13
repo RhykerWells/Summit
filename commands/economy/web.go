@@ -236,7 +236,7 @@ func saveNewItemHandler(w http.ResponseWriter, r *http.Request) {
 	guildID := pat.Param(r, "server")
 	guild := functions.GetGuild(guildID)
 
-	var item *models.EconomyShop
+	var item models.EconomyShop
 
 	decoder := schema.NewDecoder()
 	decoder.IgnoreUnknownKeys(true)
@@ -248,7 +248,7 @@ func saveNewItemHandler(w http.ResponseWriter, r *http.Request) {
 
 	item.GuildID = guild.ID
 
-	ok, err := isItemOk(item, false)
+	ok, err := isItemOk(&item, false)
 	if !ok {
 		web.SendErrorToast(w, err.Error())
 		return
