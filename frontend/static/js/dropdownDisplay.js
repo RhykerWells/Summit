@@ -4,11 +4,14 @@ document.addEventListener('DOMContentLoaded', () => {
 	updateRoleOptionsMulti()
 	updateChannelOptionsSingle()
 	updateCaseTypeSearch()
+
+	// Initialize table filters
+	initializeTableFilters()
 });
 
 // Global variables for tables
-const rowsPerPage = 10;
-let currentPage = 1;
+const DEFAULT_ROWS_PER_PAGE = 10;
+const tableFilterState = {};
 
 /**
 * Updates single-role dropdowns.
@@ -18,11 +21,10 @@ let currentPage = 1;
 */
 function updateRoleOptionsSingle() {
 	document.querySelectorAll('.dropDownRoleSingleItem').forEach(item => {
-		item.addEventListener('click', () => {
+		item.addEventListener('click', event => {
 			if (item.classList.contains('disabled')) {
-				e.stopPropagation();
-				e.preventDefault();
-				return;
+				event.stopPropagation();
+				event.preventDefault();
 			}
 
 			const container = item.closest('.input-group'); // Drop down container. Makes sure we only select objects for the appropriate role select.
@@ -41,7 +43,7 @@ function updateRoleOptionsSingle() {
 					displayText = name;
 				}
 			}
-			label.textContent = displayText
+			label.textContent = displayText;
 		});
 	});
 }
@@ -85,11 +87,10 @@ function updateRoleOptionsMulti() {
 */
 function updateChannelOptionsSingle() {
 	document.querySelectorAll('.channelListItem').forEach(item => {
-		item.addEventListener('click', () => {
+		item.addEventListener('click', event => {
 			if (item.classList.contains('disabled')) {
-				e.stopPropagation();
-				e.preventDefault();
-				return;
+				event.stopPropagation();
+				event.preventDefault();
 			}
 
 			const container = item.closest('.input-group'); // Drop down container. Makes sure we only select objects for the appropriate role select.
@@ -108,7 +109,7 @@ function updateChannelOptionsSingle() {
 					displayText = name;
 				}
 			}
-			label.textContent = displayText
+			label.textContent = displayText;
 		});
 	});
 }
@@ -118,11 +119,10 @@ function updateChannelOptionsSingle() {
 */
 function updateCaseTypeSearch() {
 	document.querySelectorAll('.caseListItem').forEach(item => {
-		item.addEventListener('click', () => {
+		item.addEventListener('click', event => {
 			if (item.classList.contains('disabled')) {
-				e.stopPropagation();
-				e.preventDefault();
-				return;
+				event.stopPropagation();
+				event.preventDefault();
 			}
 
 			const container = item.closest('.input-group'); // Drop down container. Makes sure we only select objects for the appropriate role select.
@@ -137,240 +137,153 @@ function updateCaseTypeSearch() {
 			if (value) {
 				displayText = name;
 			}
-			label.textContent = displayText
+			label.textContent = displayText;
 
-			hiddenInput.dispatchEvent(new Event("input", { bubbles: true }))
+			hiddenInput.dispatchEvent(new Event("input", { bubbles: true }));
 		});
 	});
 }
 
-// Case system
+function initializeTableFilters() {
+	const controls = document.querySelectorAll('[data-table-id][data-filter-column-index]');
+	if (!controls.length) return;
 
+	const tables = {};
 
-function filterCases(tableID, noRowID, filters, resetPage = true) {
-	const table  = document.getElementById(tableID);
-	const rows   = table.getElementsByTagName("tr");
-	const noRow = noRowID ? document.getElementById(noRowID) : null;
+	controls.forEach(control => {
+		const tableID = control.dataset.tableId;
+		if (!tableID) return;
 
-	// get the filter values
-	const values = filters.map(f => ({
-		Column: f.ColumnIndex,
-		Value: document.getElementById(f.InputID).value
-	}));
+		const columnIndex = Number(control.dataset.filterColumnIndex) || 0;
+		const noRowID = control.dataset.noRowId || null;
+		const rowsPerPage = Number(control.dataset.rowsPerPage) || DEFAULT_ROWS_PER_PAGE;
 
-	// filter matches
-	lastMatches = [];
-	for (let i = 1; i < rows.length; i++) {
-		if (rows[i].id === noRowID) continue;
-
-		let matchesAll = true;
-		for (const f of values) {
-			const cell = rows[i].getElementsByTagName("td")[f.Column];
-			if (!cell || !cell.textContent.includes(f.Value)) {
-				matchesAll = false;
-				break;
-			}
+		if (!tables[tableID]) {
+			tables[tableID] = { filters: [], noRowID, rowsPerPage };
 		}
 
-		if (matchesAll) lastMatches.push(rows[i]);
-		else rows[i].style.display = "none";
-	}
+		tables[tableID].filters.push({ InputElement: control, ColumnIndex: columnIndex });
+	});
 
-	// reset if needed
-	if (resetPage) currentPage = 1;
-
-	// pagination
-	const totalPages = Math.ceil(lastMatches.length / rowsPerPage) || 1;
-	if (currentPage > totalPages) currentPage = totalPages;
-	const start = (currentPage - 1) * rowsPerPage;
-	const end   = start + rowsPerPage;
-
-	// hide all matches first
-	lastMatches.forEach(row => row.style.display = "none");
-	// show only the slice for this page
-	lastMatches.slice(start, end).forEach(row => row.style.display = "");
-
-	if (noRow) noRow.style.display = lastMatches.length === 0 ? "" : "none";
-
-	// pagination buttons
-	const paginationContainerID = tableID + "-pagination";
-	let container = document.getElementById(paginationContainerID);
-	if (!container) return;
-
-	container.innerHTML = "";
-
-	const prevBtn = document.createElement("button");
-	prevBtn.textContent = "Previous";
-	prevBtn.className = "btn btn-sm btn-secondary me-2";
-	prevBtn.disabled = currentPage === 1;
-	prevBtn.onclick = () => { currentPage--; filterCases(tableID, noRowID, filters, false); };
-	container.appendChild(prevBtn);
-
-	for (let i = 1; i <= totalPages; i++) {
-		const btn = document.createElement("button");
-		btn.textContent = i;
-		btn.className = "btn btn-sm " + (i === currentPage ? "btn-primary" : "btn-outline-primary") + " mx-1";
-		btn.style.cssText = "background-color: var(--basePurple); border: 1px solid var(--accentGrey);"
-		btn.onclick = () => { currentPage = i; filterCases(tableID, noRowID, filters, false); };
-		container.appendChild(btn);
-	}
-
-	const nextBtn = document.createElement("button");
-	nextBtn.textContent = "Next";
-	nextBtn.className = "btn btn-sm btn-secondary ms-2";
-	nextBtn.disabled = currentPage === totalPages;
-	nextBtn.onclick = () => { currentPage++; filterCases(tableID, noRowID, filters, false); };
-	container.appendChild(nextBtn);
+	Object.entries(tables).forEach(([tableID, config]) => {
+		const callback = () => filterTable(tableID, config.noRowID, config.filters, true, { rowsPerPage: config.rowsPerPage });
+		config.filters.forEach(filter => {
+			const eventType = filter.InputElement.tagName.toLowerCase() === 'select' ? 'change' : 'input';
+			filter.InputElement.addEventListener(eventType, callback);
+		});
+		callback();
+	});
 }
 
-function filterResponses(tableID, noRowID, filters, resetPage = true) {
-	const table  = document.getElementById(tableID);
-	const rows   = table.getElementsByTagName("tr");
-	const noRow = noRowID ? document.getElementById(noRowID) : null;
+function filterTable(tableID, noRowID, filters = [], resetPage = true, options = {}) {
+	const table = document.getElementById(tableID);
+	if (!table) return;
 
-	// get the filter values
-	const values = filters.map(f => ({
-		Column: f.ColumnIndex,
-		Value: document.getElementById(f.InputID).value
+	const state = getTableState(tableID);
+	const rowsPerPage = options.rowsPerPage || DEFAULT_ROWS_PER_PAGE;
+	if (resetPage) state.currentPage = 1;
+
+	const tbody = table.tBodies.length ? table.tBodies[0] : table;
+	const rows = Array.from(tbody.querySelectorAll('tr'));
+
+	const activeFilters = filters.map(filter => ({
+		Column: typeof filter.ColumnIndex === 'number' ? filter.ColumnIndex : (typeof filter.column === 'number' ? filter.column : 0),
+		Value: getFilterValue(filter)
 	}));
 
-	// filter matches
-	lastMatches = [];
-	for (let i = 1; i < rows.length; i++) {
-		if (rows[i].id === noRowID) continue;
-		
-		let matchesAll = true;
-		for (const f of values) {
-			const cell = rows[i].getElementsByTagName("td")[f.Column];
-			if (!cell || !cell.textContent.includes(f.Value)) {
-				matchesAll = false;
-				break;
-			}
+	const visibleRows = [];
+
+	rows.forEach(row => {
+		if (row.id === noRowID) {
+			row.style.display = 'none';
+			return;
 		}
 
-		if (matchesAll) lastMatches.push(rows[i]);
-		else rows[i].style.display = "none";
+		if (row.closest('thead')) {
+			return;
+		}
+
+		const cells = Array.from(row.querySelectorAll('td'));
+		const matched = activeFilters.every(filter => {
+			if (!filter.Value) return true;
+			const cell = cells[filter.Column];
+			return cell && cell.textContent.toLowerCase().includes(filter.Value);
+		});
+
+		if (matched) {
+			visibleRows.push(row);
+		} else {
+			row.style.display = 'none';
+		}
+	});
+
+	const totalPages = Math.max(1, Math.ceil(visibleRows.length / rowsPerPage));
+	if (state.currentPage > totalPages) state.currentPage = totalPages;
+
+	const start = (state.currentPage - 1) * rowsPerPage;
+	const end = start + rowsPerPage;
+
+	visibleRows.forEach((row, index) => {
+		row.style.display = index >= start && index < end ? '' : 'none';
+	});
+
+	if (noRowID) {
+		const noRow = document.getElementById(noRowID);
+		if (noRow) {
+			noRow.style.display = visibleRows.length === 0 ? '' : 'none';
+		}
 	}
 
-	// reset if needed
-	if (resetPage) currentPage = 1;
-
-	// pagination
-	const totalPages = Math.ceil(lastMatches.length / rowsPerPage) || 1;
-	if (currentPage > totalPages) currentPage = totalPages;
-	const start = (currentPage - 1) * rowsPerPage;
-	const end   = start + rowsPerPage;
-
-	// hide all matches first
-	lastMatches.forEach(row => row.style.display = "none");
-	// show only the slice for this page
-	lastMatches.slice(start, end).forEach(row => row.style.display = "");
-
-	if (noRow) noRow.style.display = lastMatches.length === 0 ? "" : "none";
-
-	// pagination buttons
-	const paginationContainerID = tableID + "-pagination";
-	let container = document.getElementById(paginationContainerID);
-	if (!container) return;
-
-	container.innerHTML = "";
-
-	const prevBtn = document.createElement("button");
-	prevBtn.textContent = "Previous";
-	prevBtn.className = "btn btn-sm btn-secondary me-2";
-	prevBtn.disabled = currentPage === 1;
-	prevBtn.onclick = () => { currentPage--; filterResponses(tableID, noRowID, filters, false); };
-	container.appendChild(prevBtn);
-
-	for (let i = 1; i <= totalPages; i++) {
-		const btn = document.createElement("button");
-		btn.textContent = i;
-		btn.className = "btn btn-sm " + (i === currentPage ? "btn-primary" : "btn-outline-primary") + " mx-1";
-		btn.style.cssText = "background-color: var(--basePurple); border: 1px solid var(--accentGrey);"
-		btn.onclick = () => { currentPage = i; filterResponses(tableID, noRowID, filters, false); };
-		container.appendChild(btn);
-	}
-
-	const nextBtn = document.createElement("button");
-	nextBtn.textContent = "Next";
-	nextBtn.className = "btn btn-sm btn-secondary ms-2";
-	nextBtn.disabled = currentPage === totalPages;
-	nextBtn.onclick = () => { currentPage++; filterResponses(tableID, noRowID, filters, false); };
-	container.appendChild(nextBtn);
+	renderPagination(tableID, totalPages, state.currentPage, newPage => {
+		state.currentPage = newPage;
+		filterTable(tableID, noRowID, filters, false, options);
+	});
 }
 
-function filterShop(tableID, noRowID, filters, resetPage = true) {
-	const table  = document.getElementById(tableID);
-	const rows   = table.getElementsByTagName("tr");
-	const noRow = noRowID ? document.getElementById(noRowID) : null;
+function getTableState(tableID) {
+	if (!tableFilterState[tableID]) {
+		tableFilterState[tableID] = { currentPage: 1 };
+	}
+	return tableFilterState[tableID];
+}
 
-	// get the filter values
-	const values = filters.map(f => ({
-		Column: f.ColumnIndex,
-		Value: document.getElementById(f.InputID).value
-	}));
-
-	// filter matches
-	lastMatches = [];
-	for (let i = 1; i < rows.length; i++) {
-		if (rows[i].id === noRowID) continue;
-
-		let matchesAll = true;
-		for (const f of values) {
-			const cell = rows[i].getElementsByTagName("td")[f.Column];
-			if (!cell || !cell.textContent.includes(f.Value)) {
-				matchesAll = false;
-				break;
-			}
-		}
-
-		if (matchesAll) lastMatches.push(rows[i]);
-		else rows[i].style.display = "none";
+function getFilterValue(filter) {
+	if (filter.InputElement) {
+		return String(filter.InputElement.value || '').trim().toLowerCase();
 	}
 
-	// reset if needed
-	if (resetPage) currentPage = 1;
+	if (filter.InputID) {
+		const input = document.getElementById(filter.InputID);
+		return String(input ? input.value : '').trim().toLowerCase();
+	}
 
-	// pagination
-	const totalPages = Math.ceil(lastMatches.length / rowsPerPage) || 1;
-	if (currentPage > totalPages) currentPage = totalPages;
-	const start = (currentPage - 1) * rowsPerPage;
-	const end   = start + rowsPerPage;
+	return String(filter.Value || '').trim().toLowerCase();
+}
 
-	// hide all matches first
-	lastMatches.forEach(row => row.style.display = "none");
-	// show only the slice for this page
-	lastMatches.slice(start, end).forEach(row => row.style.display = "");
-
-	if (noRow) noRow.style.display = lastMatches.length === 0 ? "" : "none";
-
-	// pagination buttons
-	const paginationContainerID = tableID + "-pagination";
-	let container = document.getElementById(paginationContainerID);
+function renderPagination(tableID, totalPages, currentPage, onPageChange) {
+	const paginationContainerID = `${tableID}-pagination`;
+	const container = document.getElementById(paginationContainerID);
 	if (!container) return;
 
-	container.innerHTML = "";
+	container.innerHTML = '';
+	container.classList.add('d-flex', 'flex-wrap', 'justify-content-center', 'gap-2');
 
-	const prevBtn = document.createElement("button");
-	prevBtn.textContent = "Previous";
-	prevBtn.className = "btn btn-sm btn-secondary me-2";
-	prevBtn.disabled = currentPage === 1;
-	prevBtn.onclick = () => { currentPage--; filterResponses(tableID, noRowID, filters, false); };
-	container.appendChild(prevBtn);
+	const makeButton = (text, disabled, handler, classes = '') => {
+		const btn = document.createElement('button');
+		btn.type = 'button';
+		btn.textContent = text;
+		btn.className = `btn btn-sm ${classes}`.trim();
+		btn.style.cssText = 'background-color: var(--basePurple); border: 1px solid var(--accentGrey);';
+		btn.disabled = disabled;
+		btn.addEventListener('click', handler);
+		return btn;
+	};
 
-	for (let i = 1; i <= totalPages; i++) {
-		const btn = document.createElement("button");
-		btn.textContent = i;
-		btn.className = "btn btn-sm " + (i === currentPage ? "btn-primary" : "btn-outline-primary") + " mx-1";
-		btn.style.cssText = "background-color: var(--basePurple); border: 1px solid var(--accentGrey);"
-		btn.onclick = () => { currentPage = i; filterResponses(tableID, noRowID, filters, false); };
-		container.appendChild(btn);
+	container.appendChild(makeButton('Previous', currentPage === 1, () => onPageChange(currentPage - 1), 'btn-secondary'));
+
+	for (let page = 1; page <= totalPages; page += 1) {
+		container.appendChild(makeButton(String(page), false, () => onPageChange(page), page === currentPage ? 'btn-primary' : 'btn-outline-primary'));
 	}
 
-	const nextBtn = document.createElement("button");
-	nextBtn.textContent = "Next";
-	nextBtn.className = "btn btn-sm btn-secondary ms-2";
-	nextBtn.disabled = currentPage === totalPages;
-	nextBtn.onclick = () => { currentPage++; filterResponses(tableID, noRowID, filters, false); };
-	container.appendChild(nextBtn);
+	container.appendChild(makeButton('Next', currentPage === totalPages, () => onPageChange(currentPage + 1), 'btn-secondary'));
 }
