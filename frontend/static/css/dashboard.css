@@ -364,3 +364,8 @@ ul.dropdown-menu::-webkit-scrollbar-track {
 .mod-action.mod-action-unban {
     background-color: color-mix(in srgb, var(--logUnban) 25%, transparent);
 }
+
+.form-control {
+	background-color: var(--basePurple) !important;
+    border: 1px solid var(--accentGrey) !important;
+}
