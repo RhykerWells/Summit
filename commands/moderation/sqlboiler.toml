@@ -8,4 +8,4 @@ dbname = "summit"
 user="summit"
 pass="icantsee"
 sslmode = "disable"
-whitelist = ["moderation_config", "moderation_mutes", "moderation_bans", "moderation_cases"]
+whitelist = ["moderation_config", "moderation_mutes", "moderation_bans", "moderation_cases", "moderation_message_logs", "moderation_message_logs_messages"]

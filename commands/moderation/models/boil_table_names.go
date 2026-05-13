@@ -4,13 +4,17 @@
 package models
 
 var TableNames = struct {
-	ModerationBans   string
-	ModerationCases  string
-	ModerationConfig string
-	ModerationMutes  string
+	ModerationBans                string
+	ModerationCases               string
+	ModerationConfig              string
+	ModerationMessageLogs         string
+	ModerationMessageLogsMessages string
+	ModerationMutes               string
 }{
-	ModerationBans:   "moderation_bans",
-	ModerationCases:  "moderation_cases",
-	ModerationConfig: "moderation_config",
-	ModerationMutes:  "moderation_mutes",
+	ModerationBans:                "moderation_bans",
+	ModerationCases:               "moderation_cases",
+	ModerationConfig:              "moderation_config",
+	ModerationMessageLogs:         "moderation_message_logs",
+	ModerationMessageLogsMessages: "moderation_message_logs_messages",
+	ModerationMutes:               "moderation_mutes",
 }

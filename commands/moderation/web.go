@@ -4,7 +4,11 @@ import (
 	"context"
 	"embed"
 	"net/http"
+	"sort"
 
+	"github.com/RhykerWells/Summit/bot/functions"
+	"github.com/RhykerWells/Summit/commands/moderation/models"
+	"github.com/RhykerWells/Summit/common"
 	"github.com/RhykerWells/Summit/web"
 	"goji.io/v3"
 	"goji.io/v3/pat"
@@ -34,6 +38,12 @@ func registerModerationRoutes(dashboard *goji.Mux) {
 
 	moderationMux.HandleFunc(pat.Get("/cases"), web.RenderPage("cases.html"))
 	moderationMux.HandleFunc(pat.Get("/cases/"), web.RenderPage("cases.html"))
+
+	moderationMux.HandleFunc(pat.Get("/logs"), web.RenderPage("logs.html"))
+	moderationMux.HandleFunc(pat.Get("/logs/"), web.RenderPage("logs.html"))
+
+	moderationMux.HandleFunc(pat.Get("/logs/:id"), handleMessageLogs)
+	moderationMux.HandleFunc(pat.Get("/logs/:id/"), handleMessageLogs)
 }
 
 // saveConfigHandler saves the parsed form data and saves it if possible.
@@ -70,9 +80,50 @@ func moderationMW(inner http.Handler) http.Handler {
 		cases := getGuildCases(guildID)
 		tmplData["Cases"] = cases
 
+		messageLogs := getGuildMessageLogs(guildID)
+		tmplData["MessageLogs"] = messageLogs
+
+		// Create a map of CaseID to MessageLogID for linking
+		caseLogMap := make(map[int64]int64)
+		for _, log := range messageLogs {
+			if log.CaseID != 0 {
+				caseLogMap[log.CaseID] = log.ID
+			}
+		}
+		tmplData["CaseLogMap"] = caseLogMap
+
 		ctx = context.WithValue(ctx, web.CtxKeyTmplData, tmplData)
 		inner.ServeHTTP(w, r.WithContext(ctx))
 	}
 
 	return http.HandlerFunc(middleware)
+}
+
+func handleMessageLogs(w http.ResponseWriter, r *http.Request) {
+	logID := pat.Param(r, "id")
+	logIDInt64 := functions.ToInt64(logID)
+
+	log, err := getMessageLogByID(logIDInt64)
+	if err != nil {
+		web.SendErrorToast(w, "Message log not found")
+		return
+	}
+
+	log.L.LoadLogModerationMessageLogsMessages(context.Background(), common.PQ, true, log, nil)
+
+	// Sort messages by creation date (ascending - oldest first)
+	sort.Slice(log.R.LogModerationMessageLogsMessages, func(i, j int) bool {
+		return log.R.LogModerationMessageLogsMessages[i].CreatedAt.Before(log.R.LogModerationMessageLogsMessages[j].CreatedAt)
+	})
+
+	tmplData, _ := r.Context().Value(web.CtxKeyTmplData).(web.TmplContextData)
+
+	caseData, err := models.FindModerationCaseG(context.Background(), log.GuildID, log.CaseID)
+	if err == nil {
+		tmplData["MessageCase"] = caseData
+	}
+
+	tmplData["MessageLog"] = log
+
+	web.RenderPage("log.html")(w, r)
 }

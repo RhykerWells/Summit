@@ -65,5 +65,41 @@ CREATE TABLE IF NOT EXISTS moderation_cases (
 	CONSTRAINT fk_guild_cases FOREIGN KEY (guild_id)
 		REFERENCES moderation_config (guild_id) ON DELETE CASCADE
 );
+`, `
+CREATE TABLE IF NOT EXISTS moderation_message_logs (
+	id BIGSERIAL PRIMARY KEY,
+
+	guild_id TEXT NOT NULL,
+	case_id BIGINT NOT NULL,
+
+	channel_id TEXT NOT NULL,
+	channel_name TEXT NOT NULL,
+
+	author_id TEXT NOT NULL,
+	author_username TEXT NOT NULL,
+
+	created_at TIMESTAMP NOT NULL,
+
+	CONSTRAINT fk_case_logs FOREIGN KEY (guild_id, case_id)
+		REFERENCES moderation_cases (guild_id, case_id) ON DELETE CASCADE
+);
+`, `
+CREATE TABLE IF NOT EXISTS moderation_message_logs_messages (
+	id BIGSERIAL PRIMARY KEY,
+	log_id BIGINT NOT NULL,
+
+	guild_id TEXT NOT NULL,
+
+	author_id TEXT NOT NULL,
+	author_username TEXT NOT NULL,
+
+	content TEXT NOT NULL,
+
+	created_at TIMESTAMP NOT NULL,
+	is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
+
+	CONSTRAINT fk_log_messages FOREIGN KEY (log_id)
+		REFERENCES moderation_message_logs (id) ON DELETE CASCADE
+);
 `,
 }

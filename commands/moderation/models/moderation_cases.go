@@ -26,12 +26,14 @@ type ModerationCase struct {
 	CaseID           int64  `boil:"case_id" json:"case_id" toml:"case_id" yaml:"case_id"`
 	GuildID          string `boil:"guild_id" json:"guild_id" toml:"guild_id" yaml:"guild_id"`
 	StaffID          string `boil:"staff_id" json:"staff_id" toml:"staff_id" yaml:"staff_id"`
+	StaffUsername    string `boil:"staff_username" json:"staff_username" toml:"staff_username" yaml:"staff_username"`
 	OffenderID       string `boil:"offender_id" json:"offender_id" toml:"offender_id" yaml:"offender_id"`
+	OffenderUsername string `boil:"offender_username" json:"offender_username" toml:"offender_username" yaml:"offender_username"`
 	Reason           string `boil:"reason" json:"reason" toml:"reason" yaml:"reason"`
 	Action           string `boil:"action" json:"action" toml:"action" yaml:"action"`
 	LogLink          string `boil:"log_link" json:"log_link" toml:"log_link" yaml:"log_link"`
-	OffenderUsername string `boil:"offender_username" json:"offender_username" toml:"offender_username" yaml:"offender_username"`
-	StaffUsername    string `boil:"staff_username" json:"staff_username" toml:"staff_username" yaml:"staff_username"`
+	ChannelID        string `boil:"channel_id" json:"channel_id" toml:"channel_id" yaml:"channel_id"`
+	ChannelName      string `boil:"channel_name" json:"channel_name" toml:"channel_name" yaml:"channel_name"`
 
 	R *moderationCaseR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L moderationCaseL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -41,44 +43,52 @@ var ModerationCaseColumns = struct {
 	CaseID           string
 	GuildID          string
 	StaffID          string
+	StaffUsername    string
 	OffenderID       string
+	OffenderUsername string
 	Reason           string
 	Action           string
 	LogLink          string
-	OffenderUsername string
-	StaffUsername    string
+	ChannelID        string
+	ChannelName      string
 }{
 	CaseID:           "case_id",
 	GuildID:          "guild_id",
 	StaffID:          "staff_id",
+	StaffUsername:    "staff_username",
 	OffenderID:       "offender_id",
+	OffenderUsername: "offender_username",
 	Reason:           "reason",
 	Action:           "action",
 	LogLink:          "log_link",
-	OffenderUsername: "offender_username",
-	StaffUsername:    "staff_username",
+	ChannelID:        "channel_id",
+	ChannelName:      "channel_name",
 }
 
 var ModerationCaseTableColumns = struct {
 	CaseID           string
 	GuildID          string
 	StaffID          string
+	StaffUsername    string
 	OffenderID       string
+	OffenderUsername string
 	Reason           string
 	Action           string
 	LogLink          string
-	OffenderUsername string
-	StaffUsername    string
+	ChannelID        string
+	ChannelName      string
 }{
 	CaseID:           "moderation_cases.case_id",
 	GuildID:          "moderation_cases.guild_id",
 	StaffID:          "moderation_cases.staff_id",
+	StaffUsername:    "moderation_cases.staff_username",
 	OffenderID:       "moderation_cases.offender_id",
+	OffenderUsername: "moderation_cases.offender_username",
 	Reason:           "moderation_cases.reason",
 	Action:           "moderation_cases.action",
 	LogLink:          "moderation_cases.log_link",
-	OffenderUsername: "moderation_cases.offender_username",
-	StaffUsername:    "moderation_cases.staff_username",
+	ChannelID:        "moderation_cases.channel_id",
+	ChannelName:      "moderation_cases.channel_name",
 }
 
 // Generated where
@@ -110,22 +120,26 @@ var ModerationCaseWhere = struct {
 	CaseID           whereHelperint64
 	GuildID          whereHelperstring
 	StaffID          whereHelperstring
+	StaffUsername    whereHelperstring
 	OffenderID       whereHelperstring
+	OffenderUsername whereHelperstring
 	Reason           whereHelperstring
 	Action           whereHelperstring
 	LogLink          whereHelperstring
-	OffenderUsername whereHelperstring
-	StaffUsername    whereHelperstring
+	ChannelID        whereHelperstring
+	ChannelName      whereHelperstring
 }{
 	CaseID:           whereHelperint64{field: "\"moderation_cases\".\"case_id\""},
 	GuildID:          whereHelperstring{field: "\"moderation_cases\".\"guild_id\""},
 	StaffID:          whereHelperstring{field: "\"moderation_cases\".\"staff_id\""},
+	StaffUsername:    whereHelperstring{field: "\"moderation_cases\".\"staff_username\""},
 	OffenderID:       whereHelperstring{field: "\"moderation_cases\".\"offender_id\""},
+	OffenderUsername: whereHelperstring{field: "\"moderation_cases\".\"offender_username\""},
 	Reason:           whereHelperstring{field: "\"moderation_cases\".\"reason\""},
 	Action:           whereHelperstring{field: "\"moderation_cases\".\"action\""},
 	LogLink:          whereHelperstring{field: "\"moderation_cases\".\"log_link\""},
-	OffenderUsername: whereHelperstring{field: "\"moderation_cases\".\"offender_username\""},
-	StaffUsername:    whereHelperstring{field: "\"moderation_cases\".\"staff_username\""},
+	ChannelID:        whereHelperstring{field: "\"moderation_cases\".\"channel_id\""},
+	ChannelName:      whereHelperstring{field: "\"moderation_cases\".\"channel_name\""},
 }
 
 // ModerationCaseRels is where relationship names are stored.
@@ -165,9 +179,9 @@ func (r *moderationCaseR) GetGuild() *ModerationConfig {
 type moderationCaseL struct{}
 
 var (
-	moderationCaseAllColumns            = []string{"case_id", "guild_id", "staff_id", "offender_id", "reason", "action", "log_link", "offender_username", "staff_username"}
-	moderationCaseColumnsWithoutDefault = []string{"case_id", "guild_id", "staff_id", "offender_id", "reason", "action", "log_link", "offender_username", "staff_username"}
-	moderationCaseColumnsWithDefault    = []string{}
+	moderationCaseAllColumns            = []string{"case_id", "guild_id", "staff_id", "staff_username", "offender_id", "offender_username", "reason", "action", "log_link", "channel_id", "channel_name"}
+	moderationCaseColumnsWithoutDefault = []string{"case_id", "guild_id", "staff_id", "staff_username", "offender_id", "offender_username", "reason", "action", "log_link"}
+	moderationCaseColumnsWithDefault    = []string{"channel_id", "channel_name"}
 	moderationCasePrimaryKeyColumns     = []string{"guild_id", "case_id"}
 	moderationCaseGeneratedColumns      = []string{}
 )
@@ -816,7 +830,7 @@ func (o *ModerationCase) Upsert(ctx context.Context, exec boil.ContextExecutor, 
 
 	value := reflect.Indirect(reflect.ValueOf(o))
 	vals := queries.ValuesFromMapping(value, cache.valueMapping)
-	var returns []interface{}
+	var returns []any
 	if len(cache.retMapping) != 0 {
 		returns = queries.PtrsFromMapping(value, cache.retMapping)
 	}

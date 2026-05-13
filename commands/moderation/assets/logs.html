@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+{{template "head" .}}
+</head>
+<body class="text-light">
+	{{template "dashboard_nav" .}}
+	<main id="main" class="d-flex m-4" style="background-color: var(--baseGrey); border-radius: 0.5rem">
+		<div class="p-4 w-100">
+			<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage" class="btn text-light w-100" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Home</a>
+			<input type="hidden" name="form_type" value="Core">
+			<div class="d-flex flex-column justify-content-between align-items-sm-center mt-1 mb-0">
+				<div class="order-2 w-100 mt-2">
+					<div class="d-flex justify-content-between align-items-center flex-wrap w-100">
+						<div class="d-flex align-items-center" style="gap: 0.5rem;">
+							<h2 class="mb-0">Message Logs</h2>
+							<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage" class="btn text-light" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Back</a>
+						</div>
+					</div>
+					<p class="mt-2 mb-0">View the last 100 messages captured during moderation actions.</p>
+				</div>
+			</div>
+			<div class="table-responsive">
+				<table class="table table-striped" id="logsTable" style="--bs-table-color: white; --bs-table-striped-color: white; --bs-table-striped-bg: rgb(30 30 30 / 50%); --bs-table-bg: transparent">
+					<thead>
+						<tr>
+							<th>Case ID</th>
+							<th>Channel</th>
+							<th>Created By</th>
+							<th>Created At</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						{{range .MessageLogs}}
+						<tr>
+							<td><small>{{or .CaseID "—"}}</small></td>
+							<td>#{{.ChannelName}} <small>({{.ChannelID}})</small></td>
+							<td>@{{.AuthorUsername}} <small>({{.AuthorID}})</small></td>
+							<td><small>{{.CreatedAt.Format "2006/01/02 15:04:05"}}</small></td>
+							<td style="text-align: center;">
+								<a href="{{$.HomeURL}}/dashboard/{{$.CurrentGuild.ID}}/manage/moderation/logs/{{.ID}}" class="log-link" title="View Log">
+									<i class="fas fa-eye"></i> View
+								</a>
+							</td>
+						</tr>
+						{{end}}
+						{{if not .MessageLogs}}
+						<tr id="noResultsRow" class="text-center">
+							<td colspan="5">No message logs found.</td>
+						</tr>
+						{{end}}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</main>
+</body>
+{{template "javascript" .}}
+</html>
