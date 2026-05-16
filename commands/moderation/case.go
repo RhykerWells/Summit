@@ -102,13 +102,15 @@ func createCase(config *Config, author, target *discordgo.User, action logAction
 	caseData := models.ModerationCase{
 		CaseID:           caseID,
 		GuildID:          config.GuildID,
-		StaffUsername:    author.Username,
 		StaffID:          author.ID,
-		OffenderUsername: target.Username,
+		StaffUsername:    author.Username,
 		OffenderID:       target.ID,
+		OffenderUsername: target.Username,
 		Reason:           reason,
 		Action:           action.CaseType,
 		LogLink:          "",
+		ChannelID:        channel.ID,
+		ChannelName:      channel.Name,
 	}
 	if err := caseData.Insert(context.Background(), common.PQ, boil.Infer()); err != nil {
 		return err
