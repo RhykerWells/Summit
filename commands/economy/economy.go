@@ -5,12 +5,11 @@ package economy
 import (
 	"context"
 
-	"github.com/RhykerWells/Summit/bot/events"
+	eventsv2 "github.com/RhykerWells/Summit/bot/eventsV2"
 	"github.com/RhykerWells/Summit/commands/economy/models"
 	"github.com/RhykerWells/Summit/common"
 	"github.com/RhykerWells/dispatch"
 	"github.com/aarondl/sqlboiler/v4/boil"
-	"github.com/bwmarrin/discordgo"
 )
 
 // EconomySetup runs the following:
@@ -20,18 +19,8 @@ import (
 //   - Registration of the economy commands & their pagination
 func EconomySetup(cmdHandler *dispatch.CommandHandler) {
 	common.InitSchema("Economy", GuildEconomySchema...)
-	events.RegisterGuildJoinfunctions([]func(g *discordgo.GuildCreate){
-		guildAddEconomyConfig,
-	})
-	events.RegisterGuildLeavefunctions([]func(g *discordgo.GuildDelete){
-		guildDeleteEconomyConfig,
-	})
-	events.RegisterGuildMemberJoinfunctions([]func(g *discordgo.GuildMemberAdd){
-		guildMemberAddToEconomy,
-	})
-	events.RegisterGuildMemberLeavefunctions([]func(g *discordgo.GuildMemberRemove){
-		guildMemberRemoveFromEconomy,
-	})
+
+	initEvents()
 
 	initWeb()
 
@@ -55,25 +44,47 @@ func EconomySetup(cmdHandler *dispatch.CommandHandler) {
 	common.Session.AddHandler(inventoryPagination)
 }
 
-// guildAddEconomyConfig creates the intial configs for the economy system for a specified guild
-func guildAddEconomyConfig(g *discordgo.GuildCreate) {
+func initEvents() {
+	eventsv2.AddHandler(handleGuildJoin, eventsv2.EventGuildCreate)
+	eventsv2.AddHandler(handleGuildDelete, eventsv2.EventGuildDelete)
+	eventsv2.AddHandler(handleGuildMemberAdd, eventsv2.EventGuildMemberAdd)
+	eventsv2.AddHandler(handleGuildMemberRemove, eventsv2.EventGuildMemberRemove)
+}
+
+// handleGuildJoin creates the intial configs for the economy system for a specified guild
+func handleGuildJoin(data *eventsv2.EventData) error {
+	g := data.GuildCreate()
+
 	config := GetConfig(g.ID)
 	SaveConfig(config)
+
+	return nil
 }
 
-// guildAddEconomyConfig deletes the configs for the economy system for a specified guild
-func guildDeleteEconomyConfig(g *discordgo.GuildDelete) {
+// handleGuildDelete deletes the configs for the economy system for a specified guild
+func handleGuildDelete(data *eventsv2.EventData) error {
+	g := data.GuildDelete()
+
 	config, err := models.EconomyConfigs(models.EconomyConfigWhere.GuildID.EQ(g.ID)).One(context.Background(), common.PQ)
 	if err != nil {
-		return
+		return err
 	}
 
-	config.Delete(context.Background(), common.PQ)
+	_, err = config.Delete(context.Background(), common.PQ)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-// guildMemberAddToEconomy adds a member to the economy system
-func guildMemberAddToEconomy(m *discordgo.GuildMemberAdd) {
-	config := GetConfig(m.GuildID)
+// handleGuildMemberAdd adds a member to the economy system
+func handleGuildMemberAdd(data *eventsv2.EventData) error {
+	m := data.GuildMemberAdd()
+
+	guildID := m.GuildID
+
+	config := GetConfig(guildID)
 	userEntry := models.EconomyUser{
 		GuildID: config.GuildID,
 		UserID:  m.User.ID,
@@ -81,11 +92,17 @@ func guildMemberAddToEconomy(m *discordgo.GuildMemberAdd) {
 		Bank:    0,
 	}
 	userEntry.Insert(context.Background(), common.PQ, boil.Infer())
+
+	return nil
 }
 
-// guildMemberRemoveFromEconomy removes a guild member from the economy system
-func guildMemberRemoveFromEconomy(m *discordgo.GuildMemberRemove) {
+// handleGuildMemberRemove removes a guild member from the economy system
+func handleGuildMemberRemove(data *eventsv2.EventData) error {
+	m := data.GuildMemberRemove()
+
 	models.EconomyUsers(models.EconomyUserWhere.GuildID.EQ(m.GuildID), models.EconomyUserWhere.UserID.EQ(m.User.ID)).DeleteAll(context.Background(), common.PQ)
 	models.EconomyCooldowns(models.EconomyCooldownWhere.GuildID.EQ(m.GuildID), models.EconomyCooldownWhere.UserID.EQ(m.User.ID)).DeleteAll(context.Background(), common.PQ)
 	models.EconomyUserInventories(models.EconomyUserInventoryWhere.GuildID.EQ(m.GuildID), models.EconomyUserInventoryWhere.UserID.EQ(m.User.ID)).DeleteAll(context.Background(), common.PQ)
+
+	return nil
 }

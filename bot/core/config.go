@@ -6,7 +6,6 @@ import (
 	"github.com/RhykerWells/Summit/bot/core/models"
 	"github.com/RhykerWells/Summit/common"
 	"github.com/aarondl/sqlboiler/v4/boil"
-	"github.com/bwmarrin/discordgo"
 )
 
 // Config defines the general struct to pass data to and from the dashboard template/context data
@@ -63,16 +62,4 @@ func DeleteConfig(config *Config) error {
 	}
 
 	return nil
-}
-
-// guildAddCoreConfig adds and saves the base moderation config when added to a new guild
-func guildAddCoreConfig(g *discordgo.GuildCreate) {
-	config := GetConfig(g.ID)
-	SaveConfig(config)
-}
-
-// guildDeleteCoreConfig removes the base moderation config when removed from a guild
-func guildDeleteCoreConfig(g *discordgo.GuildDelete) {
-	config := GetConfig(g.ID)
-	DeleteConfig(config)
 }
