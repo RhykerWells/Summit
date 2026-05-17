@@ -41,6 +41,8 @@ var (
 // Run starts the necessary processes to begin serving the web server
 // it handles starting the authentication and the multiplexer
 func Run() {
+	common.InitWebPlugins()
+
 	initDiscordOauth()
 	multiplexer := setupWebRoutes()
 	runWebServer(multiplexer)

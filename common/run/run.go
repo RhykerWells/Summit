@@ -31,7 +31,6 @@ func Init() {
 // Run starts the services after initialisation and enables the shutdown services to safely stop and close the bot
 func Run() {
 	go web.Run()
-	common.InitWebPlugins()
 	bot.Run()
 	shutdown()
 }
