@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/RhykerWells/Summit/commands/economy"
-	"github.com/RhykerWells/Summit/commands/moderation"
-	"github.com/RhykerWells/Summit/commands/notifications"
+	"github.com/RhykerWells/Summit/economy"
+	"github.com/RhykerWells/Summit/moderation"
+	"github.com/RhykerWells/Summit/notifications"
 )
 
 func initPlugins() {

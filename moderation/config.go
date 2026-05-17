@@ -3,8 +3,8 @@ package moderation
 import (
 	"context"
 
-	"github.com/RhykerWells/Summit/commands/moderation/models"
 	"github.com/RhykerWells/Summit/common"
+	"github.com/RhykerWells/Summit/moderation/models"
 	"github.com/aarondl/sqlboiler/v4/boil"
 )
 

@@ -10,8 +10,8 @@ import (
 	"strconv"
 
 	"github.com/RhykerWells/Summit/bot/functions"
-	"github.com/RhykerWells/Summit/commands/economy/models"
 	"github.com/RhykerWells/Summit/common"
+	"github.com/RhykerWells/Summit/economy/models"
 	"github.com/RhykerWells/Summit/web"
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/gorilla/schema"

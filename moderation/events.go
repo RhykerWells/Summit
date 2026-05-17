@@ -6,8 +6,8 @@ import (
 
 	eventsv2 "github.com/RhykerWells/Summit/bot/eventsV2"
 	"github.com/RhykerWells/Summit/bot/functions"
-	"github.com/RhykerWells/Summit/commands/moderation/models"
 	"github.com/RhykerWells/Summit/common"
+	"github.com/RhykerWells/Summit/moderation/models"
 	"github.com/bwmarrin/discordgo"
 )
 

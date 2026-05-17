@@ -7,8 +7,8 @@ import (
 
 	eventsv2 "github.com/RhykerWells/Summit/bot/eventsV2"
 	"github.com/RhykerWells/Summit/command"
-	"github.com/RhykerWells/Summit/commands/economy/models"
 	"github.com/RhykerWells/Summit/common"
+	"github.com/RhykerWells/Summit/economy/models"
 	"github.com/RhykerWells/dispatch"
 	"github.com/aarondl/sqlboiler/v4/boil"
 )

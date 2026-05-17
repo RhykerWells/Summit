@@ -8,8 +8,8 @@ import (
 
 	"github.com/RhykerWells/Summit/bot/functions"
 	"github.com/RhykerWells/Summit/command"
-	"github.com/RhykerWells/Summit/commands/moderation/models"
 	"github.com/RhykerWells/Summit/common"
+	"github.com/RhykerWells/Summit/moderation/models"
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/bwmarrin/discordgo"
 )

@@ -3,7 +3,7 @@ package notifications
 import (
 	"context"
 
-	"github.com/RhykerWells/Summit/commands/notifications/models"
+	"github.com/RhykerWells/Summit/notifications/models"
 	"github.com/aarondl/sqlboiler/v4/boil"
 )
 
