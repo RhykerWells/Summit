@@ -7,8 +7,8 @@ import (
 	"sort"
 
 	"github.com/RhykerWells/Summit/bot/functions"
-	"github.com/RhykerWells/Summit/commands/moderation/models"
 	"github.com/RhykerWells/Summit/common"
+	"github.com/RhykerWells/Summit/moderation/models"
 	"github.com/RhykerWells/Summit/web"
 	"goji.io/v3"
 	"goji.io/v3/pat"

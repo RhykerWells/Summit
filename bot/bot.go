@@ -2,9 +2,7 @@ package bot
 
 import (
 	"context"
-	"database/sql"
 
-	"github.com/RhykerWells/Summit/bot/core"
 	"github.com/RhykerWells/Summit/bot/core/models"
 	eventsv2 "github.com/RhykerWells/Summit/bot/eventsV2"
 	"github.com/RhykerWells/Summit/bot/functions"
@@ -31,16 +29,33 @@ var (
 	)
 )
 
-// Run initialises all the core bot modules such as the event system
-// the core bot config, the command system and the intents the bot needs
-func Run(s *discordgo.Session, db *sql.DB) {
-	s.AddHandler(eventsv2.HandleEvent)
-	core.Init()
-	command.InitCommandHandler(s)
-	commands.InitCommands(s)
-	s.Identify.Intents = gatewayIntentsUsed
+func Run() {
+	logrus.Infoln("Starting bot")
+	common.Session.Identify.Intents = gatewayIntentsUsed
 
+	common.Session.AddHandler(eventsv2.HandleEvent)
 	addAdditionalHandlers()
+
+	err := common.Session.Open()
+	if err != nil {
+		logrus.WithError(err).Fatal("Failed to open Discord session")
+	}
+	common.Bot = common.Session.State.User
+
+	logrus.Infoln("Initialising command handler and commands")
+	command.InitCommandHandler(common.Session)
+	commands.InitCommands(common.Session)
+
+	common.InitPluginCommands()
+
+	common.InitBotPlugins()
+}
+
+func addAdditionalHandlers() {
+	eventsv2.AddHandler(handleBotReady, eventsv2.EventReady)
+
+	eventsv2.AddHandler(handleGuildJoin, eventsv2.EventGuildCreate)
+	eventsv2.AddHandler(handleGuildDelete, eventsv2.EventGuildDelete)
 }
 
 func handleBotReady(data *eventsv2.EventData) error {
@@ -51,13 +66,6 @@ func handleBotReady(data *eventsv2.EventData) error {
 	functions.SetStatus(common.VERSION)
 
 	return nil
-}
-
-func addAdditionalHandlers() {
-	eventsv2.AddHandler(handleBotReady, eventsv2.EventReady)
-
-	eventsv2.AddHandler(handleGuildJoin, eventsv2.EventGuildCreate)
-	eventsv2.AddHandler(handleGuildDelete, eventsv2.EventGuildDelete)
 }
 
 func handleGuildJoin(data *eventsv2.EventData) error {

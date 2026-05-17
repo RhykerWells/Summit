@@ -3,8 +3,8 @@ package moderation
 import (
 	"context"
 
-	"github.com/RhykerWells/Summit/commands/moderation/models"
 	"github.com/RhykerWells/Summit/common"
+	"github.com/RhykerWells/Summit/moderation/models"
 	"github.com/aarondl/sqlboiler/v4/boil"
 )
 
@@ -116,10 +116,6 @@ func SaveConfig(config *Config) error {
 	err := config.ConfigToSQLModel().UpsertG(context.Background(), true, []string{models.ModerationConfigColumns.GuildID}, boil.Infer(), boil.Infer())
 	if err != nil {
 		return err
-	}
-
-	if config.MuteManageRole && config.MuteRole != "" {
-		go refreshMuteSettings(config)
 	}
 
 	return nil

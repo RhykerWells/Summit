@@ -6,38 +6,42 @@ import (
 	"context"
 
 	eventsv2 "github.com/RhykerWells/Summit/bot/eventsV2"
-	"github.com/RhykerWells/Summit/commands/economy/models"
+	"github.com/RhykerWells/Summit/command"
 	"github.com/RhykerWells/Summit/common"
+	"github.com/RhykerWells/Summit/economy/models"
 	"github.com/RhykerWells/dispatch"
 	"github.com/aarondl/sqlboiler/v4/boil"
 )
 
-// EconomySetup runs the following:
-//   - The schema initialiser
-//   - Registration of the guild and user join/leave functions
-//   - Initialises the web plugin
-//   - Registration of the economy commands & their pagination
-func EconomySetup(cmdHandler *dispatch.CommandHandler) {
+func RegisterPlugin() {
+	common.RegisterPlugin(&Plugin{})
+
 	common.InitSchema("Economy", GuildEconomySchema...)
+}
 
-	initEvents()
+type Plugin struct{}
 
+func (p *Plugin) PluginInfo() *common.PluginInfo {
+	return &common.PluginInfo{
+		Name:     "Economy",
+		Category: &dispatch.CommandCategory{},
+	}
+}
+
+func (p *Plugin) InitCommands(cmdHandler *dispatch.CommandHandler) {
+	command.RegisterCommands(informationCommands...)
+	command.RegisterCommands(incomeCommands...)
+	command.RegisterCommands(transferCommands...)
+	command.RegisterCommands(shopCommands...)
+	command.RegisterCommands(inventoryCommands...)
+}
+
+func (p *Plugin) InitWeb() {
 	initWeb()
+}
 
-	// Information commands
-	cmdHandler.RegisterCommands(informationCommands...)
-
-	// Income commands
-	cmdHandler.RegisterCommands(incomeCommands...)
-
-	// Transfer commands
-	cmdHandler.RegisterCommands(transferCommands...)
-
-	// Shop commands
-	cmdHandler.RegisterCommands(shopCommands...)
-
-	// Inventory commands
-	cmdHandler.RegisterCommands(inventoryCommands...)
+func (p *Plugin) InitBot() {
+	initEvents()
 
 	common.Session.AddHandler(leaderboardPagination)
 	common.Session.AddHandler(shopPagination)

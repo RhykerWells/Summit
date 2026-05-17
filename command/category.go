@@ -19,4 +19,8 @@ var (
 		Name:        "Moderation",
 		Description: "Moderation and guild safety",
 	}
+	CategoryMisc = dispatch.CommandCategory{
+		Name:        "Misc",
+		Description: "Commands that don't fit into other categories",
+	}
 )

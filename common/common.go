@@ -37,12 +37,35 @@ CREATE TABLE IF NOT EXISTS banned_guilds (
 // Init creates a new discord session, attempts to connect to the postgres database, and
 // intialises all the databases
 func Init() error {
-	s, err := discordgo.New(ConfigDgoBotToken())
+	err := setupDGoSession()
 	if err != nil {
 		log.WithError(err).Fatal()
 	}
+
+	err = postgresConnect()
+	if err != nil {
+		log.WithError(err).Fatal("Failed to connect to database")
+	}
+
+	log.Infof("Initializing core schema")
+	InitSchema("Core", CoreSchema...)
+
+	return nil
+}
+
+func setupDGoSession() error {
+	s, err := discordgo.New(ConfigDgoBotToken())
+	if err != nil {
+		return err
+	}
+
 	Session = s
 
+	return nil
+}
+
+// postgresConnect opens the database connection and sets the global variables to be accessible
+func postgresConnect() error {
 	db := "summit"
 	if ConfigPGDB != "" {
 		db = ConfigPGDB
@@ -55,42 +78,22 @@ func Init() error {
 	if ConfigPGPort != "" {
 		port = ConfigPGPort
 	}
-
-	err = postgresConnect(db, host, port, ConfigPGUsername, ConfigPGPassword)
-	if err != nil {
-		log.WithError(err).Fatal("Failed to connect to database")
+	username := "summit"
+	if ConfigPGUsername != "" {
+		username = ConfigPGUsername
 	}
-
-	log.Infof("Initializing DB schema")
-	InitSchema("Core", CoreSchema...)
-
-	return nil
-}
-
-// Run connects the bot account to the Discord session
-func Run(s *discordgo.Session) {
-	s.Open()
-	Bot = s.State.User
-	log.Infoln("Bot is now running. Press CTRL-C to exit.")
-}
-
-// postgresConnect opens the database connection and sets the global variables to be accessible
-func postgresConnect(database string, host string, port string, username string, password string) error {
-	if host == "" {
-		host = "localhost"
-	}
-
-	if password != "" {
-		password = " password='" + password + "'"
+	password := "password"
+	if ConfigPGPassword != "" {
+		password = ConfigPGPassword
 	}
 
 	// Initialise database
-	db, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable%s", host, port, username, database, password))
+	var err error
+	PQ, err = sql.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, username, password, db))
 	if err != nil {
 		return err
 	}
 
-	PQ = db
 	boil.SetDB(PQ)
 
 	return nil

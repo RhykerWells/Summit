@@ -9,7 +9,7 @@ import (
 	"github.com/RhykerWells/Summit/bot"
 	"github.com/RhykerWells/Summit/common"
 	"github.com/RhykerWells/Summit/web"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 // Init initialises the core database system, discord gateway connection, and
@@ -20,18 +20,19 @@ func Init() {
 
 	common.ConfigTestMode = *testing
 
+	logrus.Infof("Starting Summit version %s", common.VERSION)
+
 	err := common.Init()
 	if err != nil {
-		log.WithError(err).Fatal("Failed to start core")
+		logrus.WithError(err).Fatal("Failed to start core")
 	}
-
-	bot.Run(common.Session, common.PQ)
-	common.Run(common.Session)
-	web.Run()
 }
 
-// Run enables the shutdown services to safely stop and close the bot
+// Run starts the services after initialisation and enables the shutdown services to safely stop and close the bot
 func Run() {
+	go web.Run()
+	common.InitWebPlugins()
+	bot.Run()
 	shutdown()
 }
 
@@ -42,6 +43,6 @@ func shutdown() {
 	<-sc
 
 	// Cleanly close down the Discord session.
-	log.Infoln("Exiting now....")
+	logrus.Infoln("Exiting now....")
 	os.Exit(0)
 }

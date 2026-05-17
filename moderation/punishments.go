@@ -8,8 +8,8 @@ import (
 
 	"github.com/RhykerWells/Summit/bot/functions"
 	"github.com/RhykerWells/Summit/command"
-	"github.com/RhykerWells/Summit/commands/moderation/models"
 	"github.com/RhykerWells/Summit/common"
+	"github.com/RhykerWells/Summit/moderation/models"
 	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/bwmarrin/discordgo"
 )
@@ -287,5 +287,15 @@ func scheduleAllPendingUnbans() {
 		}
 
 		scheduleUnban(config, bannedUser.UserID, bannedUser.UnbanAt)
+	}
+}
+
+// refreshAllMuteSettings refreshes mute settings for all guilds on startup
+func refreshAllMuteSettings() {
+	for _, guild := range common.Session.State.Guilds {
+		config := GetConfig(guild.ID)
+		if config.MuteManageRole && config.MuteRole != "" {
+			refreshMuteSettings(config)
+		}
 	}
 }

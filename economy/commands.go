@@ -14,8 +14,8 @@ import (
 
 	"github.com/RhykerWells/Summit/bot/functions"
 	"github.com/RhykerWells/Summit/command"
-	"github.com/RhykerWells/Summit/commands/economy/models"
 	"github.com/RhykerWells/Summit/common"
+	"github.com/RhykerWells/Summit/economy/models"
 	"github.com/RhykerWells/dispatch"
 	"github.com/aarondl/null/v8"
 	"github.com/aarondl/sqlboiler/v4/boil"
