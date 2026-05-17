@@ -118,10 +118,6 @@ func SaveConfig(config *Config) error {
 		return err
 	}
 
-	if config.MuteManageRole && config.MuteRole != "" {
-		go refreshMuteSettings(config)
-	}
-
 	return nil
 }
 

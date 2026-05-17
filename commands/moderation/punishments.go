@@ -289,3 +289,13 @@ func scheduleAllPendingUnbans() {
 		scheduleUnban(config, bannedUser.UserID, bannedUser.UnbanAt)
 	}
 }
+
+// refreshAllMuteSettings refreshes mute settings for all guilds on startup
+func refreshAllMuteSettings() {
+	for _, guild := range common.Session.State.Guilds {
+		config := GetConfig(guild.ID)
+		if config.MuteManageRole && config.MuteRole != "" {
+			refreshMuteSettings(config)
+		}
+	}
+}

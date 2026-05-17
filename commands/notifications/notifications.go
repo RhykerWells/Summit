@@ -1,18 +1,31 @@
 package notifications
 
 import (
+	"github.com/RhykerWells/Summit/command"
 	"github.com/RhykerWells/Summit/common"
-	"github.com/RhykerWells/dispatch"
 )
 
 //go:generate sqlboiler --no-hooks psql
 
-// NotificationSetup runs the following:
-//   - The schema initialiser
-//   - Registration of the guild and user join/leave functions
-//   - Initialises the web plugin
-func NotificationSetup(cmdHandler *dispatch.CommandHandler) {
+func RegisterPlugin() {
+	common.RegisterPlugin(&Plugin{})
+
 	common.InitSchema("Notifications", GuildNotificationSchema...)
-	initEvents()
+}
+
+type Plugin struct{}
+
+func (p *Plugin) PluginInfo() *common.PluginInfo {
+	return &common.PluginInfo{
+		Name:     "Notifications",
+		Category: &command.CategoryMisc,
+	}
+}
+
+func (p *Plugin) InitWeb() {
 	initWeb()
+}
+
+func (p *Plugin) InitBot() {
+	initEvents()
 }

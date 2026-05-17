@@ -4,14 +4,11 @@ import (
 	"github.com/bwmarrin/discordgo"
 
 	"github.com/RhykerWells/Summit/command"
-	"github.com/RhykerWells/Summit/commands/economy"
 	banserver "github.com/RhykerWells/Summit/commands/maintenance/banServer"
 	createinvite "github.com/RhykerWells/Summit/commands/maintenance/createInvite"
 	leaveserver "github.com/RhykerWells/Summit/commands/maintenance/leaveServer"
 	setstatus "github.com/RhykerWells/Summit/commands/maintenance/setStatus"
 	unbanserver "github.com/RhykerWells/Summit/commands/maintenance/unbanServer"
-	"github.com/RhykerWells/Summit/commands/moderation"
-	"github.com/RhykerWells/Summit/commands/notifications"
 	"github.com/RhykerWells/Summit/commands/standard/help"
 	"github.com/RhykerWells/Summit/commands/standard/invite"
 	"github.com/RhykerWells/Summit/commands/standard/ping"
@@ -37,9 +34,4 @@ func InitCommands(session *discordgo.Session) {
 		setstatus.Command,
 		unbanserver.Command,
 	)
-
-	economy.EconomySetup(command.CommandHandler)
-	moderation.ModerationSetup(command.CommandHandler)
-	notifications.NotificationSetup(command.CommandHandler)
-	session.AddHandler(command.CommandHandler.HandleMessageCreate)
 }
