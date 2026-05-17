@@ -6,5 +6,6 @@ import (
 
 func main() {
 	run.Init()
+	initPlugins()
 	run.Run()
 }
