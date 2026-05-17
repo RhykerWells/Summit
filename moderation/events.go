@@ -58,7 +58,7 @@ func handleAuditLogEntry(data *eventsv2.EventData) error {
 
 	err := auditLogCheckBase(entry.AuditLogEntry, config)
 	if err != nil {
-		return err
+		return nil
 	}
 
 	author, _ := functions.GetUser(entry.UserID)
