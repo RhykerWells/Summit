@@ -26,14 +26,13 @@ func Init() {
 	if err != nil {
 		logrus.WithError(err).Fatal("Failed to start core")
 	}
-
-	bot.Run(common.Session, common.PQ)
-	common.Run(common.Session)
-	web.Run()
 }
 
-// Run enables the shutdown services to safely stop and close the bot
+// Run starts the services after initialisation and enables the shutdown services to safely stop and close the bot
 func Run() {
+	bot.Run()
+	common.Run(common.Session)
+	web.Run()
 	shutdown()
 }
 
