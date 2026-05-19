@@ -25,6 +25,25 @@ var PageHTML embed.FS
 func initWeb() {
 	web.AddHTMLFilesystem(PageHTML)
 	web.RegisterDashboardRoutes(registerEconomyRoutes)
+
+	categoryEconomy := web.SidebarCategory{
+		Name: "Economy",
+		Icon: "fa-solid fa-coins",
+		Items: []*web.SidebarItem{
+			{
+				Name: "Economy",
+				Icon: "fa-solid fa-coins",
+				URL:  "economy",
+			},
+			{
+				Name: "Shop",
+				Icon: "fa-solid fa-store",
+				URL:  "economy/shop",
+			},
+		},
+	}
+
+	web.AddSidebarCategory(categoryEconomy)
 }
 
 func registerEconomyRoutes(dashboard *goji.Mux) {

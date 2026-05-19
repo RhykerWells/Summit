@@ -20,6 +20,30 @@ var PageHTML embed.FS
 func initWeb() {
 	web.AddHTMLFilesystem(PageHTML)
 	web.RegisterDashboardRoutes(registerModerationRoutes)
+
+	categoryModeration := web.SidebarCategory{
+		Name: "Moderation",
+		Icon: "fa-solid fa-users-gear",
+		Items: []*web.SidebarItem{
+			{
+				Name: "Moderation",
+				Icon: "fa-solid fa-users-gear",
+				URL:  "moderation",
+			},
+			{
+				Name: "Cases",
+				Icon: "fa-solid fa-rectangle-list",
+				URL:  "moderation/cases",
+			},
+			{
+				Name: "Message Logs",
+				Icon: "fa-solid fa-square-poll-horizontal",
+				URL:  "moderation/logs",
+			},
+		},
+	}
+
+	web.AddSidebarCategory(categoryModeration)
 }
 
 func registerModerationRoutes(dashboard *goji.Mux) {

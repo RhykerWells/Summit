@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sync"
+	"time"
 
 	"github.com/RhykerWells/Summit/common"
 	"github.com/RhykerWells/Summit/frontend"
@@ -44,6 +45,16 @@ func Run() {
 	common.InitWebPlugins()
 
 	initDiscordOauth()
+
+	// Start session cleanup goroutine
+	go func() {
+		ticker := time.NewTicker(1 * time.Hour)
+		defer ticker.Stop()
+		for range ticker.C {
+			cleanupExpiredSessions()
+		}
+	}()
+
 	multiplexer := setupWebRoutes()
 	runWebServer(multiplexer)
 }
@@ -279,4 +290,23 @@ func getGithubReleases() []GithubRelease {
 	}
 
 	return filtered
+}
+
+type SidebarCategory struct {
+	Name  string // Name of the sidebar category
+	Icon  string // Icon for the category (e.g., FontAwesome class)
+	URL   string // Home URL for the category
+	Items []*SidebarItem
+}
+
+type SidebarItem struct {
+	Name string // Name of the sidebar item
+	Icon string // Icon for the item (e.g., FontAwesome class)
+	URL  string // URL for the sidebar item
+}
+
+var sidebarData []SidebarCategory
+
+func AddSidebarCategory(category SidebarCategory) {
+	sidebarData = append(sidebarData, category)
 }
