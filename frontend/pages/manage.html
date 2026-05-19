@@ -1,96 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-{{template "head" .}}
+	{{template "head" .}}
 </head>
-<body class="text-light">
+<body class="d-flex text-light">
 	{{template "dashboard_nav" .}}
-	<main class="d-flex align-items-start m-4" style="background-color: var(--baseGrey); border-radius: 0.5rem">
-		<div class="m-4 w-100">
-			<h2 style="margin-top: 2px">Core</h2>
-			<div class="container-fluid mb-4 px-0">
-				<div class="row row-cols-1 row-cols-md-3 g-4">
-					<div class="col">
-						<div class="card">
-							<h5 class="card-header">Core settings</h5>
-							<div class="card-body">
-								<p class="card-text">Configure and manage your servers core settings</p>
-								<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage/core" class="btn text-light">Edit Settings</a>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<h2 style="margin-top: 2px">Moderation</h2>
-			<div class="container-fluid mb-4 px-0">
-				<div class="row row-cols-1 row-cols-md-3 g-4">
-					<div class="col">
-						<div class="card">
-							<h5 class="card-header">Moderation settings</h5>
-							<div class="card-body">
-								<p class="card-text">Configure and manage your servers moderation settings</p>
-								<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage/moderation" class="btn text-light">Edit Settings</a>
-							</div>
-						</div>
-					</div>
-					<div class="col">
-						<div class="card">
-							<h5 class="card-header">Cases</h5>
-							<div class="card-body">
-								<p class="card-text">View, filter, and search all recorded moderation cases.</p>
-								<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage/moderation/cases" class="btn text-light">View Cases</a>
-							</div>
-						</div>
-					</div>
-					<div class="col">
-						<div class="card">
-							<h5 class="card-header">Logs</h5>
-							<div class="card-body">
-								<p class="card-text">View, filter, and search the latest moderation message logs.</p>
-								<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage/moderation/logs" class="btn text-light">View Logs</a>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<h2 style="margin-top: 2px">Economy</h2>
-			<div class="container-fluid mb-4 px-0">
-				<div class="row row-cols-1 row-cols-md-3 g-4">
-					<div class="col">
-						<div class="card">
-							<h5 class="card-header">Economy settings</h5>
-							<div class="card-body">
-								<p class="card-text">Configure and manage your servers economy settings</p>
-								<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage/economy" class="btn text-light">Edit Settings</a>
-							</div>
-						</div>
-					</div>
-					<div class="col">
-						<div class="card">
-							<h5 class="card-header">Shop</h5>
-							<div class="card-body">
-								<p class="card-text">View, edit, delete and manage all shop items.</p>
-								<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage/economy/shop" class="btn text-light">Manage the shop</a>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			<h2 style="margin-top: 2px">Notifications</h2>
-			<div class="container-fluid mb-4 px-0">
-				<div class="row row-cols-1 row-cols-md-3 g-4">
-					<div class="col">
-						<div class="card">
-							<h5 class="card-header">Notifications settings</h5>
-							<div class="card-body">
-								<p class="card-text">Configure and manage your servers notification settings</p>
-								<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage/notifications" class="btn text-light">Edit Settings</a>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
+	{{template "sidebar" .}}
+	<main class="d-flex-row p-2">
+		<div id="pageInfo" class="d-flex flex-column justify-content-center align-items-center">
+			<h2 class="mb-0">Overview</h2>
+			<span class="text-secondary">There's nothing here yet... check back soon</span>
 		</div>
-	</main>
+	</div>
+</main>
 </body>
 </html>
