@@ -1,17 +1,15 @@
 {{define "navbar"}}
-<nav class="navbar navbar-expand-sm navbar-main fixed-top">
+<nav id="navbar" class="navbar navbar-expand-sm navbar-main fixed-top">
 	<div class="container-fluid">
 		<a class="navbar-brand" href="#">
 			<img src="{{.HomeURL}}/static/img/avatar.svg" alt="logo" width="64" height="64">
 		</a>
 		<ul class="navbar-nav me-auto mb-2 mb-lg-0">
 			<li class="nav-item">
-				<a class="nav-link text-light" aria-current="page" href="https://discord.gg/3TQyZp67cW">Support
-					server</a>
+				<a class="nav-link text-light" aria-current="page" href="https://discord.gg/3TQyZp67cW">Support server</a>
 			</li>
 			<li class="nav-item">
-				<a class="nav-link text-light" aria-current="page" href="https://github.com/RhykerWells/Summit">Source
-				code</a>
+				<a class="nav-link text-light" aria-current="page" href="https://github.com/RhykerWells/Summit">Source code</a>
 			</li>
 		</ul>
 		<div class="navbar-login-section d-flex">
@@ -22,38 +20,42 @@
 {{end}}
 
 {{define "dashboard_nav"}}
-<nav class="navbar navbar-expand fixed-top">
+<nav id="navbar" class="navbar navbar-expand fixed-top">
 	<div class="container-fluid">
-		<a class="navbar-brand" href="{{.HomeURL}}/">
-			<img src="{{.HomeURL}}/static/img/avatar.svg" alt="logo" width="35" height="35">
-		</a>
-		<div class="d-none d-lg-flex me-3" id="navbarServerUserArea">
-			<div class="vr d-block me-2"></div>
+		<div class="d-flex">
+			<a class="d-flex d-xl-none text-decoration-none align-items-center me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
+				<i class="fa-solid fa-bars"></i>
+			</a>
+			<a class="navbar-brand" href="{{.HomeURL}}/">
+				<img src="{{.HomeURL}}/static/img/avatar.svg" alt="logo" width="35" height="35">
+			</a>
+		</div>
+		<div id="desktopNavbarServerUserSelect" class="d-none d-xl-flex me-3">
+			<div class="vr me-2 d-block"></div>
 				<ul class="navbar-nav">
 					{{if .User}}
-					<li class="nav-item dropdown">
-						<a class="nav-link dropdown-toggle d-flex align-items-center position-relative me-2 pe-5 text-light selectServerDropDown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="width: 350px;">
-							<figure class="profile-picture me-3 mb-0">
-								<img src="{{if not .CurrentGuild}}{{.HomeURL}}/static/img/icons/magnifying-glass.svg{{else}}{{.CurrentGuild.Avatar}}{{end}}" class="rounded-circle w-auto" style="height: 32px; width: 32px;">
-							</figure>
+					<li id="desktopNavbarServerDropdown" class="nav-item dropdown dropdown-center">
+						<a class="nav-link dropdown-toggle d-flex align-items-center text-decoration-none text-white" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+							<img src="{{if not .CurrentGuild}}{{.HomeURL}}/static/img/icons/magnifying-glass.svg{{else}}{{.CurrentGuild.Avatar}}{{end}}" width="32" height="32" class="rounded-circle me-2">
 							<span class="d-flex flex-column">
 								<span>{{if not .CurrentGuild}}Select server{{else}}{{.CurrentGuild.Name}}{{end}}</span>
 								<span style="font-size: 0.8rem;">Switch server</span>
 							</span>
+							<i class="fa-solid fa-caret-down"></i>
 						</a>
-						<ul class="dropdown-menu selectserverarea w-100" aria-labelledby="collapseServers">
+						<ul class="dropdown-menu w-100">
 							{{if .ManagedGuilds}}
 							{{range .ManagedGuilds}}
 							<li class="d-flex align-items-center gap-2 px-2 py-1">
-								<a class="dropdown-item d-flex align-items-center m-0 gap-2 text-light serverbtn" href="{{$.HomeURL}}/dashboard/{{.ID}}/manage" style="white-space: normal; word-break: break-word; padding-left: 0rem;">
+								<a class="dropdown-item d-flex align-items-center m-0 gap-2 text-white" href="{{$.HomeURL}}/dashboard/{{.ID}}/manage" style="white-space: normal; word-break: break-word; padding-left: 0;">
 									<img src="{{.Avatar}}" class="rounded-circle flex-shrink-0" style="height: 32px; width: 32px; margin-left: 0.5rem">								
-									{{.Name}}
+									<strong>{{.Name}}</strong>
 								</a>
 							</li>
 							{{end}}
 							{{else}}
 							<li class="px-2 py-1">
-								<p class="dropdown-item serverbtn">
+								<p class="dropdown-item">
 									You don't manage any servers
 								</p>
 							</li>
@@ -65,31 +67,33 @@
 							{{end}}
 							{{range .AvailableGuilds}}
 							<li class="d-flex align-items-center gap-2 px-2 py-1">
-								<a class="dropdown-item d-flex align-items-center m-0 gap-2 text-light serverbtn" href="{{getJoinLink .ID}}" style="white-space: normal; word-break: break-word; padding-left: 0rem;">
+								<a class="dropdown-item d-flex align-items-center m-0 gap-2 text-white" href="{{getJoinLink .ID}}" style="white-space: normal; word-break: break-word; padding-left: 0;">
 									<img src="{{$.HomeURL}}/static/img/icons/plus.svg" class="rounded-circle flex-shrink-0" style="height: 32px; width: 32px; margin-left: 0.5rem">						
-									{{.Name}}
+									<strong>{{.Name}}</strong>
 								</a>
 							</li>
 							{{end}}
 						</ul>
 					</li>
-					<div class="vr d-block me-2"></div>
-					<li class="nav-item dropdown me-2">
-						<a class="nav-link dropdown-toggle d-flex align-items-center position-relative me-2 text-light userAreaDropDown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-							<figure class="profile-picture me-2 mb-0">
-								<img src="{{.User.AvatarURL "1024"}}" class="rounded-circle w-auto" style="height: 32px; width: 32px;">
-							</figure>
-							<span class="d-flex flex-column">
-								<span>{{or .User.GlobalName .User.Username}}</span>
-							</span>
+					<div class="vr ms-2 me-2 d-block"></div>
+					<li id="desktopNavbarUserDropdown" class="nav-item dropdown dropdown-center d-flex align-items-center">
+						<a class="nav-link dropdown-toggle d-flex align-items-center justify-content-between text-decoration-none text-white" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+							<div class="d-flex align-items-center">
+								<img src="{{.User.AvatarURL "1024"}}" width="32" height="32" class="rounded-circle me-2">
+								<span class="d-flex flex-column">
+									<strong>{{or .User.GlobalName .User.Username}}</strong>
+									{{if .User.GlobalName}}<span style="font-size: 0.8rem;">{{.User.Username}}</span>{{end}}
+								</span>
+							</div>
+							<i class="fa-solid fa-caret-down"></i>
 						</a>
-						<ul class="dropdown-menu logoutarea" aria-labelledby="navbarDropdown">
+						<ul class="dropdown-menu">
 							<li class="px-2 py-1"><a class="dropdown-item logoutbtn text-light" href="{{.HomeURL}}/logout">Logout</a></li>
 						</ul>
 					</li>
 					{{else}}
 					<li class="nav-item">
-						<a class="nav-link text-light" href="{{.HomeURL}}/login">Login with Discord</a>
+						<a class="nav-link text-white" href="{{.HomeURL}}/login">Login with Discord</a>
 					</li>
 					{{end}}
 				</ul>
