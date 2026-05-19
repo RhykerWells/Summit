@@ -12,7 +12,7 @@
 				<h2 class="mb-2">Latest releases</h2>
 				<div style="display: flex; flex-direction: column; max-height: calc(100vh - 10rem);">
 					<div class="scrollable-releases mb-5" style="overflow-y: auto; flex-grow: 1;">
-						{{if .Releases}}
+						{{if not .Releases}}
 						<div class="card">
 							<div class="card-header">
 								<span>No releases found</span>
