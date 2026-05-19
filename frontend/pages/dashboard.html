@@ -3,22 +3,23 @@
 <head>
 	{{template "head" .}}
 </head>
-<body class="d-flex flex-column min-vh-100 text-light">
+<body class="d-flex text-light">
 	{{template "dashboard_nav" .}}
-	<main class="d-flex mt-5 pt-5">
-		<div class="row ms-5 me-5">
-			<div class="col-lg-7">
+	{{template "sidebar" .}}
+	<main class="d-flex-row p-3">
+		<div class="row ms-5 mt-5 me-5">
+			<div id="releasesRow" class="col-lg-7">
 				<h2 class="mb-2">Latest releases</h2>
-				{{if not .Releases}}
-				<div class="card">
-					<div class="card-header">
-						<span>No releases found</span>
-					</div>
-					<div class="card-body">Sorry :(</div>
-				</div>
-				{{else}}
 				<div style="display: flex; flex-direction: column; max-height: calc(100vh - 10rem);">
 					<div class="scrollable-releases mb-5" style="overflow-y: auto; flex-grow: 1;">
+						{{if .Releases}}
+						<div class="card">
+							<div class="card-header">
+								<span>No releases found</span>
+							</div>
+							<div class="card-body">Sorry :(</div>
+						</div>
+						{{else}}
 						{{range $k, $_ := .Releases}}
 						<div class="card{{if ne $k 0}} mt-3{{end}}">
 							<div class="card-header">
@@ -29,14 +30,16 @@
 							</div>
 						</div>
 						{{end}}
+						{{end}}
 					</div>
-					{{end}}
 				</div>
 			</div>
-			<div class="col-lg-5 pb-5">
+			<div id="informationRow" class="col-lg-5 pb-5">
 				<div class="card">
 					<div class="card-header">
-						<h2 class="card-title">Information {{if .Testing}}(development: <code>{{.Version}}</code>){{end}}</h2>
+						<div class="card-title d-flex justify-content-between align-items-center mb-0">
+							<h4 class="mb-0">Information</h4>
+						</div>
 					</div>
 					<div class="card-body">
 						<p>Summit started off as a hobby project to teach myself Golang (which the bot is written in).</p>
