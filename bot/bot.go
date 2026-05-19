@@ -3,6 +3,7 @@ package bot
 import (
 	"context"
 
+	"github.com/RhykerWells/Summit/bot/core"
 	"github.com/RhykerWells/Summit/bot/core/models"
 	eventsv2 "github.com/RhykerWells/Summit/bot/eventsV2"
 	"github.com/RhykerWells/Summit/bot/functions"
@@ -32,6 +33,8 @@ var (
 func Run() {
 	logrus.Infoln("Starting bot")
 	common.Session.Identify.Intents = gatewayIntentsUsed
+
+	core.Init()
 
 	common.Session.AddHandler(eventsv2.HandleEvent)
 	addAdditionalHandlers()
