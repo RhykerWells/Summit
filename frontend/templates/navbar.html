@@ -34,7 +34,7 @@
 			<div class="vr me-2 d-block"></div>
 				<ul class="navbar-nav">
 					{{if .User}}
-					<li id="desktopNavbarServerDropdown" class="nav-item dropdown dropdown-center">
+					<li id="desktopNavbarServerDropdown" class="nav-item dropdown dropdown-center" style="width: 250px;">
 						<a class="nav-link dropdown-toggle d-flex align-items-center text-decoration-none text-white" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 							<img src="{{if not .CurrentGuild}}{{.HomeURL}}/static/img/icons/magnifying-glass.svg{{else}}{{.CurrentGuild.Avatar}}{{end}}" width="32" height="32" class="rounded-circle me-2">
 							<span class="d-flex flex-column">

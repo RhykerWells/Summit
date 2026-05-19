@@ -55,12 +55,14 @@
 		<div class="d-xl-none d-flex flex-column gap-2">
 			{{if .User}}
 			<div class="mobileSidebarDropdownServerArea dropup dropup-center">
-				<a id="mobileSidebarDropdownServers" class="dropdown-toggle d-flex align-items-center text-decoration-none" data-bs-toggle="dropdown" aria-expanded="false">
-					<img src="{{if not .CurrentGuild}}{{.HomeURL}}/static/img/icons/magnifying-glass.svg{{else}}{{.CurrentGuild.Avatar}}{{end}}" width="32" height="32" class="rounded-circle me-2">
-					<span class="d-flex flex-column">
-						<span>{{if not .CurrentGuild}}Select server{{else}}{{.CurrentGuild.Name}}{{end}}</span>
-						<span style="font-size: 0.8rem;">Switch server</span>
-					</span>
+				<a id="mobileSidebarDropdownServers" class="dropdown-toggle d-flex align-items-center justify-content-between text-decoration-none" data-bs-toggle="dropdown" aria-expanded="false">
+					<div class="d-flex align-items-center">
+						<img src="{{if not .CurrentGuild}}{{.HomeURL}}/static/img/icons/magnifying-glass.svg{{else}}{{.CurrentGuild.Avatar}}{{end}}" width="32" height="32" class="rounded-circle me-2">
+						<span class="d-flex flex-column">
+							<span>{{if not .CurrentGuild}}Select server{{else}}{{.CurrentGuild.Name}}{{end}}</span>
+							<span style="font-size: 0.8rem;">Switch server</span>
+						</span>
+					</div>
 					<i class="fa-solid fa-caret-up"></i>
 				</a>
 				<ul class="dropdown-menu w-100">
