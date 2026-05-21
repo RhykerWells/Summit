@@ -35,12 +35,14 @@
 				<ul class="navbar-nav">
 					{{if .User}}
 					<li id="desktopNavbarServerDropdown" class="nav-item dropdown dropdown-center" style="width: 250px;">
-						<a class="nav-link dropdown-toggle d-flex align-items-center text-decoration-none text-white" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-							<img src="{{if not .CurrentGuild}}{{.HomeURL}}/static/img/icons/magnifying-glass.svg{{else}}{{.CurrentGuild.Avatar}}{{end}}" width="32" height="32" class="rounded-circle me-2">
-							<span class="d-flex flex-column">
-								<span>{{if not .CurrentGuild}}Select server{{else}}{{.CurrentGuild.Name}}{{end}}</span>
-								<span style="font-size: 0.8rem;">Switch server</span>
-							</span>
+						<a class="nav-link dropdown-toggle d-flex align-items-center justify-content-center text-decoration-none text-white" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+							<div class="d-flex align-items-center">
+								<img src="{{if not .CurrentGuild}}{{.HomeURL}}/static/img/icons/magnifying-glass.svg{{else}}{{.CurrentGuild.Avatar}}{{end}}" width="32" height="32" class="rounded-circle me-2">
+								<span class="d-flex flex-column">
+									<span>{{if not .CurrentGuild}}Select server{{else}}{{.CurrentGuild.Name}}{{end}}</span>
+									<span style="font-size: 0.8rem;">Switch server</span>
+								</span>
+							</div>
 							<i class="fa-solid fa-caret-down"></i>
 						</a>
 						<ul class="dropdown-menu w-100">
