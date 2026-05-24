@@ -1,5 +1,16 @@
+// Helper function to convert camelCase to Title Case
+function camelToTitleCase(str) {
+	return str
+		.replace(/([A-Z])/g, ' $1')
+		.replace(/^./, c => c.toUpperCase())
+		.trim();
+}
+
 $('table[id]').each(function () {
 	const tableObj = $(this)
+
+	// Get metadata/label mappings
+	const metaLabels = tableObj.data('metalabels') || {};
 
 	// Filter row creation
 	const columnNum = tableObj.find('thead tr:first th').length;
@@ -9,10 +20,32 @@ $('table[id]').each(function () {
 	}
 	tableObj.find('thead').append(filterHTML);
 
+	// Expand column creation
+	const hasExpandableRows = tableObj.find('tbody tr').filter(function () {
+		return Object.keys($(this).data()).length > 0;
+	}).length > 0;
+
+	if (hasExpandableRows) {
+		tableObj.find('thead tr').each(function () {
+			$(this).prepend('<th class="expand-control"></th>')
+		});
+
+		tableObj.find('tbody tr').each(function () {
+			$(this).prepend(`
+				<td class="dt-control">
+					<i class="fa-solid fa-caret-down"></i>
+				</td>
+			`)
+		});
+	}
+
 	const $table = $(this).DataTable({
 		paging: true,
 		searching: true,
 		ordering: false,
+
+		columnDefs,
+
 		info: true,
 		lengthChange: true,
 		pageLength: 10,
@@ -133,4 +166,42 @@ $('table[id]').each(function () {
 			});
 		}
 	});
+
+	tableObj.on('click', 'tbody td.dt-control', function () {
+		const tr = $(this).closest('tr');
+		const row = $table.row(tr);
+
+		if (row.child.isShown()) {
+			row.child.hide();
+			tr.removeClass('shown');
+		} else {
+			row.child(formatChildRow(tr, metaLabels)).show();
+			tr.addClass('shown');
+		}
+	});
 });
+
+function formatChildRow(tr, metaLabels = {}) {
+	const data = tr.data();
+	const labelMap = metaLabels.labels || {};
+
+	let html = '<div class="p-3">';
+
+	Object.entries(data).forEach(([key, value]) => {
+		if (key.startsWith('dt')) return;
+		if (!value) return;
+
+		// Use custom label if provided, otherwise convert camelCase to Title Case
+		const displayLabel = labelMap[key] || camelToTitleCase(key);
+
+		html += `
+			<div>
+				<strong>${displayLabel}:</strong> ${value}
+			</div>
+		`;
+	});
+
+	html += '</div>';
+
+	return html;
+}
