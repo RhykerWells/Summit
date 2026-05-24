@@ -5,10 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	updateChannelOptionsSingle()
 });
 
-// Global variables for tables
-const DEFAULT_ROWS_PER_PAGE = 10;
-const tableFilterState = {};
-
 /**
 * Updates single-role dropdowns.
 * Adds click event listeners to each element with the class 'dropDownRoleSingleItem'.
