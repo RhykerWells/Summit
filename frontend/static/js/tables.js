@@ -39,7 +39,53 @@ $('table[id]').each(function () {
 		});
 	}
 
+	const emptyColumnTargets = [];
+	tableObj.find('thead tr:first th').each(function (idx) {
+		if (!$(this).text().trim() && !$(this).hasClass('expand-control')) {
+			emptyColumnTargets.push(idx);
+		}
+	});
+
+	const columnDefs = hasExpandableRows ? [
+		{
+			targets: 0,
+			orderable: false,
+			searchable: false,
+			className: 'dt-control',
+			width: '1%'
+		}
+	] : [];
+
+	if (emptyColumnTargets.length) {
+		columnDefs.push({
+			targets: emptyColumnTargets,
+			orderable: false,
+			searchable: false,
+			width: '1%'
+		});
+	}
+
+	const actionColumnTargets = [];
+	tableObj.find('tbody tr').each(function () {
+		$(this).find('td').each(function () {
+			if ($(this).find('.action-links, .action-link').length > 0) {
+				actionColumnTargets.push($(this).index());
+			}
+		});
+	});
+
+	if (actionColumnTargets.length) {
+		columnDefs.push({
+			targets: [...new Set(actionColumnTargets)],
+			orderable: false,
+			searchable: false,
+			className: 'text-center',
+			width: '1%'
+		});
+	}
+
 	const $table = $(this).DataTable({
+		autoWidth: false,
 		paging: true,
 		searching: true,
 		ordering: false,
@@ -184,16 +230,16 @@ $('table[id]').each(function () {
 function formatChildRow(tr, metaLabels = {}) {
 	const data = tr.data();
 	const labelMap = metaLabels.labels || {};
+    const fieldOrder = metaLabels.fieldOrder || Object.keys(data);
 
 	let html = '<div class="p-3">';
 
-	Object.entries(data).forEach(([key, value]) => {
+    fieldOrder.forEach((key) => {
+        const value = data[key];
 		if (key.startsWith('dt')) return;
 		if (!value) return;
 
-		// Use custom label if provided, otherwise convert camelCase to Title Case
 		const displayLabel = labelMap[key] || camelToTitleCase(key);
-
 		html += `
 			<div>
 				<strong>${displayLabel}:</strong> ${value}
@@ -202,6 +248,5 @@ function formatChildRow(tr, metaLabels = {}) {
 	});
 
 	html += '</div>';
-
 	return html;
 }
