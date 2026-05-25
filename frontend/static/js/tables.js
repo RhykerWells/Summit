@@ -124,7 +124,7 @@ $('table[id]').each(function () {
 					$(`
 						<input
 							type="text"
-							class="textInput form-control text-light"
+							class="form-control text-light"
 							style="min-width: 4rem;"
 						/>
 					`)

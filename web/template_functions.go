@@ -6,11 +6,9 @@ import (
 	"net/url"
 	"regexp"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 
-	"github.com/RhykerWells/Summit/bot/functions"
 	"github.com/RhykerWells/Summit/common"
 	"github.com/RhykerWells/durationutil"
 	"github.com/bwmarrin/discordgo"
@@ -27,14 +25,13 @@ var (
 		// Data types
 		"dict":       dict,
 		"stringDict": stringDict,
-		// Forms content
-		"textInput":            textInput,
-		"textInputLong":        textInputLong,
+		// Input content
 		"toggleSwitch":         toggleSwitch,
-		"numberSelect":         numberSelection,
 		"roleOptionsSingle":    roleOptionsSingle,
 		"roleOptionsMulti":     roleOptionsMulti,
 		"channelOptionsSingle": channelOptionsSingle,
+		// Emoji/Image conversion
+		"replaceCustomEmojis": replaceCustomEmojis,
 	}
 )
 
@@ -69,63 +66,6 @@ func stringDict(pairs ...interface{}) map[string]interface{} {
 	return result
 }
 
-// textInput generates a HTML element for a text input field.
-//
-// Parameters:
-//   - currentInput: the current input of the input
-//   - uniqueID: unique identifier for the input's ID (used to retrieve and store changed data)
-//   - opts: An optional key/value map of additional parameters.
-func textInput(currentInput, uniqueID string, opts ...map[string]interface{}) template.HTML {
-	var menu strings.Builder
-
-	var leftLable, rightLabel, maxCharacters string
-	if len(opts) > 0 {
-		leftLable, rightLabel = inputLabel(opts[0])
-		if value, ok := opts[0]["maxlength"]; ok {
-			maxCharacters = fmt.Sprint(functions.ToInt64(value))
-		}
-	}
-
-	menu.WriteString(`<div class="input-group">`)
-
-	menu.WriteString(leftLable)
-	menu.WriteString(`<input type="text" class="textInput form-control text-light" name="` + uniqueID + `" id="` + uniqueID + `" autocomplete="off" value="` + currentInput + `" maxlength="` + maxCharacters + `">`)
-	menu.WriteString(rightLabel)
-
-	menu.WriteString("</div>")
-
-	return template.HTML(menu.String())
-}
-
-// textInputLong generates a HTML element for a textarea input field.
-//
-// Parameters:
-//   - currentInput: the current input of the input
-//   - uniqueID: unique identifier for the input's ID (used to retrieve and store changed data)
-//   - opts: An optional key/value map of additional parameters.
-func textInputLong(currentInput, uniqueID string, opts ...map[string]interface{}) template.HTML {
-	var menu strings.Builder
-
-	var rows int = 1
-	if len(opts) > 0 {
-		if value, ok := opts[0]["rows"]; ok {
-			if _, ok := value.(int); !ok {
-				rows = 1
-			}
-			rows = value.(int)
-			if rows < 1 {
-				rows = 1
-			}
-		}
-	}
-
-	menu.WriteString(`<div class="input-group">`)
-	menu.WriteString(`<textarea class="textInput form-control text-light" name="` + uniqueID + `" id="` + uniqueID + `" autocomplete="off" rows="` + strconv.Itoa(rows) + `">` + currentInput + `</textarea>`)
-	menu.WriteString("</div>")
-
-	return template.HTML(menu.String())
-}
-
 // toggleSwitch generates a HTML object for the custom switch.
 // currentState: the bool of the current state of the switch
 // uniqueID: string for the input ID (used to retrieve and store changed data)
@@ -137,37 +77,6 @@ func toggleSwitch(currentState bool, uniqueID string) template.HTML {
 
 	var menu strings.Builder
 	menu.WriteString(`<input type="checkbox" class="switch" name="` + uniqueID + `" id="` + uniqueID + `" value="true"` + checked + `/>`)
-
-	return template.HTML(menu.String())
-}
-
-// numberSelection generates a HTML element for a number input field.
-//
-// Parameters:
-//   - min: lowest number possible
-//   - max: highest number possible
-//   - currentNumber: the current number
-//   - uniqueID: unique identifier for the input's ID (used to retrieve and store changed data)
-//   - opts: An optional key/value map of additional parameters such as label settings.
-func numberSelection(min, max, currentNumber int64, uniqueID string, opts ...map[string]interface{}) template.HTML {
-	var menu strings.Builder
-	menu.WriteString(`<div class="input-group">`)
-
-	var leftLable, rightLabel string
-	if len(opts) > 0 {
-		leftLable, rightLabel = inputLabel(opts[0])
-	}
-
-	menu.WriteString(leftLable)
-	if max == 0 {
-		menu.WriteString(`<input type="number" name="` + uniqueID + `" id="` + uniqueID + `" min="` + strconv.FormatInt(min, 10) + `" step="1"` + `" class="form-control text-light" placeholder="0" value="` + strconv.FormatInt(currentNumber, 10) + `">`)
-	} else {
-		menu.WriteString(`<input type="number" name="` + uniqueID + `" id="` + uniqueID + `" min="` + strconv.FormatInt(min, 10) + `" step="1" max="` + strconv.FormatInt(max, 10) + `" class="form-control text-light" placeholder="0" value="` + strconv.FormatInt(currentNumber, 10) + `">`)
-	}
-
-	menu.WriteString(rightLabel)
-
-	menu.WriteString(`</div>`)
 
 	return template.HTML(menu.String())
 }
@@ -350,7 +259,7 @@ func channelOptionsSingle(channels []*discordgo.Channel, selectedChannelID strin
 	}
 
 	var menu strings.Builder
-	menu.WriteString(`<div class="dropdown input-group">`)
+	menu.WriteString(`<div class="dropdown">`)
 	menu.WriteString(`
 		<a class="btn dropdown-toggle text-start flex-grow-1 d-flex align-items-center justify-content-between text-decoration-none text-white" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 			<span id="` + uniqueID + `Label">` + template.HTMLEscapeString(displayText) + `</span>
@@ -368,49 +277,11 @@ func channelOptionsSingle(channels []*discordgo.Channel, selectedChannelID strin
 	}
 
 	menu.WriteString(`</ul>`)
-	menu.WriteString(`<input type="hidden" id="` + uniqueID + `" name="` + uniqueID + `" value="` + template.HTMLEscapeString(selectedChannelID) + `">`)
 	menu.WriteString(`</div>`)
 	return template.HTML(menu.String())
 }
 
-func inputLabel(opts map[string]interface{}) (string, string) {
-	var labelEnabled bool
-	var labelContent, labelSide string
-
-	if v, ok := opts["label"]; ok {
-		if b, ok := v.(bool); ok {
-			labelEnabled = b
-		}
-	}
-
-	if v, ok := opts["labelContent"]; ok {
-		if s, ok := v.(string); ok {
-			labelContent = s
-		}
-	}
-
-	if v, ok := opts["labelSide"]; ok {
-		if s, ok := v.(string); ok {
-			labelSide = s
-		}
-	}
-
-	if !labelEnabled || (labelSide != "left" && labelSide != "right") {
-		return "", ""
-	}
-
-	labelContent = convertToImage(labelContent)
-
-	label := fmt.Sprintf("<span class=\"input-group-text text-light\">%s</span>", labelContent)
-
-	if labelSide == "left" {
-		return label, ""
-	}
-
-	return "", label
-}
-
-func convertToImage(emoji string) string {
+func replaceCustomEmojis(emoji string) string {
 	re := regexp.MustCompile(`<a?:([a-zA-Z0-9_]+):(\d+)>`)
 
 	return re.ReplaceAllStringFunc(emoji, func(match string) string {

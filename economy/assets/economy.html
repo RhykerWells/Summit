@@ -27,7 +27,7 @@
 									<h5 class="card-title mb-0">Currency Symbol</h5>
 								</div>
 								<div class="card-body">
-									{{textInput .EconomyConfig.EconomySymbol "EconomySymbol"}}
+									<input type="text" class="form-control text-light" name="EconomySymbol" id="EconomySymbol" autocomplete="off" value="{{.EconomyConfig.EconomySymbol}}">
 									<p class="card-text">Note: To use an emoji, use the full name & code and ensure the bot has access to the emoji, for example: <code>&lt;NAME:IDXXXX&gt;</code>.</p>
 								</div>
 							</div>
@@ -38,7 +38,10 @@
 									<h5 class="card-title mb-0">Start Balance</h5>
 								</div>
 								<div class="card-body">
-									{{numberSelect 0 0 .EconomyConfig.EconomyStartBalance "EconomyStartBalance" (stringDict "label" true "labelContent" .EconomyConfig.EconomySymbol "labelSide" "left")}}
+									<div class="input-group">
+										<span class="input-group-text">{{replaceCustomEmojis .EconomyConfig.EconomySymbol}}</span>
+										<input type="number" name="EconomyStartBalance" id="EconomyStartBalance" min="0" step="1" class="form-control text-light" placeholder="0" value="{{.EconomyConfig.EconomyStartBalance}}">
+									</div>
 									<p class="card-text">Note: setting <code>0</code> will result in new members staring at 0.</p>
 								</div>
 							</div>
@@ -46,7 +49,7 @@
 					</div>
 					<div class="row justify-content-evenly">
 						<div class="col-11">
-							<hr>	
+							<hr>
 						</div>
 					</div>
 					<div class="row justify-content-evenly">
@@ -56,7 +59,10 @@
 									<h5 class="card-title mb-0">Minimum payout</h5>
 								</div>
 								<div class="card-body">
-									{{numberSelect 1 .EconomyConfig.EconomyMaxReturn .EconomyConfig.EconomyMinReturn "EconomyMinReturn" (stringDict "label" true "labelContent" .EconomyConfig.EconomySymbol "labelSide" "left")}}
+									<div class="input-group">
+										<span class="input-group-text">{{replaceCustomEmojis .EconomyConfig.EconomySymbol}}</span>
+										<input type="number" name="EconomyMinReturn" id="EconomyMinReturn" min="0" step="1" class="form-control text-light" placeholder="0" value="{{.EconomyConfig.EconomyMinReturn}}">
+									</div>
 									<p class="card-text">Note: This only affects <code>work</code> &amp; <code>crime</code>.</p>
 								</div>
 							</div>
@@ -67,7 +73,10 @@
 									<h5 class="card-title mb-0">Maximum payout</h5>
 								</div>
 								<div class="card-body">
-									{{numberSelect .EconomyConfig.EconomyMinReturn 0 .EconomyConfig.EconomyMaxReturn "EconomyMaxReturn" (stringDict "label" true "labelContent" .EconomyConfig.EconomySymbol "labelSide" "left")}}
+									<div class="input-group">
+										<span class="input-group-text">{{replaceCustomEmojis .EconomyConfig.EconomySymbol}}</span>
+										<input type="number" name="EconomyMaxReturn" id="EconomyMaxReturn" min="0" step="1" class="form-control text-light" placeholder="0" value="{{.EconomyConfig.EconomyMaxReturn}}">
+									</div>
 									<p class="card-text">Note: This only affects <code>work</code> &amp; <code>crime</code>.</p>
 								</div>
 							</div>
@@ -77,7 +86,7 @@
 			</div>
 		</form>
 		<div id="responses">
-			<h2 style="margin-top: 2px; margin-bottom: 0px;">Custom Responses</h2> 
+			<h2 style="margin-top: 2px; margin-bottom: 0px;">Custom Responses</h2>
 			<div class="m-4">
 				<div class="card settings-card">
 					<div class="card-header">
@@ -177,7 +186,7 @@
 						<form id="edit{{$customResponse}}Response{{.ID}}Form" method="POST" action="{{$.HomeURL}}/dashboard/{{$.CurrentGuild.ID}}/manage/economy/responses/{{lower $customResponse}}/{{.ID}}/edit">
 							<div class="modal-body">
 								<p class="card-text">To add the payout to the response, include the literal string: <code>(amount)</code></p>
-								<span>{{textInput .Response "Response"}}</span>
+								<input type="text" class="form-control text-light" name="Response" id="Response" value="">
 							</div>
 							<div class="modal-footer justify-content-between">
 								<div>
@@ -222,7 +231,7 @@
 						<form method="POST" action="{{$.HomeURL}}/dashboard/{{$.CurrentGuild.ID}}/manage/economy/responses/{{lower $customResponse}}/new">
 							<div class="modal-body">
 								<p class="card-text">To add the payout to the response, include the literal string: <code>(amount)</code>.</p>
-								{{textInput "" "Response"}}
+								<input type="text" class="form-control text-light" name="Response" id="Response" autocomplete="off">
 							</div>
 							<div class="modal-footer justify-content-between">
 								<button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>

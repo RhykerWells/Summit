@@ -24,8 +24,8 @@
 								<div class="card-header">
 									<h5 class="card-title mb-0">Guild prefix</h5>
 								</div>
-								<div class="card-body">	
-									{{textInput .CoreConfig.GuildPrefix "GuildPrefix"}}
+								<div class="card-body">
+									<input type="text" class="form-control text-light" name="GuildPrefix" id="GuildPrefix" autocomplete="off" value="{{.CoreConfig.GuildPrefix}}">
 									<p class="card-text">Note: That the bot will always be triggered by <code>@Summit</code></p>
 								</div>
 							</div>

@@ -49,7 +49,10 @@
 									</div>
 								</div>
 								<div class="card-body">	
-									{{numberSelect 0 60 .ModerationConfig.ModerationTriggerDeletionSeconds "ModerationTriggerDeletionSeconds" (stringDict "label" true "labelContent" "seconds" "labelSide" "right")}}
+									<div class="input-group">
+										<input type="number" name="ModerationTriggerDeletionSeconds" id="ModerationTriggerDeletionSeconds" min="0" max="60" step="1" class="form-control text-light" placeholder="0" value="{{.ModerationConfig.ModerationTriggerDeletionSeconds}}">
+										<span class="input-group-text">Seconds</span>
+									</div>
 									<p class="card-text">Note: a time of <code>0</code> seconds is immediate</p>
 								</div>
 							</div>
@@ -62,8 +65,11 @@
 										{{toggleSwitch .ModerationConfig.ModerationResponseDeletionEnabled "ModerationResponseDeletionEnabled"}}
 									</div>
 								</div>
-								<div class="card-body">	
-									{{numberSelect 0 60 .ModerationConfig.ModerationResponseDeletionSeconds "ModerationResponseDeletionSeconds" (stringDict "label" true "labelContent" "seconds" "labelSide" "right")}}
+								<div class="card-body">
+									<div class="input-group">
+										<input type="number" name="ModerationResponseDeletionSeconds" id="ModerationResponseDeletionSeconds" min="0" max="60" step="1" class="form-control text-light" placeholder="0" value="{{.ModerationConfig.ModerationResponseDeletionSeconds}}">
+										<span class="input-group-text">Seconds</span>
+									</div>
 									<p class="card-text">Note: a time of <code>0</code> seconds is immediate</p>
 								</div>
 							</div>

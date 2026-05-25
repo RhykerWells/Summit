@@ -56,28 +56,28 @@
 					<form id="editItemForm" method="POST" action="{{$.HomeURL}}/dashboard/{{$.CurrentGuild.ID}}/manage/economy/shop/{{.ID}}/edit">
 						<div class="modal-body">
 							<div class="form-group d-flex flex-column">
-								<label class="text-nowrap">Item Name</label>
-								{{textInput .Name "Name" (stringDict "maxlength" 30)}}
+								<label for="Name" class="text-nowrap">Item Name</label>
+								<input type="text" class="form-control text-light" name="Name" id="Name" autocomplete="off" value="{{.Name}}">
 							</div>
 							<div class="form-group d-flex flex-column">
-								<label class="text-nowrap">Description</label>
-								{{textInput .Description "Description" (stringDict "maxlength" 200)}}
+								<label for="Description" class="text-nowrap">Description</label>
+								<input type="text" class="form-control text-light" name="Description" id="Description" autocomplete="off" value="{{.Description}}">
 							</div>
 							<div class="form-group d-flex flex-column">
-								<label class="text-nowrap">Price</label>
-								{{numberSelect 0 0 .Price "Price" (stringDict "label" true "labelContent" $.EconomyConfig.EconomySymbol "labelSide" "left")}}
+								<label for="Price" class="text-nowrap">Price</label>
+								<input type="number" class="form-control text-light" name="Price" id="Price" min="0" step="1" placeholder="0" value="{{.Price}}">
 							</div>
 							<div class="form-group d-flex flex-column">
-								<label class="text-nowrap">Quantity</label>
-								{{numberSelect 0 0 .Quantity "Quantity"}}
+								<label for="Quantity" class="text-nowrap">Quantity</label>
+								<input type="number" class="form-control text-light" name="Quantity" id="Quantity" min="0" step="1" placeholder="0" value="{{.Quantity}}">
 							</div>
 							<div class="form-group d-flex flex-column">
-								<label class="text-nowrap">Role given</label>
+								<label for="Role" class="text-nowrap">Role given</label>
 								{{roleOptionsSingle $.CurrentGuild.Roles .Role "Role" $.CurrentGuild.BotHighestRolePosition}}
 							</div>
 							<div class="form-group d-flex flex-column">
-								<label class="text-nowrap">Reply</label>
-								{{textInput .Reply "Reply" (stringDict "maxlength" 200)}}
+								<label for="Reply" class="text-nowrap">Reply</label>
+								<input type="text" class="form-control text-light" name="Reply" id="Reply" autocomplete="off" value="{{.Reply}}">
 							</div>
 						</div>
 						<div class="modal-footer justify-content-between">
@@ -123,28 +123,31 @@
 					<form id="newItemForm" method="POST" action="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage/economy/shop/new">
 						<div class="modal-body">
 							<div class="form-group d-flex flex-column">
-								<label class="text-nowrap">Item Name</label>
-								{{textInput "" "Name" (stringDict "maxlength" 30)}}
+								<label for="Name" class="text-nowrap">Item Name</label>
+								<input type="text" class="form-control text-light" name="Name" id="Name" autocomplete="off" value="">
 							</div>
 							<div class="form-group d-flex flex-column">
-								<label class="text-nowrap">Item Description</label>
-								{{textInput "" "Description" (stringDict "maxlength" 200)}}
+								<label for="Description" class="text-nowrap">Item Description</label>
+								<input type="text" class="form-control text-light" name="Description" id="Description" autocomplete="off" value="">
 							</div>
 							<div class="form-group d-flex flex-column">
-								<label class="text-nowrap">Item Price</label>
-								{{numberSelect 0 0 0 "Price" (stringDict "label" true "labelContent" .EconomyConfig.EconomySymbol "labelSide" "left")}}
+								<label for="Price" class="text-nowrap">Item Price</label>
+								<div class="input-group">
+									<span class="input-group-text">{{replaceCustomEmojis .EconomyConfig.EconomySymbol}}</span>
+									<input type="number" class="form-control text-light" name="Price" id="Price" min="0" step="1" placeholder="0" value="">
+								</div>
 							</div>
 							<div class="form-group d-flex flex-column">
-								<label class="text-nowrap">Item Quantity</label>
-								{{numberSelect 0 0 0 "Quantity"}}
+								<label for="Quantity" class="text-nowrap">Item Quantity</label>
+								<input type="number" class="form-control text-light" name="Quantity" id="Quantity" min="0" step="1" placeholder="0" value="">
 							</div>
 							<div class="form-group d-flex flex-column">
-								<label class="text-nowrap">Role Given By Item</label>
+								<label for="Role" class="text-nowrap">Role Given By Item</label>
 								{{roleOptionsSingle .CurrentGuild.Roles "" "Role" .CurrentGuild.BotHighestRolePosition}}
 							</div>
 							<div class="form-group d-flex flex-column">
-								<label class="text-nowrap">Reply when using item</label>
-								{{textInput "" "Reply" (stringDict "maxlength" 200)}}
+								<label for="Reply" class="text-nowrap">Reply when using item</label>
+								<input type="text" class="form-control text-light" name="Reply" id="Reply" autocomplete="off" value="">
 							</div>
 						</div>
 						<div class="modal-footer justify-content-between">
