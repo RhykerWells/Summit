@@ -160,7 +160,7 @@ $('table[id]').each(function () {
 						if (!text) return;
 						menu.append(`
 							<li>
-								<a class="dropdown-item" data-value="${text}">
+								<a href="#" class="dropdown-item" data-value="${text}">
 									${text}
 								</a>
 							</li>

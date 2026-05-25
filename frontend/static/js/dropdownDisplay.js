@@ -22,9 +22,6 @@ function updateRoleOptionsSingle() {
 			const container = item.closest('.input-group'); // Drop down container. Makes sure we only select objects for the appropriate role select.
 			const name = item.textContent.trim();
 			const value = item.getAttribute('data-value');
-			const hiddenInput = container.querySelector('input[type=hidden]');
-
-			hiddenInput.value = value;
 
 			const label = container.querySelector('span[id$="Label"]');
 			let displayText = "Select role";
@@ -43,7 +40,6 @@ function updateRoleOptionsSingle() {
 /**
 * Updates multi-role checkboxes.
 * Adds change event listeners to each checkbox with the class 'dropDownRoleCheckbox'.
-* Updates the hidden input with selected role IDs and updates the label text.
 * If multiple roles are selected, the label either lists them or shows the count if the text is long.
 */
 function updateRoleOptionsMulti() {
@@ -88,9 +84,6 @@ function updateChannelOptionsSingle() {
 			const container = item.closest('.input-group'); // Drop down container. Makes sure we only select objects for the appropriate role select.
 			const name = item.textContent.trim();
 			const value = item.getAttribute('data-value');
-			const hiddenInput = container.querySelector('input[type=hidden]');
-
-			hiddenInput.value = value;
 
 			const label = container.querySelector('span[id$="Label"]');
 			let displayText = "Select channel";
