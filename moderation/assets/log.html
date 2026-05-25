@@ -1,68 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 	{{template "head" .}}
 </head>
-
-<body class="text-light">
+<body class="d-flex text-light">
 	{{template "dashboard_nav" .}}
-	<main id="main" class="d-flex m-4" style="background-color: var(--baseGrey); border-radius: 0.5rem">
-		<div class="p-4 w-100">
-			<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage" class="btn text-light w-100"
-				style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Home</a>
-			<input type="hidden" name="form_type" value="Core">
-			<div class="d-flex flex-column justify-content-between align-items-sm-center mt-1 mb-0">
-				<div class="order-2 w-100 mt-2">
-					<div class="d-flex justify-content-between align-items-center flex-wrap w-100">
-						<div class="d-flex align-items-center" style="gap: 0.5rem;">
-							<h2 class="mb-0">Message Logs</h2>
-							<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage/moderation/logs"
-								class="btn text-light"
-								style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Back</a>
-						</div>
-					</div>
-					<p class="mt-2 mb-0">{{if .MessageLog.CaseID}}Viewing message log for case
-						#{{.MessageLog.CaseID}}{{if .MessageLog.ChannelName}} in
-						#{{.MessageLog.ChannelName}}{{end}}.{{else}}Viewing this moderation message log.{{end}} Messages
-						are shown oldest first.</p>
-					{{if .MessageCase}}
-					<div class="mt-3 p-3"
-						style="background-color: rgba(255,255,255,.05); border: 1px solid var(--accentGrey); border-radius: 0.5rem;">
-						<div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-start"
-							style="gap: 1rem;">
-							<div class="flex-grow-1" style="min-width: 0;">
-								<span class="mb-1"><strong>Case #{{.MessageCase.CaseID}}</strong> · <span
-										class="mod-action mod-action-{{lower .MessageCase.Action}}">{{.MessageCase.Action}}</span></span>
-								<p></p>
-								<p class="mb-0"><strong>Offender:</strong> @{{.MessageCase.OffenderUsername}} <small
-										style="opacity: 0.7;">({{.MessageCase.OffenderID}})</small></p>
-								<p class="mb-0"><strong>Moderator:</strong> @{{.MessageCase.StaffUsername}} <small
-										style="opacity: 0.7;">({{.MessageCase.StaffID}})</small></p>
-							</div>
-							<div class="text-sm-end">
-								<p class="mb-1"><strong>Reason:</strong></p>
-								<p style="max-width: 500px; overflow-wrap: anywhere; word-break: break-word;">
-									{{.MessageCase.Reason}}</p>
-							</div>
-						</div>
-					</div>
-					{{end}}
-				</div>
+	{{template "sidebar" .}}
+	<main class="d-flex-row p-3">
+		<div id="pluginInfo" class="d-flex justify-content-between">
+			<div class="d-flex flex-column">
+				<h2 class="mb-0">Message Logs</h2>
+				<span class="text-secondary">Viewing message logs for #{{.MessageLog.ChannelName}}{{with .MessageLog.CaseID}} (Case #{{.}}){{end}}.</span>
 			</div>
-			<div class="row g-2 mt-2 mb-1 justify-content-end">
-				<div class="col-md-3 col-sm-6">
-					<input type="text" class="form-control" placeholder="Search Author" data-table-id="logTable"
-						data-filter-column-index="2" data-no-row-id="noResultsRow">
-				</div>
-				<div class="col-md-3 col-sm-6">
-					<input type="text" class="form-control" placeholder="Search Content" data-table-id="logTable"
-						data-filter-column-index="3" data-no-row-id="noResultsRow">
-				</div>
-			</div>
+		</div>
+		<div class="m-4">
 			<div class="table-responsive">
-				<table class="table table-striped" id="logTable"
-					style="--bs-table-color: white; --bs-table-striped-color: white; --bs-table-striped-bg: rgb(30 30 30 / 50%); --bs-table-bg: transparent">
+				<table class="table table-striped" id="logTable" data-non-searchable="0,1,2,3">
 					<thead>
 						<tr>
 							<th></th>
@@ -71,7 +24,7 @@
 							<th>Content</th>
 						</tr>
 					</thead>
-					<tbody>
+					<tbody class="table-group-divider">
 						{{range $i, $msg := .MessageLog.R.GetLogModerationMessageLogsMessages}}
 						<tr {{if $msg.IsDeleted}}class="row-danger" {{end}}>
 							<td>{{add $i 1}}</td>
@@ -80,16 +33,11 @@
 							<td class="row-content">{{$msg.Content}}</td>
 						</tr>
 						{{end}}
-						<tr id="noResultsRow" class="text-center" {{if
-							.MessageLog.R.GetLogModerationMessageLogsMessages}}style="display: none;" {{end}}>
-							<td colspan="4">No logs found.</td>
-						</tr>
 					</tbody>
 				</table>
-				<div id="logTable-pagination" class="mb-0 mt-2 d-flex justify-content-center"></div>
 			</div>
+		</div>
 	</main>
 </body>
 {{template "javascript" .}}
-
 </html>

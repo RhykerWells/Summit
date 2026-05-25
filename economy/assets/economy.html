@@ -1,179 +1,169 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-{{template "head" .}}
+	{{template "head" .}}
 </head>
-<body class="text-light">
+<body class="d-flex text-light">
 	{{template "dashboard_nav" .}}
-	<main id="main" class="d-flex m-4" style="background-color: var(--baseGrey); border-radius: 0.5rem">
-		<div class="m-4 w-100">
-			<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage" class="btn text-light w-100" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Home</a>
-			<form id="CoreForm" method="POST" action="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage/economy">
-				<div class="d-flex flex-column justify-content-between align-items-sm-center mt-1 mb-0">
-					<div class="order-2 w-100 mt-2">
-						<div class="d-flex justify-content-between align-items-center flex-wrap w-100">
-							<div class="d-flex align-items-center">
-								{{toggleSwitch .EconomyConfig.EconomyEnabled "EconomyEnabled"}}
-								<h2 class="mb-0">Economy</h2>
-							</div>
-							<button type="submit" class="btn btn-success">Save changes</button>
-						</div>
-					</div>
+	{{template "sidebar" .}}
+	<div id="toastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1100;"></div>
+	<main class="d-flex-row p-3">
+		<form method="POST">
+			<div id="pluginInfo" class="d-flex justify-content-between">
+				<div class="d-flex align-items-center gap-2">
+					<h2 class="mb-0">Economy</h2>
+					{{toggleSwitch .EconomyConfig.EconomyEnabled "EconomyEnabled"}}
 				</div>
-				<div class="container-fluid my-4 px-0">
-					<div class="row">
-						<div class="col-md-4 mb-4">
-							<div class="card">
+				<div class="d-flex">
+					<button type="submit" class="btn btn-success">Save changes</button>
+				</div>
+			</div>
+			<div class="m-4">
+				<div id="settings">
+					<div class="row justify-content-evenly">
+						<div class="col-6">
+							<div class="card settings-card">
 								<div class="card-header">
-									<h5>Currency symbol</h5>
+									<h5 class="card-title mb-0">Currency Symbol</h5>
 								</div>
 								<div class="card-body">
-									<p class="card-text">Note: To use an emoji, use the full name & code and ensure the bot has access to the emoji, for example: <code>&lt;NAME:IDXXXX&gt;</code>.</p>
 									{{textInput .EconomyConfig.EconomySymbol "EconomySymbol"}}
+									<p class="card-text">Note: To use an emoji, use the full name & code and ensure the bot has access to the emoji, for example: <code>&lt;NAME:IDXXXX&gt;</code>.</p>
 								</div>
 							</div>
 						</div>
-						<div class="col-md-4 mb-4">
-							<div class="card">
-								<div class="d-flex align-items-center card-header">
-									<h5>Start balance</h5>
+						<div class="col-6">
+							<div class="card settings-card">
+								<div class="card-header">
+									<h5 class="card-title mb-0">Start Balance</h5>
 								</div>
 								<div class="card-body">
-									<p class="card-text">Note: setting <code>0</code> will result in new members staring at 0.</p>
 									{{numberSelect 0 0 .EconomyConfig.EconomyStartBalance "EconomyStartBalance" (stringDict "label" true "labelContent" .EconomyConfig.EconomySymbol "labelSide" "left")}}
+									<p class="card-text">Note: setting <code>0</code> will result in new members staring at 0.</p>
 								</div>
 							</div>
 						</div>
-						<div class="col-md-4 d-none d-md-block"></div>
-						<div class="col-md-4 mb-4">
-							<div class="card">
-								<div class="d-flex align-items-center card-header">
-									<h5>Minimum payout</h5>
+					</div>
+					<div class="row justify-content-evenly">
+						<div class="col-11">
+							<hr>	
+						</div>
+					</div>
+					<div class="row justify-content-evenly">
+						<div class="col-6">
+							<div class="card settings-card">
+								<div class="card-header">
+									<h5 class="card-title mb-0">Minimum payout</h5>
 								</div>
 								<div class="card-body">
-									<p class="card-text">Note: This only affects <code>work</code> &amp; <code>crime</code>.</p>
 									{{numberSelect 1 .EconomyConfig.EconomyMaxReturn .EconomyConfig.EconomyMinReturn "EconomyMinReturn" (stringDict "label" true "labelContent" .EconomyConfig.EconomySymbol "labelSide" "left")}}
-								</div>
-							</div>
-						</div>
-						<div class="col-md-4 mb-4">
-							<div class="card">
-								<div class="d-flex align-items-center card-header">
-									<h5>Maximum payout</h5>
-								</div>
-								<div class="card-body">
 									<p class="card-text">Note: This only affects <code>work</code> &amp; <code>crime</code>.</p>
-									{{numberSelect .EconomyConfig.EconomyMinReturn 0 .EconomyConfig.EconomyMaxReturn "EconomyMaxReturn" (stringDict "label" true "labelContent" .EconomyConfig.EconomySymbol "labelSide" "left")}}
 								</div>
 							</div>
 						</div>
-						<div class="col-md-4 mb-4">
-							<div class="card">
-								<div class="d-flex align-items-center card-header">
-									<h5>Maximum bet amount</h5>
+						<div class="col-6">
+							<div class="card settings-card">
+								<div class="card-header">
+									<h5 class="card-title mb-0">Maximum payout</h5>
 								</div>
 								<div class="card-body">
-									<p class="card-text">Note: This affects gambling related commands.</p>
-									{{numberSelect 0 0 .EconomyConfig.EconomyMaxBet "EconomyMaxBet" (stringDict "label" true "labelContent" .EconomyConfig.EconomySymbol "labelSide" "left")}}
+									{{numberSelect .EconomyConfig.EconomyMinReturn 0 .EconomyConfig.EconomyMaxReturn "EconomyMaxReturn" (stringDict "label" true "labelContent" .EconomyConfig.EconomySymbol "labelSide" "left")}}
+									<p class="card-text">Note: This only affects <code>work</code> &amp; <code>crime</code>.</p>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-				<h2 style="margin-top: 2px; margin-bottom: 0px;">Custom responses</h2>
-				<p>This section allows you to add custom responses to the <code>work</code> and <code>crime</code> commands<br>Note: The bot will automatically use custom responses instead of the in-built one if there are any present.</p>
-				<div id="responses" class="container-fluid px-0">
-					<ul class="nav nav-tabs" id="myTab" role="tablist" style="border-bottom: none;">
-						<li class="nav-item" role="presentation">
-							<button class="tab-head nav-link active" id="work-tab" data-bs-toggle="tab" data-bs-target="#work-tab-pane" type="button" role="tab" aria-controls="work-tab-pane" aria-selected="true">Work</button>
-						</li>
-						<li class="nav-item" role="presentation">
-							<button class="tab-head nav-link" id="crime-tab" data-bs-toggle="tab" data-bs-target="#crime-tab-pane" type="button" role="tab" aria-controls="crime-tab-pane" aria-selected="false">Crime</button>
-						</li>
-					</ul>
-					<div class="tab-content" id="myTabContent" style="background-color: var(--accentGrey); padding: .5rem; border-radius: 0px 10px 10px 10px !important;">
-						<div class="tab-pane fade show active" id="work-tab-pane" role="tabpanel" aria-labelledby="work-tab" tabindex="0">
-							<div class="row">
-								<div class="col-sm">
-									<div class="form-group">
-										<div class="input-group mb-3" style="align-items: center;">
-											{{toggleSwitch .EconomyConfig.EconomyCustomWorkResponsesEnabled "EconomyCustomWorkResponsesEnabled"}}
-											<label>Enable custom work responses.</label>
-										</div>
+			</div>
+		</form>
+		<div id="responses">
+			<h2 style="margin-top: 2px; margin-bottom: 0px;">Custom Responses</h2> 
+			<div class="m-4">
+				<div class="card settings-card">
+					<div class="card-header">
+						<ul class="nav nav-tabs" id="responsesTabs" role="tablist" style="border-bottom: none;">
+							<li class="nav-item" role="presentation">
+								<button class="tab-head nav-link text-white active" id="work-tab" data-bs-toggle="tab" data-bs-target="#work-tab-pane" type="button" role="tab" aria-controls="work-tab-pane" aria-selected="true">Work</button>
+							</li>
+							<li class="nav-item" role="presentation">
+								<button class="tab-head nav-link text-white" id="crime-tab" data-bs-toggle="tab" data-bs-target="#crime-tab-pane" type="button" role="tab" aria-controls="crime-tab-pane" aria-selected="false">Crime</button>
+							</li>
+						</ul>
+					</div>
+					<div class="card-body">
+						<div class="tab-content">
+							<div class="tab-pane fade show active" id="work-tab-pane" role="tabpabel" aria-labelledby="work-tab" tabindex="0">
+								<div class="row">
+									<div class="col-sm">
+										<p>Allows you to manage your custom responses for <code>work</code> commands.</p>
+										<p>Note: The bot bot will automatically use custom responses instead of the built-in one if there are any present</p>
 									</div>
-									<button type="button" style="background-color: var(--basePurple); border-color: var(--accentGrey);" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newWorkResponse">Add new response</button>
-								</div>
-								<div class="col-sm">
-									{{$workResponses := .WorkResponses}}
-									<div class="table-responsive">
-										<table class="table table-striped" id="workTable" style="--bs-table-color: white; --bs-table-striped-color: white; --bs-table-striped-bg: rgb(30 30 30 / 50%); --bs-table-bg: transparent;">
-											<thead>
-												<tr>
-													<th style="width: 10%; white-space: nowrap;"></th>
-													<th>Response</th>
-												</tr>
-											</thead>
-											<tbody>
-												{{range $workResponses}}
-												<tr>
-													<td>
-														<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editWorkResponse{{.ID}}Modal" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);"><i class="fa-solid fa-pen-to-square"></i></button>
-														<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deleteWorkResponse{{.ID}}Modal" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);"><i class="fa-solid fa-trash"></i></button>
-													</td>
-													<td class="text-truncate">{{.Response}}</td>
-												</tr>
-												{{end}}
-												<tr id="workNoResultsRow" class="text-center" colspan="3" {{if $workResponses}} style=" display:none;" {{end}}><td colspan="4">No responses found.</td></tr>
-											</tbody>
-										</table>
-										<div id="workTable-pagination" class="mb-0 mt-2 d-flex justify-content-center"></div>
+									<div class="col-sm d-flex flex-column gap-2">
+										<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newWorkResponse">Add new response</button>
+										<div class="table-responsive">
+											<table class="table table-striped" id="workResponseTable">
+												<thead>
+													<tr>
+														<th>Response</th>
+														<th class="align-middle text-center" style="width: 10%; white-space: nowrap;">Actions</th>
+													</tr>
+												</thead>
+												<tbody>
+													{{range .WorkResponses}}
+													<tr>
+														<td class="text-truncate">{{.Response}}</td>
+														<td class="align-middle text-center">
+															<div class="action-links d-flex justify-content-between">
+																<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editWorkResponse{{.ID}}Modal"><i class="fa-solid fa-pen-to-square"></i></button>
+																<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deleteWorkResponse{{.ID}}Modal"><i class="fa-solid fa-trash"></i></button>
+															</div>
+														</td>
+													</tr>
+													{{end}}
+												</tbody>
+											</table>
+										</div>
 									</div>
 								</div>
 							</div>
-						</div>
-						<div class="tab-pane fade" id="crime-tab-pane" role="tabpanel" aria-labelledby="crime-tab" tabindex="0">
-							<div class="row">
-								<div class="col-sm">
-									<div class="form-group">
-										<div class="input-group mb-3" style="align-items: center;">
-											{{toggleSwitch .EconomyConfig.EconomyCustomCrimeResponsesEnabled "EconomyCustomCrimeResponsesEnabled"}}
-											<label>Enable custom crime responses.</label>
-										</div>
+							<div class="tab-pane fade" id="crime-tab-pane" role="tabpabel" aria-labelledby="crime-tab" tabindex="0">
+								<div class="row">
+									<div class="col-sm">
+										<p>Allows you to manage your custom responses for <code>crime</code> commands.</p> 
+										<p>Note: The bot bot will automatically use custom responses instead of the built-in one if there are any present</p>
 									</div>
-									<button type="button" style="background-color: var(--basePurple); border-color: var(--accentGrey);" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newCrimeResponse">Add new response</button>
-								</div>
-								<div class="col-sm">
-									{{$crimeResponses := .CrimeResponses}}
-									<div class="table-responsive">
-										<table class="table table-striped" id="crimeTable" style="--bs-table-color: white; --bs-table-striped-color: white; --bs-table-striped-bg: rgb(30 30 30 / 50%); --bs-table-bg: transparent;">
-											<thead>
-												<tr>
-													<th style="width: 10%; white-space: nowrap;"></th>
-													<th>Response</th>
-												</tr>
-											</thead>
-											<tbody>
-												{{range $crimeResponses}}
-												<tr>
-													<td>
-														<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editCrimeResponse{{.ID}}Modal" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);"><i class="fa-solid fa-pen-to-square"></i></button>
-														<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deleteCrimeResponse{{.ID}}Modal" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);"><i class="fa-solid fa-trash"></i></button>
-													</td>
-													<td class="text-truncate">{{.Response}}</td>
-												</tr>
-												{{end}}
-												<tr id="crimeNoResultsRow" class="text-center" colspan="3" {{if $crimeResponses}} style=" display:none;" {{end}}><td colspan="4">No responses found.</td></tr>
-											</tbody>
-										</table>
-										<div id="crimeTable-pagination" class="mb-0 mt-2 d-flex justify-content-center"></div>
+									<div class="col-sm d-flex flex-column gap-2">
+										<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newCrimeResponse">Add new response</button>
+										<div class="table-responsive">
+											<table class="table table-striped" id="crimeResponseTable">
+												<thead>
+													<tr>
+														<th>Response</th>
+														<th class="align-middle text-center" style="width: 10%; white-space: nowrap;">Actions</th>
+													</tr>
+												</thead>
+												<tbody>
+													{{range .CrimeResponses}}
+													<tr>
+														<td class="text-truncate">{{.Response}}</td>
+														<td class="align-middle text-center">
+															<div class="action-links d-flex justify-content-between">
+																<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editCrimeResponse{{.ID}}Modal"><i class="fa-solid fa-pen-to-square"></i></button>
+																<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deleteCrimeResponse{{.ID}}Modal"><i class="fa-solid fa-trash"></i></button>
+															</div>
+														</td>
+													</tr>
+													{{end}}
+												</tbody>
+											</table>
+										</div>
 									</div>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-				<div class="d-flex m-2"></div>
-			</form>
+			</div>
 			{{range $_, $customResponse := dict 1 "Work" 2 "Crime"}}
 			{{$responses := $.WorkResponses}}{{if eq $customResponse "Crime"}}{{$responses = $.CrimeResponses}}{{end}}
 			{{range $responses}}
@@ -209,7 +199,7 @@
 						<form id="delete{{$customResponse}}Response{{.ID}}Form" method="POST" action="{{$.HomeURL}}/dashboard/{{$.CurrentGuild.ID}}/manage/economy/responses/{{lower $customResponse}}/{{.ID}}/delete">
 							<div class="modal-body">
 								<p class="card-text">This cannot be undone!</p>
-								<span>You are deleting: "<code>{{.Response}}</code>"</span>
+								<span>You are deleting: "<code>{{- .Response -}}</code>"</span>
 							</div>
 							<div class="modal-footer justify-content-between">
 								<div>
@@ -245,7 +235,6 @@
 			{{end}}
 		</div>
 	</main>
-	<div id="toastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1100;"></div>
-</body>h
+</body>
 {{template "javascript" .}}
-</html>
+</html>>
