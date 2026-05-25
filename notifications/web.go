@@ -16,6 +16,20 @@ var PageHTML embed.FS
 func initWeb() {
 	web.AddHTMLFilesystem(PageHTML)
 	web.RegisterDashboardRoutes(registerNotificationRoutes)
+
+	categoryNotifications := web.SidebarCategory{
+		Name: "Notifications",
+		Icon: "fa-solid fa-bell",
+		Items: []*web.SidebarItem{
+			{
+				Name: "Notifications",
+				Icon: "fa-solid fa-bell",
+				URL:  "notifications",
+			},
+		},
+	}
+
+	web.AddSidebarCategory(categoryNotifications)
 }
 
 func registerNotificationRoutes(dashboard *goji.Mux) {

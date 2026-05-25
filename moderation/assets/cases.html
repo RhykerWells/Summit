@@ -1,149 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 	{{template "head" .}}
 </head>
-
-<body class="text-light">
+<body class="d-flex text-light">
 	{{template "dashboard_nav" .}}
-	<main id="main" class="d-flex m-4" style="background-color: var(--baseGrey); border-radius: 0.5rem">
-		<div class="p-4 w-100">
-			<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage" class="btn text-light w-100"
-				style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Home</a>
-			<input type="hidden" name="form_type" value="Core">
-			<div class="d-flex flex-column justify-content-between align-items-sm-center mt-1 mb-0">
-				<div class="order-2 w-100 mt-2">
-					<div class="d-flex justify-content-between align-items-center flex-wrap w-100">
-						<div class="d-flex align-items-center" style="gap: 0.5rem;">
-							<h2 class="mb-0">Cases</h2>
-							<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage" class="btn text-light"
-								style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Back</a>
-						</div>
-					</div>
+	{{template "sidebar" .}}
+	<main class="d-flex-row p-3">
+		<form method="POST">
+			<div id="pluginInfo" class="d-flex justify-content-between">
+				<div class="d-flex align-items-center gap-2">
+					<h2 class="mb-0">Cases</h2>
 				</div>
 			</div>
-			<div class="row g-2 mt-2 mb-1 justify-content-end">
-				<div class="col-md-3 col-sm-6">
-					<input type="text" class="form-control" placeholder="Search Offender" data-table-id="casesTable"
-						data-filter-column-index="1" data-no-row-id="noResultsRow">
-				</div>
-				<div class="col-md-3 col-sm-6">
-					<input type="text" class="form-control" placeholder="Search Moderator" data-table-id="casesTable"
-						data-filter-column-index="2" data-no-row-id="noResultsRow">
-				</div>
-				<div class="col-md-3 col-sm-6">
-					<div class="input-group">
-						<button class="btn dropdown-toggle text-start flex-grow-1 text-white show" type="button"
-							data-bs-toggle="dropdown"
-							style="background-color: var(--basePurple); border: 1px solid var(--accentGrey); border-top-right-radius: var(--bs-btn-border-radius); border-bottom-right-radius: var(--bs-btn-border-radius);"
-							aria-expanded="true">
-							<span id="ModerationActionLabel">Select case type</span>
-						</button>
-						<ul class="dropdown-menu w-100 overflow-auto" style="max-height: 250px;">
-							<li><a class="dropdown-item caseListItem" data-value="">All</a></li>
-							{{range $_, $moderationAction := dict 1 "Warn" 2 "Mute" 3 "Kick" 4 "Ban"}}
-							<li><a class="dropdown-item caseListItem"
-									data-value="{{$moderationAction}}">{{$moderationAction}}</a></li>
+			<div class="m-4">
+				<div class="table-responsive">
+					<table class="table table-striped" id="casesTable" data-metalabels='{"labels": {"channelId": "Channel ID", "channelName": "Channel Name"}, "fieldOrder": ["channelName", "channelId"]}'>
+						<thead>
+							<tr>
+								<th class="number text-filter">Case</th>
+								<th class="dropdown-filter">Action</th>
+								<th class="text-filter">Offender</th>
+								<th class="text-filter">Moderator</th>
+								<th>Reason</th>
+								<th class="align-middle text-center">Actions</th>
+							</tr>
+						</thead>
+						<tbody class="table-group-divider">
+							{{range .Cases}}
+							<tr data-channel-id="{{.ChannelID}}" data-channel-name="{{.ChannelName}}">
+								<td><small>{{.CaseID}}</small></td>
+								<td class="align-middle"><span class="mod-action mod-action-{{lower .Action}}">{{.Action}}</span>
+								</td>
+								<td>@{{.OffenderUsername}} <small style="opacity: 0.7;">({{.OffenderID}})</small></td>
+								<td>@{{.StaffUsername}} <small style="opacity: 0.7;">({{.StaffID}})</small></td>
+								<td class="text-truncate w-50" style="max-width: 220px;" title="{{.Reason}}">
+									<span>{{.Reason}}</span>
+								</td>
+								<td class="align-middle text-center">
+									<div class="action-links {{if index $.CaseLogMap .CaseID}}d-flex justify-content-between{{end}}">
+										<a title="View case in Discord" href="{{.LogLink}}" class="btn btn-primary action-link text-decoration-none">
+											<i class="fas fa-eye"></i>
+										</a>
+										{{if index $.CaseLogMap .CaseID}}
+										<a title="View attached message log" href="{{$.HomeURL}}/dashboard/{{$.CurrentGuild.ID}}/manage/moderation/logs/{{index $.CaseLogMap .CaseID}}" class="btn btn-primary action-link text-decoration-none">
+											<i class="fa-solid fa-envelope-open-text"></i>
+										</a>
+										{{end}}
+									</div>
+								</td>
+							</tr>
 							{{end}}
-						</ul>
-						<input type="hidden" id="moderationAction" name="ModerationAction" value=""
-							data-table-id="casesTable" data-filter-column-index="3" data-no-row-id="noResultsRow">
-					</div>
-				</div>
-				<div class="col-md-3">
-					<input type="text" class="form-control" placeholder="Search Reason" data-table-id="casesTable"
-						data-filter-column-index="4" data-no-row-id="noResultsRow">
+						</tbody>
+					</table>
 				</div>
 			</div>
-			<div class="table-responsive">
-				<table class="table table-striped" id="casesTable"
-					style="--bs-table-color: white; --bs-table-striped-color: white; --bs-table-striped-bg: rgb(30 30 30 / 50%); --bs-table-bg: transparent">
-					<thead>
-						<tr>
-							<th style="white-space: nowrap;">Case ID</th>
-							<th>Offender</th>
-							<th>Moderator</th>
-							<th>Action</th>
-							<th>Reason</th>
-							<th></th>
-						</tr>
-					</thead>
-					<tbody>
-						{{range .Cases}}
-						<tr>
-							<td style="text-align: center;"><small>{{.CaseID}}</small></td>
-							<td>@{{.OffenderUsername}} <small style="opacity: 0.7;">({{.OffenderID}})</small></td>
-							<td>@{{.StaffUsername}} <small style="opacity: 0.7;">({{.StaffID}})</small></td>
-							<td><span class="mod-action mod-action-{{lower .Action}}">{{.Action}}</span></td>
-							<td class="text-truncate w-50" style="max-width: 220px;" title="{{.Reason}}">
-								<span>{{.Reason}}</span>
-							</td>
-							<td style="text-align: center;">
-								<a type="button" class="log-link" data-bs-toggle="modal"
-									data-bs-target="#{{.CaseID}}Modal">
-									<i class="fas fa-eye"></i>
-								</a>
-								{{if index $.CaseLogMap .CaseID}}
-								<a href="{{$.HomeURL}}/dashboard/{{$.CurrentGuild.ID}}/manage/moderation/logs/{{index $.CaseLogMap .CaseID}}"
-									class="log-link">
-									<i class="fa-solid fa-envelope-open-text"></i>
-								</a>
-								{{end}}
-							</td>
-						</tr>
-						{{end}}
-						<tr id="noResultsRow" class="text-center" {{if .Cases}}style="display: none;" {{end}}>
-							<td colspan="6">No cases found.</td>
-						</tr>
-					</tbody>
-				</table>
-				<div id="casesTable-pagination" class="mb-0 mt-2 d-flex justify-content-center"></div>
-			</div>
-			{{range .Cases}}
-			<div class="modal fade" id="{{.CaseID}}Modal" tabindex="-1" data-bs-backdrop="static"
-				data-bs-keyboard="false">
-				<div class="modal-dialog modal-dialog-centered modal-lg">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5>Case #{{.CaseID}}</h5>
-							<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-						</div>
-						<div class="modal-body"
-							style="border-bottom-right-radius: var(--bs-modal-inner-border-radius); border-bottom-left-radius: var(--bs-modal-inner-border-radius);">
-							<table class="table table-striped"
-								style="--bs-table-color: white; --bs-table-striped-color: white; --bs-table-bg: var(--baseGrey); --bs-table-bg: transparent">
-								<thead>
-									<tr>
-										<th>Offender</th>
-										<th>Moderator</th>
-										<th>Action</th>
-										<th>Reason</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr>
-										<th>{{.OffenderUsername}} (<code>{{.OffenderID}}</code>)</th>
-										<th>{{.StaffUsername}} (<code>{{.StaffID}}</code>)</th>
-										<th><code style="font-weight: bold;">{{.Action}}</code></th>
-										<th>{{.Reason}}</th>
-									</tr>
-									<tr colspan="4">
-										<td colspan="4"><a class="btn btn-primary w-100" href="{{.LogLink}}"
-												role="button"
-												style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Link
-												to Discord case</a></td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
-					</div>
-				</div>
-			</div>
-			{{end}}
-		</div>
+		</form>
 	</main>
 </body>
 {{template "javascript" .}}
-
 </html>

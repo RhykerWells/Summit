@@ -1,42 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-{{template "head" .}}
+	{{template "head" .}}
 </head>
-<body class="text-light">
+<body class="d-flex text-light">
 	{{template "dashboard_nav" .}}
-	<main class="d-flex align-items-start m-4" style="background-color: var(--baseGrey); border-radius: 0.5rem">
-		<div class="m-4 w-100">
-			<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage" class="btn text-light w-100" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Home</a>
-			<form id="CoreForm" method="POST">
-				<input type="hidden" name="form_type" value="Core">
-				<div class="d-flex flex-column justify-content-between align-items-sm-center mt-1 mb-0">
-					<div class="order-2 w-100 mt-2">
-						<div class="d-flex justify-content-between align-items-center flex-wrap w-100">
-							<div class="d-flex align-items-center">
-								<h2 class="mb-0">Core config</h2>
-							</div>
-							<button type="submit" class="btn btn-success">Save core changes</button>
-						</div>
-					</div>
+	{{template "sidebar" .}}
+	<main class="d-flex-row p-3">
+		<form method="POST">
+			<div id="pluginInfo" class="d-flex justify-content-between">
+				<div class="d-flex align-items-center gap-2">
+					<h2 class="mb-0">Core</h2>
 				</div>
-				<div class="container-fluid my-4 px-0">
+				<div class="d-flex">
+					<button type="submit" class="btn btn-success">Save changes</button>
+				</div>
+			</div>
+			<div class="m-4">
+				<div id="settings">
 					<div class="row">
-						<div class="col-md-4 mb-4">
-							<div class="card">
+						<div class="col-5">
+							<div class="card settings-card">
 								<div class="card-header">
-									<h5>Guild prefix</h5>
+									<h5 class="card-title mb-0">Guild prefix</h5>
 								</div>
 								<div class="card-body">
+									<input type="text" class="form-control text-light" name="GuildPrefix" id="GuildPrefix" autocomplete="off" value="{{.CoreConfig.GuildPrefix}}">
 									<p class="card-text">Note: That the bot will always be triggered by <code>@Summit</code></p>
-									{{textInput .CoreConfig.GuildPrefix "GuildPrefix"}}
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-			</form>
-		</div>
+			</div>
+		</form>
 	</main>
 	<div id="toastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1100;"></div>
 </body>

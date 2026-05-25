@@ -141,6 +141,7 @@ func BaseTemplateDataMW(inner http.Handler) http.Handler {
 			"Path":    r.URL.Path,
 			"Version": common.VERSION,
 			"Testing": common.ConfigTestMode,
+			"Sidebar": sidebarData,
 		}
 
 		inner.ServeHTTP(w, r.WithContext(SetTmplContextData(r.Context(), baseData)))

@@ -17,6 +17,20 @@ var PageHTML embed.FS
 func initWeb() {
 	web.AddHTMLFilesystem(PageHTML)
 	web.RegisterDashboardRoutes(registerCoreRoute)
+
+	categoryCore := web.SidebarCategory{
+		Name: "Core",
+		Icon: "fas fa-cogs",
+		Items: []*web.SidebarItem{
+			{
+				Name: "Core",
+				Icon: "fas fa-cogs",
+				URL:  "core",
+			},
+		},
+	}
+
+	web.AddSidebarCategory(categoryCore)
 }
 
 // registerCoreRoute initialises the core web routes

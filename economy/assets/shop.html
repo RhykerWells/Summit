@@ -1,171 +1,166 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 	{{template "head" .}}
 </head>
-
 <body class="text-light">
 	{{template "dashboard_nav" .}}
-	<main id="main" class="d-flex m-4" style="background-color: var(--baseGrey); border-radius: 0.5rem">
-		<div class="p-4 w-100">
-			<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage" class="btn text-light w-100"
-				style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Home</a>
-			<input type="hidden" name="form_type" value="Core">
-			<div class="d-flex flex-column justify-content-between align-items-sm-center mt-1 mb-0">
-				<div class="order-2 w-100 mt-2">
-					<div class="d-flex justify-content-between align-items-center flex-wrap w-100">
-						<div class="d-flex align-items-center">
-							<h2 class="mb-0">Shop</h2>
-						</div>
-						<div class="row gx-2 gy-1">
-							<button type="button" class="btn btn-primary" data-bs-toggle="modal"
-								data-bs-target="#newItemModal"
-								style="background-color: var(--basePurple); border-color: var(--accentGrey); text-wrap: nowrap;">Add
-								new item</button>
-						</div>
-					</div>
-				</div>
+	{{template "sidebar" .}}
+	<div id="toastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1100;"></div>
+	<main class="d-flex-row p-3">
+		<div id="pluginInfo" class="d-flex justify-content-between">
+			<div class="d-flex align-items-center gap-2">
+				<h2 class="mb-0">Economy Shop</h2>
 			</div>
+			<div class="d-flex">
+				<button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#newItemModal">Add Item</button>
+			</div>
+		</div>
+		<div class="m-4">
 			<div class="table-responsive">
-				<table class="table table-striped" id="itemTable"
-					style="--bs-table-color: white; --bs-table-striped-color: white; --bs-table-striped-bg: rgb(30 30 30 / 50%); --bs-table-bg: transparent;">
+				<table class="table table-striped" id="itemTable" data-metalabels='{"labels": {"description": "Description", "price": "Price", "quantity": "Quantity", "role": "Role", "reply": "Reply"}, "fieldOrder": ["description", "price", "quantity", "role", "reply"]}'>
 					<thead>
 						<tr>
-							<th style="width: 10%; white-space: nowrap;"></th>
-							<th>Item</th>
+							<th class="text-filter">Item</th>
+							<th class="align-middle text-center">Actions</th>
 						</tr>
 					</thead>
 					<tbody>
-						{{range $i, $item := .Store}}
-						<tr>
-							<td>
-								<button type="button" class="btn btn-primary" data-bs-toggle="modal"
-									data-bs-target="#editItem{{$item.ID}}Modal"
-									style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);"><i
-										class="fa-solid fa-pen-to-square"></i></button>
-								<button type="button" class="btn btn-primary" data-bs-toggle="modal"
-									data-bs-target="#deleteItem{{$item.ID}}Modal"
-									style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);"><i
-										class="fa-solid fa-trash"></i></button>
+						{{range .Store}}
+						<tr data-description="{{.Description}}" data-price="{{.Price}}" data-quantity="{{.Quantity}}" data-role="{{.Role}}" data-reply="{{.Reply}}">
+							<td class="text-truncate">{{.Name}}</td>
+							<td class="align-middle text-center">
+								<div class="action-links d-flex justify-content-between">
+									<button title="Edit" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editItem{{.ID}}Modal">
+										<i class="fa-solid fa-pen-to-square"></i>
+									</button>
+									<button title="Delete" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deleteItem{{.ID}}Modal">
+										<i class="fa-solid fa-trash"></i>
+									</button>
+								</div>
 							</td>
-							<td class="text-truncate">{{$item.Name}}</td>
 						</tr>
 						{{end}}
-						<tr id="noResultsRow" class="text-center" {{if .Store}}style="display: none;" {{end}}>
-							<td colspan="2">No items found.</td>
-						</tr>
 					</tbody>
 				</table>
-				<div id="itemTable-pagination" class="mb-0 mt-2 d-flex justify-content-center"></div>
 			</div>
-			{{range .Store}}
-			<div class="modal fade" id="editItem{{.ID}}Modal" tabindex="-1" data-bs-backdrop="static"
-				data-bs-keyboard="false">
-				<div class="modal-dialog modal-dialog-centered modal-lg">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="modal-title">Edit item</h5>
-							<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-						</div>
-						<form id="editItemForm" method="POST"
-							action="{{$.HomeURL}}/dashboard/{{$.CurrentGuild.ID}}/manage/economy/shop/{{.ID}}/edit">
-							<div class="modal-body">
-								<p class="card-text">Item name</p>
-								{{textInput .Name "Name" (stringDict "maxlength" 30 "label" true "labelContent" (printf
-								"%d/30" (len .Name)) "labelSide" "right")}}
-								<p class="card-text">Description</p>
-								{{textInput .Description "Description" (stringDict "maxlength" 200 "label" true
-								"labelContent" (printf "%d/200" (len .Description)) "labelSide" "right")}}
-								<p class="card-text">Price</p>
-								{{numberSelect 0 0 .Price "Price" (stringDict "label" true "labelContent"
-								$.EconomyConfig.EconomySymbol "labelSide" "left")}}
-								<p class="card-text">Quantity</p>
-								{{numberSelect 0 0 .Quantity "Quantity"}}
-								<p class="card-text">Role given</p>
-								{{roleOptionsSingle $.CurrentGuild.Roles .Role "Role"
-								$.CurrentGuild.BotHighestRolePosition}}
-								<p class="card-text">Reply</p>
-								{{textInput .Reply "Reply" (stringDict "maxlength" 200 "label" true "labelContent"
-								(printf "%d/200" (len .Reply)) "labelSide" "right")}}
-							</div>
-							<div class="modal-footer justify-content-between">
-								<div>
-									<button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
-									<button type="submit" class="btn btn-success">Save changes</button>
-								</div>
-							</div>
-						</form>
+		</div>
+		{{range .Store}}
+		<div class="modal fade" id="editItem{{.ID}}Modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+			<div class="modal-dialog modal-dialog-centered modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">Edit item</h5>
+						<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
 					</div>
+					<form id="editItemForm" method="POST" action="{{$.HomeURL}}/dashboard/{{$.CurrentGuild.ID}}/manage/economy/shop/{{.ID}}/edit">
+						<div class="modal-body">
+							<div class="form-group d-flex flex-column">
+								<label for="Name" class="text-nowrap">Item Name</label>
+								<input type="text" class="form-control text-light" name="Name" id="Name" autocomplete="off" value="{{.Name}}">
+							</div>
+							<div class="form-group d-flex flex-column">
+								<label for="Description" class="text-nowrap">Description</label>
+								<input type="text" class="form-control text-light" name="Description" id="Description" autocomplete="off" value="{{.Description}}">
+							</div>
+							<div class="form-group d-flex flex-column">
+								<label for="Price" class="text-nowrap">Price</label>
+								<input type="number" class="form-control text-light" name="Price" id="Price" min="0" step="1" placeholder="0" value="{{.Price}}">
+							</div>
+							<div class="form-group d-flex flex-column">
+								<label for="Quantity" class="text-nowrap">Quantity</label>
+								<input type="number" class="form-control text-light" name="Quantity" id="Quantity" min="0" step="1" placeholder="0" value="{{.Quantity}}">
+							</div>
+							<div class="form-group d-flex flex-column">
+								<label for="Role" class="text-nowrap">Role given</label>
+								{{roleOptionsSingle $.CurrentGuild.Roles .Role "Role" $.CurrentGuild.BotHighestRolePosition}}
+							</div>
+							<div class="form-group d-flex flex-column">
+								<label for="Reply" class="text-nowrap">Reply</label>
+								<input type="text" class="form-control text-light" name="Reply" id="Reply" autocomplete="off" value="{{.Reply}}">
+							</div>
+						</div>
+						<div class="modal-footer justify-content-between">
+							<div>
+								<button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+								<button type="submit" class="btn btn-success">Save changes</button>
+							</div>
+						</div>
+					</form>
 				</div>
 			</div>
-			<div class="modal fade" id="deleteItem{{.ID}}Modal" tabindex="-1" data-bs-backdrop="static"
-				data-bs-keyboard="false">
-				<div class="modal-dialog modal-dialog-centered modal-lg">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="modal-title">Delete item</h5>
-							<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-						</div>
-						<form id="deleteItem{{.ID}}Form" method="POST"
-							action="{{$.HomeURL}}/dashboard/{{$.CurrentGuild.ID}}/manage/economy/shop/{{.ID}}/delete">
-							<div class="modal-body">
-								<p class="card-text">This cannot be undone!</p>
-								<span>You are deleting: "<code>{{.Name}}</code>"</span>
-							</div>
-							<div class="modal-footer justify-content-between">
-								<div>
-									<button type="button" class="btn btn-secondary"
-										data-bs-dismiss="modal">Close</button>
-									<button type="submit" class="btn btn-danger">Delete response</button>
-								</div>
-							</div>
-						</form>
+		</div>
+		<div class="modal fade" id="deleteItem{{.ID}}Modal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+			<div class="modal-dialog modal-dialog-centered modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">Delete item</h5>
+						<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
 					</div>
+					<form id="deleteItem{{.ID}}Form" method="POST" action="{{$.HomeURL}}/dashboard/{{$.CurrentGuild.ID}}/manage/economy/shop/{{.ID}}/delete">
+						<div class="modal-body">
+							<p class="card-text">This cannot be undone!</p>
+							<span>You are deleting: "<code>{{.Name}}</code>"</span>
+						</div>
+						<div class="modal-footer justify-content-between">
+							<div>
+								<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+								<button type="submit" class="btn btn-danger">Delete response</button>
+							</div>
+						</div>
+					</form>
 				</div>
 			</div>
-			{{end}}
-			<div class="modal fade" id="newItemModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-				<div class="modal-dialog modal-dialog-centered modal-lg">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="modal-title">New item</h5>
-							<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-						</div>
-						<form id="newItemForm" method="POST"
-							action="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage/economy/shop/new">
-							<div class="modal-body">
-								<p class="card-text">Item name</p>
-								{{textInput "" "Name" (stringDict "maxlength" 30 "label" true "labelContent" "0/30"
-								"labelSide" "right")}}
-								<p class="card-text">Description</p>
-								{{textInput "" "Description" (stringDict "maxlength" 200 "label" true "labelContent"
-								"0/200" "labelSide" "right")}}
-								<p class="card-text">Price</p>
-								{{numberSelect 0 0 0 "Price" (stringDict "label" true "labelContent"
-								.EconomyConfig.EconomySymbol "labelSide" "left")}}
-								<p class="card-text">Quantity</p>
-								{{numberSelect 0 0 0 "Quantity"}}
-								<p class="card-text">Role given</p>
+		</div>
+		{{end}}
+		<div class="modal fade" id="newItemModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+			<div class="modal-dialog modal-dialog-centered modal-lg">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">New item</h5>
+						<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+					</div>
+					<form id="newItemForm" method="POST" action="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage/economy/shop/new">
+						<div class="modal-body">
+							<div class="form-group d-flex flex-column">
+								<label for="Name" class="text-nowrap">Item Name</label>
+								<input type="text" class="form-control text-light" name="Name" id="Name" autocomplete="off" value="">
+							</div>
+							<div class="form-group d-flex flex-column">
+								<label for="Description" class="text-nowrap">Item Description</label>
+								<input type="text" class="form-control text-light" name="Description" id="Description" autocomplete="off" value="">
+							</div>
+							<div class="form-group d-flex flex-column">
+								<label for="Price" class="text-nowrap">Item Price</label>
+								<div class="input-group">
+									<span class="input-group-text">{{replaceCustomEmojis .EconomyConfig.EconomySymbol}}</span>
+									<input type="number" class="form-control text-light" name="Price" id="Price" min="0" step="1" placeholder="0" value="">
+								</div>
+							</div>
+							<div class="form-group d-flex flex-column">
+								<label for="Quantity" class="text-nowrap">Item Quantity</label>
+								<input type="number" class="form-control text-light" name="Quantity" id="Quantity" min="0" step="1" placeholder="0" value="">
+							</div>
+							<div class="form-group d-flex flex-column">
+								<label for="Role" class="text-nowrap">Role Given By Item</label>
 								{{roleOptionsSingle .CurrentGuild.Roles "" "Role" .CurrentGuild.BotHighestRolePosition}}
-								<p class="card-text">Reply</p>
-								{{textInput "" "Reply" (stringDict "maxlength" 200 "label" true "labelContent" "0/200"
-								"labelSide" "right")}}
 							</div>
-							<div class="modal-footer justify-content-between">
-								<div>
-									<button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
-									<button type="submit" class="btn btn-success">Save</button>
-								</div>
+							<div class="form-group d-flex flex-column">
+								<label for="Reply" class="text-nowrap">Reply when using item</label>
+								<input type="text" class="form-control text-light" name="Reply" id="Reply" autocomplete="off" value="">
 							</div>
-						</form>
-					</div>
+						</div>
+						<div class="modal-footer justify-content-between">
+							<div>
+								<button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+								<button type="submit" class="btn btn-success">Save</button>
+							</div>
+						</div>
+					</form>
 				</div>
 			</div>
 		</div>
 	</main>
-	<div id="toastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1100;"></div>
 </body>
 {{template "javascript" .}}
-
 </html>

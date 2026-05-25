@@ -1,150 +1,172 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-{{template "head" .}}
+	{{template "head" .}}
 </head>
-<body class="text-light">
+<body class="d-flex text-light">
 	{{template "dashboard_nav" .}}
-	<main id="main" class="d-flex m-4" style="background-color: var(--baseGrey); border-radius: 0.5rem">
-		<div class="m-4 w-100">
-			<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage" class="btn text-light w-100" style="background-color: var(--accentGrey); border: 1px solid var(--accentGrey);">Home</a>
-			<form id="CoreForm" method="POST">
-				<input type="hidden" name="form_type" value="Core">
-				<div class="d-flex flex-column justify-content-between align-items-sm-center mt-1 mb-0">
-					<div class="order-2 w-100 mt-2">
-						<div class="d-flex justify-content-between align-items-center flex-wrap w-100">
-							<div class="d-flex align-items-center">
-								{{toggleSwitch .ModerationConfig.ModerationEnabled "ModerationEnabled"}}
-								<h2 class="mb-0">Moderation</h2>
-							</div>
-							<button type="submit" class="btn btn-success">Save changes</button>
-						</div>
-					</div>
-				</div>
-				<div class="container-fluid my-4 px-0">
-					<div class="row">
-						<div class="col-md-4 mb-4">
-							<div class="card">
-								<div class="card-header">
-									<h5>Modlog channel</h5>
-								</div>
-								<div class="card-body">
-									<p class="card-text">Note: If <code>None</code> is selected, moderation commands won't run.</p>
-									{{channelOptionsSingle .CurrentGuild.Channels .ModerationConfig.ModerationLogChannel "ModerationLogChannel"}}
-								</div>
-							</div>
-						</div>
-						<div class="col-md-4 mb-4">
-							<div class="card">
-								<div class="d-flex align-items-center card-header">
-									{{toggleSwitch .ModerationConfig.ModerationTriggerDeletionEnabled "ModerationTriggerDeletionEnabled"}}
-									<h5>Trigger deletion</h5>
-								</div>
-								<div class="card-body">
-									<p class="card-text">Note: a time of <code>0</code> seconds is immediate</p>
-									{{numberSelect 0 60 .ModerationConfig.ModerationTriggerDeletionSeconds "ModerationTriggerDeletionSeconds" (stringDict "label" true "labelContent" "seconds" "labelSide" "right")}}
-								</div>
-							</div>
-						</div>
-						<div class="col-md-4 mb-4">
-							<div class="card">
-								<div class="d-flex align-items-center card-header">
-									{{toggleSwitch .ModerationConfig.ModerationResponseDeletionEnabled "ModerationResponseDeletionEnabled"}}
-									<h5>Response deletion</h5>
-								</div>
-								<div class="card-body">
-									<p class="card-text">Note: a time of <code>0</code> seconds is immediate</p>
-									{{numberSelect 0 60 .ModerationConfig.ModerationResponseDeletionSeconds "ModerationResponseDeletionSeconds" (stringDict "label" true "labelContent" "seconds" "labelSide" "right")}}
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-				<h2 style="margin-top: 2px; margin-bottom: 0px;">Command settings</h2>
-				<div id="restrictions" class="container-fluid my-4 px-0">
-					<ul class="nav nav-tabs" id="myTab" role="tablist" style="border-bottom: none;">
-						<li class="nav-item" role="presentation">
-							<button class="tab-head nav-link active" id="warn-tab" data-bs-toggle="tab" data-bs-target="#warn-tab-pane" type="button" role="tab" aria-controls="warn-tab-pane" aria-selected="true">Warn</button>
-						</li>
-						<li class="nav-item" role="presentation">
-							<button class="tab-head nav-link" id="mute-tab" data-bs-toggle="tab" data-bs-target="#mute-tab-pane" type="button" role="tab" aria-controls="mute-tab-pane" aria-selected="false">Mute/Unmute</button>
-						</li>
-						<li class="nav-item" role="presentation">
-							<button class="tab-head nav-link" id="kick-tab" data-bs-toggle="tab" data-bs-target="#kick-tab-pane" type="button" role="tab" aria-controls="kick-tab-pane" aria-selected="false">Kick</button>
-						</li>
-						<li class="nav-item" role="presentation">
-							<button class="tab-head nav-link" id="ban-tab" data-bs-toggle="tab" data-bs-target="#ban-tab-pane" type="button" role="tab" aria-controls="ban-tab-pane" aria-selected="false">Ban/Unban</button>
-						</li>
-					</ul>
-					<div class="tab-content" id="myTabContent">
-						<div class="tab-pane fade show active" id="warn-tab-pane" role="tabpanel" aria-labelledby="warn-tab" tabindex="0">
-							<p>Allows you to add warnings to a users profile. Cases can be accessed through <code>-cases @user [page] -type warn</code></p>
-							<div class="row">
-								<div class="col-sm">
-									<div class="form-group">
-										<label>Users with any of the following roles will have permission to use warning related commands</label>
-										{{roleOptionsMulti .CurrentGuild.Roles .ModerationConfig.WarnRequiredRoles "WarnRequiredRoles" -1}}
-									</div>
-								</div>
-								<div class="col-sm"></div>
-							</div>
-						</div>
-						<div class="tab-pane fade" id="mute-tab-pane" role="tabpanel" aria-labelledby="mute-tab" tabindex="0">
-							<p>Allows you to add punish users by removing their ability to talk. Cases can be accessed through <code>-cases @user [page] -type mute</code></p>
-							<div class="row">
-								<div class="col-sm">
-									<div class="form-group">
-										<label>Role given when a user is muted</label>
-										{{roleOptionsSingle .CurrentGuild.Roles .ModerationConfig.MuteRole "MuteRole" .CurrentGuild.BotHighestRolePosition}}
-									</div>
-									<div class="form-group">
-										<div class="input-group mb-3">
-											{{toggleSwitch .ModerationConfig.MuteManageRole "MuteManageRole"}}
-											<label>Enable the bot to manage the mute role.</label>
-										</div>
-									</div>
-									<div class="form-group">
-										<label>Remove and re-add the following roles on <code>mute</code> and <code>unmute</code>.</label>
-										{{roleOptionsMulti .CurrentGuild.Roles .ModerationConfig.MuteUpdateRoles "MuteUpdateRoles" .CurrentGuild.BotHighestRolePosition}}
-									</div>
-									<div class="form-group">
-										<label>Users with any of the following roles will have permission to use mute related commands</label>
-										{{roleOptionsMulti .CurrentGuild.Roles .ModerationConfig.MuteRequiredRoles "MuteRequiredRoles" -1}}
-									</div>
-								</div>
-								<div class="col-sm"></div>
-							</div>
-						</div>
-						<div class="tab-pane fade" id="kick-tab-pane" role="tabpanel" aria-labelledby="kick-tab" tabindex="0">
-							<p>Allows you to kick users from the server. Cases can be accessed through <code>-cases @user [page] -type kick</code></p>
-							<div class="row">
-								<div class="col-sm">
-									<div class="form-group">
-										<label>Users with any of the following roles will have permission to use kick related commands</label>
-										{{roleOptionsMulti .CurrentGuild.Roles .ModerationConfig.KickRequiredRoles "KickRequiredRoles" -1}}
-									</div>
-								</div>
-								<div class="col-sm"></div>
-							</div>
-						</div>
-						<div class="tab-pane fade" id="ban-tab-pane" role="tabpanel" aria-labelledby="ban-tab" tabindex="0">
-							<p>Allows you to ban users from the server. Cases can be accessed through <code>-cases @user [page] -type ban</code></p>
-							<div class="row">
-								<div class="col-sm">
-									<div class="form-group">
-										<label>Users with any of the following roles will have permission to use ban related commands</label>
-										{{roleOptionsMulti .CurrentGuild.Roles .ModerationConfig.BanRequiredRoles "BanRequiredRoles" -1}}
-									</div>
-								</div>
-								<div class="col-sm"></div>
-							</div>
-						</div>
-					</div>
-				</form>
-			</div>
-		</div>
-	</main>
+	{{template "sidebar" .}}
 	<div id="toastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1100;"></div>
+	<main class="d-flex-row p-3">
+		<form method="POST">
+			<div id="pluginInfo" class="d-flex justify-content-between">
+				<div class="d-flex align-items-center gap-2">
+					<h2 class="mb-0">Moderation</h2>
+					{{toggleSwitch .ModerationConfig.ModerationEnabled "ModerationEnabled"}}
+				</div>
+				<div class="d-flex">
+					<button type="submit" class="btn btn-success">Save changes</button>
+				</div>
+			</div>
+			<div class="m-4">
+				<div id="settings">
+					<div class="row justify-content-evenly">
+						<div class="col-6">
+							<div class="card settings-card">
+								<div class="card-header">
+									<h5 class="card-title mb-0">Mod log channel</h5>
+								</div>
+								<div class="card-body">	
+									{{channelOptionsSingle .CurrentGuild.Channels .ModerationConfig.ModerationLogChannel "ModerationLogChannel"}}
+									<p class="card-text">Note: If <code>None</code> is selected, moderation commands won't run.</p>
+								</div>
+							</div>
+						</div>
+						<div class="col-6"></div>
+					</div>
+					<div class="row justify-content-evenly">
+						<div class="col-11">
+							<hr>	
+						</div>
+					</div>
+					<div class="row justify-content-evenly">
+						<div class="col-6">
+							<div class="card settings-card">
+								<div class="card-header">
+									<div class="card-title d-flex justify-content-between align-items-center gap-2 mb-0">
+										<h5 class="mb-0">Delete Trigger</h5>
+										{{toggleSwitch .ModerationConfig.ModerationTriggerDeletionEnabled "ModerationTriggerDeletionEnabled"}}
+									</div>
+								</div>
+								<div class="card-body">	
+									<div class="input-group">
+										<input type="number" name="ModerationTriggerDeletionSeconds" id="ModerationTriggerDeletionSeconds" min="0" max="60" step="1" class="form-control text-light" placeholder="0" value="{{.ModerationConfig.ModerationTriggerDeletionSeconds}}">
+										<span class="input-group-text">Seconds</span>
+									</div>
+									<p class="card-text">Note: a time of <code>0</code> seconds is immediate</p>
+								</div>
+							</div>
+						</div>
+						<div class="col-6">
+							<div class="card settings-card">
+								<div class="card-header">
+									<div class="card-title d-flex justify-content-between align-items-center gap-2 mb-0">
+										<h5 class="mb-0">Delete Response</h5>
+										{{toggleSwitch .ModerationConfig.ModerationResponseDeletionEnabled "ModerationResponseDeletionEnabled"}}
+									</div>
+								</div>
+								<div class="card-body">
+									<div class="input-group">
+										<input type="number" name="ModerationResponseDeletionSeconds" id="ModerationResponseDeletionSeconds" min="0" max="60" step="1" class="form-control text-light" placeholder="0" value="{{.ModerationConfig.ModerationResponseDeletionSeconds}}">
+										<span class="input-group-text">Seconds</span>
+									</div>
+									<p class="card-text">Note: a time of <code>0</code> seconds is immediate</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="restrictions">
+				<h2 style="margin-top: 2px; margin-bottom: 0px;">Command Settings</h2> 
+				<div class="m-4">
+					<div class="card settings-card">
+						<div class="card-header">
+							<ul class="nav nav-tabs" id="myTab" role="tablist" style="border-bottom: none;">
+								<li class="nav-item" role="presentation">
+									<button class="tab-head nav-link text-white active" id="warn-tab" data-bs-toggle="tab" data-bs-target="#warn-tab-pane" type="button" role="tab" aria-controls="warn-tab-pane" aria-selected="true">Warn</button>
+								</li>
+								<li class="nav-item" role="presentation">
+									<button class="tab-head nav-link text-white" id="mute-tab" data-bs-toggle="tab" data-bs-target="#mute-tab-pane" type="button" role="tab" aria-controls="mute-tab-pane" aria-selected="false">Mute/Unmute</button>
+								</li>
+								<li class="nav-item" role="presentation">
+									<button class="tab-head nav-link text-white" id="kick-tab" data-bs-toggle="tab" data-bs-target="#kick-tab-pane" type="button" role="tab" aria-controls="kick-tab-pane" aria-selected="false">Kick</button>
+								</li>
+								<li class="nav-item" role="presentation">
+									<button class="tab-head nav-link text-white" id="ban-tab" data-bs-toggle="tab" data-bs-target="#ban-tab-pane" type="button" role="tab" aria-controls="ban-tab-pane" aria-selected="false">Ban/Unban</button>
+								</li>
+							</ul>
+						</div>
+						<div class="card-body">
+							<div class="tab-content" id="myTabContent">
+								<div class="tab-pane fade show active" id="warn-tab-pane" role="tabpanel" aria-labelledby="warn-tab" tabindex="0">
+									<div class="row">
+										<div class="col-sm">
+											<p>Allows you to add warnings to a users profile. Cases can be accessed through <code>-cases @user [page] -type warn</code>.</p>
+											<div class="form-group d-flex flex-column">
+												<label>Users with any of the following roles will have permission to use warning related commands.</label>
+												{{roleOptionsMulti .CurrentGuild.Roles .ModerationConfig.WarnRequiredRoles "WarnRequiredRoles" -1}}
+											</div>
+										</div>
+										<div class="col-sm"></div>
+									</div>
+								</div>
+								<div class="tab-pane fade" id="mute-tab-pane" role="tabpanel" aria-labelledby="mute-tab" tabindex="0">
+									<div class="row">
+										<div class="col-sm">
+											<p>Allows you to add punish users by removing their ability to talk. Cases can be accessed through <code>-cases @user [page] -type mute</code></p>
+											<div class="form-group d-flex flex-column">
+												<label class="text-nowrap">Role given when a user is muted</label>
+												{{roleOptionsSingle .CurrentGuild.Roles .ModerationConfig.MuteRole "MuteRole" .CurrentGuild.BotHighestRolePosition}}
+											</div>
+											<div class="form-group d-flex gap-2 align-items-center">
+												{{toggleSwitch .ModerationConfig.MuteManageRole "MuteManageRole"}}
+												<label class="text-nowrap">Enable the bot to manage the mute role.</label>
+											</div>
+											<div class="form-group d-flex flex-column">
+												<label class="text-nowrap">Remove and re-add the following roles on <code>mute</code> and <code>unmute</code>.</label>
+												{{roleOptionsMulti .CurrentGuild.Roles .ModerationConfig.MuteUpdateRoles "MuteUpdateRoles" .CurrentGuild.BotHighestRolePosition}}
+											</div>
+											<div class="form-group d-flex flex-column">
+												<label class="text-nowrap">Users with any of the following roles will have permission to use mute related commands</label>
+												{{roleOptionsMulti .CurrentGuild.Roles .ModerationConfig.MuteRequiredRoles "MuteRequiredRoles" -1}}
+											</div>
+										</div>
+										<div class="col-sm"></div>
+									</div>
+								</div>
+								<div class="tab-pane fade" id="kick-tab-pane" role="tabpanel" aria-labelledby="kick-tab" tabindex="0">
+									<p>Allows you to kick users from the server. Cases can be accessed through <code>-cases @user [page] -type kick</code></p>
+									<div class="row">
+										<div class="col-sm">
+											<div class="form-group">
+												<label>Users with any of the following roles will have permission to use kick related commands</label>
+												{{roleOptionsMulti .CurrentGuild.Roles .ModerationConfig.KickRequiredRoles "KickRequiredRoles" -1}}
+											</div>
+										</div>
+										<div class="col-sm"></div>
+									</div>
+								</div>
+								<div class="tab-pane fade" id="ban-tab-pane" role="tabpanel" aria-labelledby="ban-tab" tabindex="0">
+									<p>Allows you to ban users from the server. Cases can be accessed through <code>-cases @user [page] -type ban</code></p>
+									<div class="row">
+										<div class="col-sm">
+											<div class="form-group">
+												<label>Users with any of the following roles will have permission to use ban related commands</label>
+												{{roleOptionsMulti .CurrentGuild.Roles .ModerationConfig.BanRequiredRoles "BanRequiredRoles" -1}}
+											</div>
+										</div>
+										<div class="col-sm"></div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+</main>
 </body>
 {{template "javascript" .}}
 </html>
