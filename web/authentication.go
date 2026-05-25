@@ -48,28 +48,28 @@ func confirmLogin(w http.ResponseWriter, r *http.Request) {
 	csrf := getCSRF(w, r)
 	state := r.URL.Query().Get("state")
 	if state != csrf {
-		http.Redirect(w, r, "/?error=invalid_CSRF", http.StatusTemporaryRedirect)
+		http.Redirect(w, r, "/?error=invalid_CSRF", http.StatusSeeOther)
 		return
 	}
 
 	code := r.FormValue("code")
 	token, err := OauthConf.Exchange(ctx, code)
 	if err != nil {
-		http.Redirect(w, r, "/?error=oauth2_failure", http.StatusTemporaryRedirect)
+		http.Redirect(w, r, "/?error=oauth2_failure", http.StatusSeeOther)
 		return
 	}
 
 	client := OauthConf.Client(ctx, token)
 	resp, err := client.Get("https://discord.com/api/v10/users/@me")
 	if err != nil {
-		http.Redirect(w, r, "/?error=failed_retrieving_info", http.StatusTemporaryRedirect)
+		http.Redirect(w, r, "/?error=failed_retrieving_info", http.StatusSeeOther)
 		return
 	}
 	defer resp.Body.Close()
 
 	setUserSession(w, token)
 
-	http.Redirect(w, r, "/dashboard", http.StatusTemporaryRedirect)
+	http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
 }
 
 // handleLogout handles the logout route and ensures that all cookies related to data storage are removed
@@ -82,5 +82,5 @@ func handleLogout(w http.ResponseWriter, r *http.Request) {
 		deleteCookie(w, csrfCookie)
 	}
 
-	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
