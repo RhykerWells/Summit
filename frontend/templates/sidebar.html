@@ -2,12 +2,12 @@
 <aside id="sidebar" class="sidebar offcanvas-xl offcanvas-start d-lg-flex flex-column text-white" tabindex="-1">
 	<div class="offcanvas-header d-flex d-xl-none justify-content-between align-items-center">
 		<h5 class="offcanvas-title">Navigation</h5>
-		<a href="#" data-bs-dismiss="sidebar"><i class="fa-solid fa-xmark"></i></a>
+		<a href="#" data-bs-dismiss="offcanvas"><i class="fa-solid fa-xmark"></i></a>
 	</div>
 	<ul class="nav flex-column mb-auto">
 		{{if .CurrentGuild}}
 		<li class="nav-item">
-			<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage" class="nav-link sidebar-category d-flex justify-content-between">
+			<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage" class="nav-link sidebar-category d-flex justify-content-between text-white">
 				<span>
 					<i class="fa-solid fa-house me-2"></i>
 					Home
@@ -17,7 +17,7 @@
 		{{range .Sidebar}}
 		<li class="nav-item mb-2">
 		<!-- Category -->
-			<a class="nav-link sidebar-category d-flex justify-content-between align-items-center text-white" data-bs-toggle="collapse" href="#sidebar-{{.Name}}" role="button" aria-expanded="false">
+			<a class="sidebar-category nav-link d-flex justify-content-between align-items-center text-white" data-bs-toggle="collapse" href="#sidebar-{{.Name}}" role="button" aria-expanded="false">
 				<span>
 					<i class="{{.Icon}} me-2"></i>
 					{{.Name}}
@@ -28,7 +28,7 @@
 				<ul class="nav flex-column">
 					{{range .Items}}
 					<li class="nav-item">
-						<a href="{{$.HomeURL}}/dashboard/{{$.CurrentGuild.ID}}/manage/{{.URL}}" class="nav-link text-secondary">
+						<a href="{{$.HomeURL}}/dashboard/{{$.CurrentGuild.ID}}/manage/{{.URL}}" class="sidebar-item item nav-link text-secondary">
 							<i class="{{.Icon}} me-2"></i>
 							{{.Name}}
 						</a>
@@ -43,7 +43,7 @@
 	<div class="p-3">
 		<hr>
 		<div id="sidebarDropdownHelpArea" class="dropup">
-			<a id="sidebarDropdownHelp" class="dropdown-toggle d-flex align-items-center justify-content-between text-decoration-none" data-bs-toggle="dropdown" aria-expanded="false">
+			<a id="sidebarDropdownHelp" class="dropdown-toggle d-flex align-items-center justify-content-between text-decoration-none text-white" data-bs-toggle="dropdown" aria-expanded="false">
 				<span>Help</span>
 				<i class="fa-solid fa-caret-up"></i>
 			</a>
