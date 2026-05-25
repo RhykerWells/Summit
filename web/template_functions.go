@@ -259,7 +259,7 @@ func channelOptionsSingle(channels []*discordgo.Channel, selectedChannelID strin
 	}
 
 	var menu strings.Builder
-	menu.WriteString(`<div class="dropdown">`)
+	menu.WriteString(`<div class="dropdown input-group">`)
 	menu.WriteString(`
 		<a class="btn dropdown-toggle text-start flex-grow-1 d-flex align-items-center justify-content-between text-decoration-none text-white" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 			<span id="` + uniqueID + `Label">` + template.HTMLEscapeString(displayText) + `</span>
