@@ -493,6 +493,15 @@ textarea {
 	}
 }
 
+.form-group {
+	margin-bottom: 1.5rem;
+
+	label {
+		font-weight: 500;
+		display: block;
+	}
+}
+
 .input-group-text {
 	background-color: var(--bg-tertiary) !important;
 	border: 1px solid rgba(255, 255, 255, 0.1) !important;
