@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"sync"
-	"time"
 
 	"github.com/RhykerWells/Summit/common"
 	"github.com/RhykerWells/Summit/frontend"
@@ -45,15 +44,6 @@ func Run() {
 	common.InitWebPlugins()
 
 	initDiscordOauth()
-
-	// Start session cleanup goroutine
-	go func() {
-		ticker := time.NewTicker(1 * time.Hour)
-		defer ticker.Stop()
-		for range ticker.C {
-			cleanupExpiredSessions()
-		}
-	}()
 
 	multiplexer := setupWebRoutes()
 	runWebServer(multiplexer)
