@@ -97,8 +97,6 @@ func saveConfigHandler(w http.ResponseWriter, r *http.Request) {
 	newCfg := web.GetForm[Config](r)
 	// Ensure these non-editable fields are still present in the new form
 	newCfg.GuildID = oldCfg.GuildID
-	newCfg.EconomyCustomWorkResponses = oldCfg.EconomyCustomWorkResponses
-	newCfg.EconomyCustomCrimeResponses = oldCfg.EconomyCustomCrimeResponses
 
 	err := SaveConfig(newCfg)
 	if err != nil {

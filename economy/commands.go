@@ -348,8 +348,9 @@ var incomeCommands = []*dispatch.Command{
 			payout := rand.Int63n(guildConfig.EconomyMaxReturn-guildConfig.EconomyMinReturn+1) + guildConfig.EconomyMinReturn
 
 			embed.Description = fmt.Sprintf("You decided to work today! You got paid a hefty %s%s", guildConfig.EconomySymbol, humanize.Comma(payout))
-			if guildConfig.EconomyCustomWorkResponsesEnabled && len(guildConfig.EconomyCustomWorkResponses) > 0 {
-				embed.Description = strings.ReplaceAll(guildConfig.EconomyCustomWorkResponses[rand.Intn(len(guildConfig.EconomyCustomWorkResponses))], "(amount)", fmt.Sprintf("%s%s", guildConfig.EconomySymbol, humanize.Comma(payout)))
+			responses, _ := models.EconomyResponses(models.EconomyResponseWhere.GuildID.EQ(guildConfig.GuildID), models.EconomyResponseWhere.Type.EQ("work")).All(context.Background(), common.PQ)
+			if guildConfig.EconomyCustomWorkResponsesEnabled && len(responses) > 0 {
+				embed.Description = strings.ReplaceAll(responses[rand.Intn(len(responses))].Response, "(amount)", fmt.Sprintf("%s%s", guildConfig.EconomySymbol, humanize.Comma(payout)))
 			}
 
 			cash = cash + payout
@@ -384,8 +385,9 @@ var incomeCommands = []*dispatch.Command{
 
 			if rand.Int63n(2) == 1 {
 				embed.Description = fmt.Sprintf("You broke the law for a pretty penny! You made %s%s in your crime spree", guildConfig.EconomySymbol, humanize.Comma(payout))
-				if guildConfig.EconomyCustomCrimeResponsesEnabled && len(guildConfig.EconomyCustomCrimeResponses) > 0 {
-					embed.Description = strings.ReplaceAll(guildConfig.EconomyCustomCrimeResponses[rand.Intn(len(guildConfig.EconomyCustomCrimeResponses))], "(amount)", fmt.Sprintf("%s%s", guildConfig.EconomySymbol, humanize.Comma(payout)))
+				responses, _ := models.EconomyResponses(models.EconomyResponseWhere.GuildID.EQ(guildConfig.GuildID), models.EconomyResponseWhere.Type.EQ("crime")).All(context.Background(), common.PQ)
+				if guildConfig.EconomyCustomCrimeResponsesEnabled && len(responses) > 0 {
+					embed.Description = strings.ReplaceAll(responses[rand.Intn(len(responses))].Response, "(amount)", fmt.Sprintf("%s%s", guildConfig.EconomySymbol, humanize.Comma(payout)))
 				}
 				embed.Color = common.SuccessGreen
 				cash = cash + payout
@@ -429,7 +431,7 @@ var incomeCommands = []*dispatch.Command{
 				return errors.New("You cannot rob yourself")
 			}
 
-			fullEconomyMemberTarget := getFullEconomyMember(guildConfig, data.Author.ID)
+			fullEconomyMemberTarget := getFullEconomyMember(guildConfig, targetMember.User.ID)
 			targetCash := fullEconomyMemberTarget.EconomyUser.Cash
 
 			if targetCash < 0 {
