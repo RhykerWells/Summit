@@ -199,7 +199,7 @@ func RequireUserMW(inner http.Handler) http.Handler {
 
 		user, ok := ctx.Value(CtxKeyCurrentUser).(*discordgo.User)
 		if !ok || user == nil {
-			http.Redirect(w, r, "/?error=no_access", http.StatusForbidden)
+			http.Redirect(w, r, "/?error=no_access", http.StatusTemporaryRedirect)
 			return
 		}
 
@@ -220,18 +220,18 @@ func CurrentGuildMW(inner http.Handler) http.Handler {
 
 		user, ok := ctx.Value(CtxKeyCurrentUser).(*discordgo.User)
 		if !ok || user == nil {
-			http.Redirect(w, r, "/?error=no_access", http.StatusForbidden)
+			http.Redirect(w, r, "/?error=no_access", http.StatusTemporaryRedirect)
 			return
 		}
 
 		member, err := functions.GetMember(guildID, user.ID)
 		if err != nil {
-			http.Redirect(w, r, "/?error=no_access", http.StatusForbidden)
+			http.Redirect(w, r, "/?error=no_access", http.StatusTemporaryRedirect)
 			return
 		}
 
 		if !isUserManaged(guildID, member) {
-			http.Redirect(w, r, "/?error=no_access", http.StatusForbidden)
+			http.Redirect(w, r, "/?error=no_access", http.StatusTemporaryRedirect)
 			return
 		}
 
@@ -251,7 +251,7 @@ func RequireGuildMW(inner http.Handler) http.Handler {
 
 		guild, ok := ctx.Value(CtxKeyCurrentGuild).(*discordgo.Guild)
 		if !ok || guild == nil {
-			http.Redirect(w, r, "/?error=no_access", http.StatusForbidden)
+			http.Redirect(w, r, "/?error=no_access", http.StatusTemporaryRedirect)
 			return
 		}
 
