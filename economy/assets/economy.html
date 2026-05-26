@@ -186,7 +186,7 @@
 						<form id="edit{{$customResponse}}Response{{.ID}}Form" method="POST" action="{{$.HomeURL}}/dashboard/{{$.CurrentGuild.ID}}/manage/economy/responses/{{lower $customResponse}}/{{.ID}}/edit">
 							<div class="modal-body">
 								<p class="card-text">To add the payout to the response, include the literal string: <code>(amount)</code></p>
-								<input type="text" class="form-control text-light" name="Response" id="Response" value="">
+								<input type="text" class="form-control text-light" name="Response" id="Response" value="{{.Response}}" autocomplete="off">
 							</div>
 							<div class="modal-footer justify-content-between">
 								<div>

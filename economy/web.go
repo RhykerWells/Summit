@@ -196,7 +196,7 @@ func editResponseHandler(w http.ResponseWriter, r *http.Request) {
 
 	decoder := schema.NewDecoder()
 	decoder.IgnoreUnknownKeys(true)
-	err = decoder.Decode(&responseEntry, r.PostForm)
+	err = decoder.Decode(responseEntry, r.PostForm)
 	if err != nil {
 		web.SendErrorToast(w, fmt.Sprintf("Failed to decode form: %s", err.Error()))
 		return
@@ -246,6 +246,8 @@ type ItemField string
 
 const (
 	DescriptionField ItemField = "Description"
+	PriceField       ItemField = "Price"
+	QuantityField    ItemField = "Quantity"
 	ReplyField       ItemField = "Reply"
 )
 
@@ -299,7 +301,7 @@ func editItemHandler(w http.ResponseWriter, r *http.Request) {
 
 	decoder := schema.NewDecoder()
 	decoder.IgnoreUnknownKeys(true)
-	err = decoder.Decode(&itemEntry, r.PostForm)
+	err = decoder.Decode(itemEntry, r.PostForm)
 	if err != nil {
 		web.SendErrorToast(w, fmt.Sprintf("Failed to decode form: %s", err.Error()))
 		return
@@ -357,6 +359,21 @@ func isItemOk(item *models.EconomyShop, ignoreCurrentName bool) (bool, error) {
 		return ok, err
 	}
 
+	ok, err = itemPriceQuantityOkay(PriceField, item.Price)
+	if !ok {
+		return ok, err
+	}
+
+	ok, err = itemPriceQuantityOkay(QuantityField, item.Quantity)
+	if !ok {
+		return ok, err
+	}
+
+	ok, err = itemRoleOkay(item.GuildID, item.Role)
+	if !ok {
+		return ok, err
+	}
+
 	return true, nil
 }
 
@@ -380,6 +397,27 @@ func itemDescReplyOkay(t ItemField, s string) (bool, error) {
 	maxLength := 200
 	if len(s) > maxLength {
 		return false, fmt.Errorf("The %s must be less than %d characters", t, maxLength)
+	}
+
+	return true, nil
+}
+
+func itemPriceQuantityOkay(t ItemField, n int64) (bool, error) {
+	if n < 0 {
+		return false, fmt.Errorf("The %s must be a positive number.", t)
+	}
+
+	return true, nil
+}
+
+func itemRoleOkay(guildID string, roleID string) (bool, error) {
+	if roleID == "" {
+		return true, nil
+	}
+
+	role, err := functions.GetRole(guildID, roleID)
+	if err != nil || role == nil {
+		return false, errors.New("Role not found.")
 	}
 
 	return true, nil
