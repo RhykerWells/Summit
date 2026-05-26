@@ -378,6 +378,10 @@ func isItemOk(item *models.EconomyShop, ignoreCurrentName bool) (bool, error) {
 }
 
 func itemNameOk(guildID string, newName string, ignoreCurrentName bool) (bool, error) {
+	if newName == "" {
+		return false, errors.New("Name cannot be empty.")
+	}
+
 	if !ignoreCurrentName {
 		currentItem, _ := models.EconomyShops(models.EconomyShopWhere.GuildID.EQ(guildID), models.EconomyShopWhere.Name.EQ(newName)).One(context.Background(), common.PQ)
 		if currentItem != nil {
