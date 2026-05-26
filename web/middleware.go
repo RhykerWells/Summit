@@ -48,11 +48,12 @@ func createCSRF() (string, error) {
 // setCSRF sets the csrf token in the clients web cache as a cookie
 func setCSRF(w http.ResponseWriter, token string) {
 	http.SetCookie(w, &http.Cookie{
-		Name:    "summit_csrf",
-		Value:   token,
-		Path:    "/",
-		Expires: time.Now().Add(300 * time.Second),
-		Secure:  true,
+		Name:     "summit_csrf",
+		Value:    token,
+		Path:     "/",
+		Expires:  time.Now().Add(300 * time.Second),
+		Secure:   true,
+		HttpOnly: true,
 	})
 }
 
@@ -65,11 +66,12 @@ func getCSRF(w http.ResponseWriter, r *http.Request) string {
 
 	// If decoding failed — clear the bad cookie
 	http.SetCookie(w, &http.Cookie{
-		Name:    "summit_csrf",
-		Value:   "",
-		Path:    "/",
-		Expires: time.Unix(0, 0),
-		Secure:  true,
+		Name:     "summit_csrf",
+		Value:    "",
+		Path:     "/",
+		Expires:  time.Unix(0, 0),
+		Secure:   true,
+		HttpOnly: true,
 	})
 	return ""
 }
@@ -80,10 +82,12 @@ func setUserSession(w http.ResponseWriter, token *oauth2.Token) {
 	sessionStore.Set(sessionID, token, cache.DefaultExpiration)
 
 	http.SetCookie(w, &http.Cookie{
-		Name:    "summit_userinfo",
-		Value:   sessionID,
-		Path:    "/",
-		Expires: time.Now().Add(24 * time.Hour * 30),
+		Name:     "summit_userinfo",
+		Value:    sessionID,
+		Path:     "/",
+		Expires:  time.Now().Add(24 * time.Hour * 30),
+		Secure:   true,
+		HttpOnly: true,
 	})
 }
 
@@ -106,10 +110,12 @@ func checkUserCookie(w http.ResponseWriter, r *http.Request) (*oauth2.Token, err
 
 		// If verification failed — clear the bad cookie
 		http.SetCookie(w, &http.Cookie{
-			Name:    "summit_userinfo",
-			Value:   "",
-			Path:    "/",
-			Expires: time.Unix(0, 0),
+			Name:     "summit_userinfo",
+			Value:    "",
+			Path:     "/",
+			Expires:  time.Unix(0, 0),
+			Secure:   true,
+			HttpOnly: true,
 		})
 	}
 	return nil, errors.New("no session found")
@@ -119,6 +125,8 @@ func checkUserCookie(w http.ResponseWriter, r *http.Request) (*oauth2.Token, err
 func deleteCookie(w http.ResponseWriter, cookie *http.Cookie) {
 	cookie.Value = "none"
 	cookie.Path = "/"
+	cookie.HttpOnly = true
+	cookie.Secure = true
 	http.SetCookie(w, cookie)
 }
 
