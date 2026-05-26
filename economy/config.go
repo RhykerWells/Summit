@@ -23,9 +23,7 @@ type Config struct {
 
 	// Custom responses
 	EconomyCustomWorkResponsesEnabled  bool
-	EconomyCustomWorkResponses         []string
 	EconomyCustomCrimeResponsesEnabled bool
-	EconomyCustomCrimeResponses        []string
 }
 
 // ConfigToSQLModel converts a Config struct to the relevant SQLBoiler model
