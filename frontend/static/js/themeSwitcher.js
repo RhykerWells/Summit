@@ -5,10 +5,6 @@
      */
     const STORAGE_KEY = 'summit-theme';
 
-    const THEMES = Array.from(
-        document.querySelectorAll('.theme-swatch')
-    ).map(btn => btn.dataset.theme);
-
     /**
      * I suppose the targer audience would probably prefer a dark mode to be default sadly.
      * @type {string}
@@ -20,6 +16,9 @@
      * @param theme The theme to apply.
      */
     function applyTheme(theme) {
+        const themes = Array.from(document.querySelectorAll('.theme-swatch'))
+            .map(btn => btn.dataset.theme);
+
         if (!THEMES.includes(theme)) theme = DEFAULT_THEME;
         document.documentElement.setAttribute('data-theme', theme);
         localStorage.setItem(STORAGE_KEY, theme);

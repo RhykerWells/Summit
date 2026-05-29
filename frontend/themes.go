@@ -24,7 +24,13 @@ func LoadThemes(static fs.FS) ([]Theme, error) {
 			return nil
 		}
 
-		if filepath.Ext(path) != ".css" {
+		name := filepath.Base(path)
+
+		if name == "core.css" {
+			return nil
+		}
+
+		if filepath.Ext(name) != ".css" {
 			return nil
 		}
 
