@@ -1,8 +1,6 @@
 {{define "head"}}
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- Apply saved theme immediately to prevent flash of default theme -->
-<script>(function(){var t=localStorage.getItem('summit-theme')||'dark';document.documentElement.setAttribute('data-theme',t);})()</script>
 <link rel="icon" type="image/png" href="{{.HomeURL}}/static/img/favicon.png">
 <title>Summit{{if .CurrentGuild}} | {{.CurrentGuild.Name}}{{end}}</title>
 <!-- Discord embed link -->
@@ -25,6 +23,10 @@
 <!-- Custom CSS -->
 {{if eq .Path "" "/"}}<link rel="stylesheet" href="{{.HomeURL}}/static/css/main.css">{{else}}<link rel="stylesheet" href="{{.HomeURL}}/static/css/dashboard.css">{{end}}
 <link rel="stylesheet" href="{{.HomeURL}}/static/css/themes/core.css">
-<link rel="stylesheet" href="{{.HomeURL}}/static/css/themes/{{.Theme}}.css">
+{{range .Themes}}
+<link rel="stylesheet" href="{{$.HomeURL}}/static/css/themes/{{.ID}}.css">
+{{end}}
+<!-- Apply saved theme immediately to prevent flash of default theme -->
+<script>(function(){var t=localStorage.getItem('summit-theme')||'dark';document.documentElement.setAttribute('data-theme',t);})()</script>
 <script src="{{.HomeURL}}/static/js/themeSwitcher.js" defer></script>
 {{end}}

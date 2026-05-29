@@ -1,49 +1,49 @@
 /* Fallback defaults (dark theme values for variables not in dashboard.css :root) */
 :root {
-	--bg-page: rgb(67, 43, 128);
-	--border-color: rgba(255, 255, 255, 0.1);
-	--border-hover: rgba(255, 255, 255, 0.2);
-	--scrollbar-track: rgba(0, 0, 0, 0.1);
-	--scrollbar-thumb: rgba(114, 118, 125, 0.4);
-	--scrollbar-thumb-hover: rgba(114, 118, 125, 0.6);
-	--btn-close-filter: invert(1);
-	--table-stripe-bg: rgba(114, 137, 218, 0.05);
-	--card-hover-shadow: rgba(67, 43, 128, 0.5);
-	--input-focus-shadow: 0 0 0 2px rgba(67, 48, 128, 0.3), 0 0 8px rgba(114, 137, 218, 0.5);
-	/* Homepage variables */
-	--home-bg: #121212;
-	--home-nav-bg: #1e1535;
-	--home-card-border: #1e1e1e;
-	--home-text: #ffffff;
+    --bg-page: rgb(67, 43, 128);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --border-hover: rgba(255, 255, 255, 0.2);
+    --scrollbar-track: rgba(0, 0, 0, 0.1);
+    --scrollbar-thumb: rgba(114, 118, 125, 0.4);
+    --scrollbar-thumb-hover: rgba(114, 118, 125, 0.6);
+    --btn-close-filter: invert(1);
+    --table-stripe-bg: rgba(114, 137, 218, 0.05);
+    --card-hover-shadow: rgba(67, 43, 128, 0.5);
+    --input-focus-shadow: 0 0 0 2px rgba(67, 48, 128, 0.3), 0 0 8px rgba(114, 137, 218, 0.5);
+    /* Homepage variables */
+    --home-bg: #121212;
+    --home-nav-bg: #1e1535;
+    --home-card-border: #1e1e1e;
+    --home-text: #ffffff;
 }
 
 /* theme swatch buttons */
 .theme-swatch {
-	width: 22px;
-	height: 22px;
-	border-radius: 50%;
-	border: 2px solid transparent;
-	cursor: pointer;
-	padding: 0;
-	transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-	outline: none;
-	flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    outline: none;
+    flex-shrink: 0;
 }
 
 .theme-swatch:hover {
-	transform: scale(1.2);
+    transform: scale(1.2);
 }
 
 .theme-swatch.active {
-	border-color: var(--text-normal);
-	transform: scale(1.15);
-	box-shadow: 0 0 0 1px var(--border-color);
+    border-color: var(--text-normal);
+    transform: scale(1.15);
+    box-shadow: 0 0 0 1px var(--border-color);
 }
 
 #themeSwitcherLabel {
-	font-size: 0.72rem;
-	color: var(--text-muted);
-	transition: color 0.3s ease;
-	text-transform: uppercase;
-	letter-spacing: 0.05em;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    transition: color 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }

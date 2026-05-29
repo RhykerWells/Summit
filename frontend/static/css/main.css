@@ -16,20 +16,25 @@
 body {
     background-color: var(--home-bg);
 }
+
 .policyBody .container {
     max-width: 1200px
 }
+
 .policyBody .link-light {
     color: #c0e8ff;
     text-decoration: underline;
 }
+
 .policyBody ol {
     counter-reset: list;
     padding-left: 1rem;
 }
+
 .policyBody ol > li {
     list-style: none;
 }
+
 .policyBody ol > li::before {
     content: "(" counter(list, lower-alpha) ") ";
     counter-increment: list;
@@ -40,6 +45,7 @@ body {
     background-color: var(--home-nav-bg);
     border-bottom: 1px solid var(--home-card-border);
 }
+
 .navbar-main .navbar-login-section {
     margin-right: 1rem;
 }
@@ -57,13 +63,14 @@ body {
 }
 
 .btn-outline-grey {
-    color: var(--accentGrey)!important;
+    color: var(--accentGrey) !important;
     background-color: transparent;
     background-image: none;
-    border-color: var(--accentGrey)!important;
+    border-color: var(--accentGrey) !important;
 }
+
 .btn-outline-grey:hover {
-    background-color: var(--accentGrey)!important;
+    background-color: var(--accentGrey) !important;
     background-image: none;
-    border-color: var(--accentGrey)!important;
+    border-color: var(--accentGrey) !important;
 }
