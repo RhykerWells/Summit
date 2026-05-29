@@ -1,39 +1,4 @@
 :root {
-	--main-color: rgb(67 43 128);
-	--hover-color: rgb(84 53 162);
-	--success-color: #43b581;
-	--warning-color: #fca253;
-	--danger-color: #d64848;
-	--info-color: #00b0f4;
-	
-	/* TEXT COLOURS */
-	--text-normal: #ffffff;
-	--text-muted: #72767d;
-	--text-strong: #ffffff;
-
-	/* LINK COLOURS */
-	--link-normal: #7289da;
-	--link-hover: #5b78c0;
-
-	/* BACKGROUND SHADINGS - Depth layers */
-	--bg-primary: rgba(0, 0, 0, 0.1);
-	--bg-primary-light: var(--border-color);
-	--bg-secondary: rgba(0, 0, 0, 0.2);
-	--bg-secondary-light: rgba(255, 255, 255, 0.2);
-	--bg-tertiary: rgba(0, 0, 0, 0.3);
-	--bg-card: rgba(0, 0, 0, 0.4);
-	--bg-modal: rgba(0, 0, 0, 0.5);
-	--bg-popout: rgba(0, 0, 0, 0.6);
-	--bg-input: rgba(0, 0, 0, 0.3);
-
-	/* ACTION COLORS */
-	--warn: #fca253;
-	--mute: #5772be;
-	--unmute: #00ff7b;
-	--kick: #f2a013;
-	--ban: #d64848;
-	--unban: #00ff7b;
-
 	/* Bootstrap variables */
 	color: var(--text-normal);
 	font-family: 'Lexend', Arial, Helvetica, sans-serif;
