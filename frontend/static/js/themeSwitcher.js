@@ -32,31 +32,29 @@
         swatches.forEach(btn => {
             btn.classList.toggle('active', btn.dataset.theme === theme);
         });
-
-        /**
-         * Gets the saved theme from local storage.
-         * @returns {string|string} The saved theme or the default theme.
-         */
-        function getSavedTheme() {
-            return localStorage.getItem(STORAGE_KEY) || DEFAULT_THEME;
-        }
-
-        /**
-         * Initialises the theme switcher.
-         */
-        function init() {
-            applyTheme(getSavedTheme());
-            document.querySelectorAll('.theme-swatch').forEach(btn => {
-                btn.addEventListener('click', () => applyTheme(btn.dataset.theme));
-            });
-        }
-
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', init);
-        } else {
-            init();
-        }
     }
 
-)
-    ();
+    /**
+     * Gets the saved theme from local storage.
+     * @returns {string|string} The saved theme or the default theme.
+     */
+    function getSavedTheme() {
+        return localStorage.getItem(STORAGE_KEY) || DEFAULT_THEME;
+    }
+
+    /**
+     * Initialises the theme switcher.
+     */
+    function init() {
+        applyTheme(getSavedTheme());
+        document.querySelectorAll('.theme-swatch').forEach(btn => {
+            btn.addEventListener('click', () => applyTheme(btn.dataset.theme));
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
