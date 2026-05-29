@@ -31,7 +31,7 @@
 	--link-normal: #7289da;
 	--link-hover: #5b78c0;
 	--bg-page: rgb(67, 43, 128);
-	--background-image: url('../img/background.png');
+	--background-image: url('../img/backgrounds/background-dark.png');
 	--bg-primary: rgba(0, 0, 0, 0.1);
 	--bg-primary-light: rgba(255, 255, 255, 0.1);
 	--bg-secondary: rgba(0, 0, 0, 0.2);
@@ -78,7 +78,7 @@
 	--link-normal: #0068e0;
 	--link-hover: #004bb5;
 	--bg-page: #f0f2f5;
-	--background-image: none;
+	--background-image: url('../img/backgrounds/background-light.png');
 	--bg-primary: rgba(255, 255, 255, 0.7);
 	--bg-primary-light: rgba(0, 0, 0, 0.04);
 	--bg-secondary: rgba(255, 255, 255, 0.85);
@@ -125,7 +125,7 @@
 	--link-normal: #c8802c;
 	--link-hover: #9e6520;
 	--bg-page: #f5e6c8;
-	--background-image: none;
+	--background-image: url('../img/backgrounds/background-bread.png');
 	--bg-primary: rgba(245, 230, 200, 0.7);
 	--bg-primary-light: rgba(61, 43, 31, 0.04);
 	--bg-secondary: rgba(250, 240, 220, 0.9);
