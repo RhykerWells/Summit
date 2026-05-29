@@ -24,6 +24,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet">
 <!-- Custom CSS -->
 {{if eq .Path "" "/"}}<link rel="stylesheet" href="{{.HomeURL}}/static/css/main.css">{{else}}<link rel="stylesheet" href="{{.HomeURL}}/static/css/dashboard.css">{{end}}
-<link rel="stylesheet" href="{{.HomeURL}}/static/css/themes.css">
+<link rel="stylesheet" href="{{.HomeURL}}/static/css/themes/core.css">
+<link rel="stylesheet" href="{{.HomeURL}}/static/css/themes/{{.Theme}}.css">
 <script src="{{.HomeURL}}/static/js/themeSwitcher.js" defer></script>
 {{end}}
