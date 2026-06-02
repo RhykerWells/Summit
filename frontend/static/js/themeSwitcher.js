@@ -6,15 +6,11 @@
     const STORAGE_KEY = 'summit-theme';
 
     /**
-     * I suppose the targer audience would probably prefer a dark mode to be default sadly.
+     * I suppose the target audience would probably prefer a dark mode to be default sadly.
      * @type {string}
      */
     const DEFAULT_THEME = 'dark';
 
-    /**
-     * Applies the theme and updates the local storage.
-     * @param theme The theme to apply.
-     */
     /**
      * Applies the theme and updates the local storage.
      * @param theme The theme to apply.
