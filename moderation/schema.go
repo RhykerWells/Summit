@@ -65,6 +65,9 @@ CREATE TABLE IF NOT EXISTS moderation_cases (
 	CONSTRAINT fk_guild_cases FOREIGN KEY (guild_id)
 		REFERENCES moderation_config (guild_id) ON DELETE CASCADE
 );
+ALTER TABLE moderation_cases
+	ADD COLUMN IF NOT EXISTS channel_id TEXT NOT NULL DEFAULT '',
+	ADD COLUMN IF NOT EXISTS channel_name TEXT NOT NULL DEFAULT '';
 `, `
 CREATE TABLE IF NOT EXISTS moderation_message_logs (
 	id BIGSERIAL PRIMARY KEY,
