@@ -1,122 +1,131 @@
 {{define "sidebar"}}
 <aside id="sidebar" class="sidebar offcanvas-xl offcanvas-start d-lg-flex flex-column text-white" tabindex="-1">
-	<div class="offcanvas-header d-flex d-xl-none justify-content-between align-items-center">
-		<h5 class="offcanvas-title">Navigation</h5>
-		<a href="#" data-bs-dismiss="offcanvas"><i class="fa-solid fa-xmark"></i></a>
-	</div>
-	<ul class="nav flex-column mb-auto">
-		{{if .CurrentGuild}}
-		<li class="nav-item">
-			<a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage" class="nav-link sidebar-category d-flex justify-content-between text-white">
+    <div class="offcanvas-header d-flex d-xl-none justify-content-between align-items-center">
+        <h5 class="offcanvas-title">Navigation</h5>
+        <a href="#" data-bs-dismiss="offcanvas"><i class="fa-solid fa-xmark"></i></a>
+    </div>
+    <ul class="nav flex-column mb-auto">
+        {{if .CurrentGuild}}
+        <li class="nav-item">
+            <a href="{{.HomeURL}}/dashboard/{{.CurrentGuild.ID}}/manage" class="nav-link sidebar-category d-flex justify-content-between text-white">
 				<span>
 					<i class="fa-solid fa-house me-2"></i>
 					Home
 				</span>
-			</a>
-		</li>
-		{{range .Sidebar}}
-		<li class="nav-item mb-2">
-		<!-- Category -->
-			<a class="sidebar-category nav-link d-flex justify-content-between align-items-center text-white" data-bs-toggle="collapse" href="#sidebar-{{.Name}}" role="button" aria-expanded="false">
+            </a>
+        </li>
+        {{range .Sidebar}}
+        <li class="nav-item mb-2">
+            <!-- Category -->
+            <a class="sidebar-category nav-link d-flex justify-content-between align-items-center text-white" data-bs-toggle="collapse" href="#sidebar-{{.Name}}" role="button" aria-expanded="false">
 				<span>
 					<i class="{{.Icon}} me-2"></i>
 					{{.Name}}
 				</span>
-				<i class="fa-solid fa-caret-down"></i>
-			</a>
-			<div class="collapse ms-3 mt-1" id="sidebar-{{.Name}}">
-				<ul class="nav flex-column">
-					{{range .Items}}
-					<li class="nav-item">
-						<a href="{{$.HomeURL}}/dashboard/{{$.CurrentGuild.ID}}/manage/{{.URL}}" class="sidebar-item item nav-link text-secondary">
-							<i class="{{.Icon}} me-2"></i>
-							{{.Name}}
-						</a>
-					</li>
-					{{end}}
-				</ul>
-			</div>
-		</li>
-		{{end}}
-		{{end}}
-	</ul>
-	<div class="p-3">
-		<hr>
-		<div id="sidebarDropdownHelpArea" class="dropup">
-			<a id="sidebarDropdownHelp" class="dropdown-toggle d-flex align-items-center justify-content-between text-decoration-none text-white" data-bs-toggle="dropdown" aria-expanded="false">
-				<span>Help</span>
-				<i class="fa-solid fa-caret-up"></i>
-			</a>
-			<ul class="dropdown-menu w-100">
-				<li class="px-2 py-1"><a href="https://discord.gg/3TQyZp67cW" class="dropdown-item helpListItem text-center">Summit General Support</a></li>
-				<li class="px-2 py-1"><a class="dropdown-item helpListItem helpListItemVersion text-center"><span class="badge bg-primary text-bg-secondary">{{.Version}}</span></a></li>
-			</ul>
-		</div>
-		<hr class="d-xl-none">
-		<div class="d-xl-none d-flex flex-column gap-2">
-			{{if .User}}
-			<div class="mobileSidebarDropdownServerArea dropup dropup-center">
-				<a id="mobileSidebarDropdownServers" class="dropdown-toggle d-flex align-items-center justify-content-between text-decoration-none" data-bs-toggle="dropdown" aria-expanded="false">
-					<div class="d-flex align-items-center">
-						<img src="{{if not .CurrentGuild}}{{.HomeURL}}/static/img/icons/magnifying-glass.svg{{else}}{{.CurrentGuild.Avatar}}{{end}}" width="32" height="32" class="rounded-circle me-2">
-						<span class="d-flex flex-column">
+                <i class="fa-solid fa-caret-down"></i>
+            </a>
+            <div class="collapse ms-3 mt-1" id="sidebar-{{.Name}}">
+                <ul class="nav flex-column">
+                    {{range .Items}}
+                    <li class="nav-item">
+                        <a href="{{$.HomeURL}}/dashboard/{{$.CurrentGuild.ID}}/manage/{{.URL}}" class="sidebar-item item nav-link text-secondary">
+                            <i class="{{.Icon}} me-2"></i>
+                            {{.Name}}
+                        </a>
+                    </li>
+                    {{end}}
+                </ul>
+            </div>
+        </li>
+        {{end}}
+        {{end}}
+    </ul>
+    <div class="p-3">
+        <div id="themeSwitcherArea" class="mb-2">
+            <span id="themeSwitcherLabel">Theme</span>
+            <div class="d-flex gap-2 align-items-center mt-1 flex-wrap">
+                {{range .Themes}}
+                <button class="theme-swatch" data-theme="{{.ID}}" title="{{.ID}}">
+                </button>
+                {{end}}
+            </div>
+        </div>
+        <hr>
+        <div id="sidebarDropdownHelpArea" class="dropup">
+            <a id="sidebarDropdownHelp" class="dropdown-toggle d-flex align-items-center justify-content-between text-decoration-none text-white" data-bs-toggle="dropdown" aria-expanded="false">
+                <span>Help</span>
+                <i class="fa-solid fa-caret-up"></i>
+            </a>
+            <ul class="dropdown-menu w-100">
+                <li class="px-2 py-1"><a href="https://discord.gg/3TQyZp67cW" class="dropdown-item helpListItem text-center">Summit General Support</a></li>
+                <li class="px-2 py-1"><a class="dropdown-item helpListItem helpListItemVersion text-center"><span class="badge bg-primary text-bg-secondary">{{.Version}}</span></a></li>
+            </ul>
+        </div>
+        <hr class="d-xl-none">
+        <div class="d-xl-none d-flex flex-column gap-2">
+            {{if .User}}
+            <div class="mobileSidebarDropdownServerArea dropup dropup-center">
+                <a id="mobileSidebarDropdownServers" class="dropdown-toggle d-flex align-items-center justify-content-between text-decoration-none" data-bs-toggle="dropdown" aria-expanded="false">
+                    <div class="d-flex align-items-center">
+                        <img src="{{if not .CurrentGuild}}{{.HomeURL}}/static/img/icons/magnifying-glass.svg{{else}}{{.CurrentGuild.Avatar}}{{end}}" width="32" height="32" class="rounded-circle me-2">
+                        <span class="d-flex flex-column">
 							<span>{{if not .CurrentGuild}}Select server{{else}}{{.CurrentGuild.Name}}{{end}}</span>
 							<span style="font-size: 0.8rem;">Switch server</span>
 						</span>
-					</div>
-					<i class="fa-solid fa-caret-up"></i>
-				</a>
-				<ul class="dropdown-menu w-100">
-					{{if .ManagedGuilds}}
-					{{range .ManagedGuilds}}
-					<li class="d-flex align-items-center gap-2 px-2 py-1">
-						<a class="dropdown-item d-flex align-items-center m-0 gap-2 text-white" href="{{$.HomeURL}}/dashboard/{{.ID}}/manage" style="white-space: normal; word-break: break-word; padding-left: 0;">
-							<img src="{{.Avatar}}" class="rounded-circle flex-shrink-0" width="32" height="32" style="margin-left: 0.5rem">								
-							<strong>{{.Name}}</strong>
-						</a>
-					</li>
-					{{end}}
-					{{else}}
-					<li class="px-2 py-1">
-						<p class="dropdown-item">
-							You don't manage any servers
-						</p>
-					</li>
-					{{end}}
-					{{if and .ManagedGuilds .AvailableGuilds}}
-					<li>
-						<hr />
-					</li>
-					{{end}}
-					{{range .AvailableGuilds}}
-					<li class="d-flex align-items-center gap-2 px-2 py-1">
-						<a class="dropdown-item d-flex align-items-center m-0 gap-2 text-white" href="{{getJoinLink .ID}}" style="white-space: normal; word-break: break-word; padding-left: 0;">
-							<img src="{{$.HomeURL}}/static/img/icons/plus.svg" class="rounded-circle flex-shrink-0" width="32" height="42" style="margin-left: 0.5rem">						
-							<strong>{{.Name}}</strong>
-						</a>
-					</li>
-					{{end}}
-				</ul>
-			</div>
-			<div id="mobileSidebarUserDropdown" class="dropup">
-				<a class="dropdown-toggle d-flex align-items-center justify-content-between text-decoration-none" data-bs-toggle="dropdown" aria-expanded="false">
-					<div class="d-flex align-items-center">
-						<img src="{{.User.AvatarURL "1024"}}" width="32" height="32" class="rounded-circle me-2">
-						<span class="d-flex flex-column">
+                    </div>
+                    <i class="fa-solid fa-caret-up"></i>
+                </a>
+                <ul class="dropdown-menu w-100">
+                    {{if .ManagedGuilds}}
+                    {{range .ManagedGuilds}}
+                    <li class="d-flex align-items-center gap-2 px-2 py-1">
+                        <a class="dropdown-item d-flex align-items-center m-0 gap-2 text-white" href="{{$.HomeURL}}/dashboard/{{.ID}}/manage" style="white-space: normal; word-break: break-word; padding-left: 0;">
+                            <img src="{{.Avatar}}" class="rounded-circle flex-shrink-0" width="32" height="32" style="margin-left: 0.5rem">
+                            <strong>{{.Name}}</strong>
+                        </a>
+                    </li>
+                    {{end}}
+                    {{else}}
+                    <li class="px-2 py-1">
+                        <p class="dropdown-item">
+                            You don't manage any servers
+                        </p>
+                    </li>
+                    {{end}}
+                    {{if and .ManagedGuilds .AvailableGuilds}}
+                    <li>
+                        <hr/>
+                    </li>
+                    {{end}}
+                    {{range .AvailableGuilds}}
+                    <li class="d-flex align-items-center gap-2 px-2 py-1">
+                        <a class="dropdown-item d-flex align-items-center m-0 gap-2 text-white" href="{{getJoinLink .ID}}" style="white-space: normal; word-break: break-word; padding-left: 0;">
+                            <img src="{{$.HomeURL}}/static/img/icons/plus.svg" class="rounded-circle flex-shrink-0" width="32" height="42" style="margin-left: 0.5rem">
+                            <strong>{{.Name}}</strong>
+                        </a>
+                    </li>
+                    {{end}}
+                </ul>
+            </div>
+            <div id="mobileSidebarUserDropdown" class="dropup">
+                <a class="dropdown-toggle d-flex align-items-center justify-content-between text-decoration-none" data-bs-toggle="dropdown" aria-expanded="false">
+                    <div class="d-flex align-items-center">
+                        <img src="{{.User.AvatarURL "1024"}}" width="32" height="32" class="rounded-circle me-2">
+                        <span class="d-flex flex-column">
 							<strong>{{or .User.GlobalName .User.Username}}</strong>
 							{{if .User.GlobalName}}<span style="font-size: 0.8rem;">{{.User.Username}}</span>{{end}}
 						</span>
-					</div>
-					<i class="fa-solid fa-caret-up"></i>
-				</a>
-				<ul class="dropdown-menu text-small">
-					<li class="px-2 py-1"><a class="dropdown-item" href="{{.HomeURL}}/logout">Sign out</a></li>
-				</ul>
-			</div>
-			{{else}}
-			<a class="text-white" href="{{.HomeURL}}/login">Login with Discord</a>
-			{{end}}
-		</div>
-	</div>
+                    </div>
+                    <i class="fa-solid fa-caret-up"></i>
+                </a>
+                <ul class="dropdown-menu text-small">
+                    <li class="px-2 py-1"><a class="dropdown-item" href="{{.HomeURL}}/logout">Sign out</a></li>
+                </ul>
+            </div>
+            {{else}}
+            <a class="text-white" href="{{.HomeURL}}/login">Login with Discord</a>
+            {{end}}
+        </div>
+    </div>
 </aside>
 {{end}}

@@ -1,0 +1,98 @@
+/* light theme */
+[data-theme="light"] {
+    --main-color: #5865f2;
+    --hover-color: #4752c4;
+    --success-color: #2d7d46;
+    --warning-color: #e67e22;
+    --danger-color: #c0392b;
+    --info-color: #2980b9;
+    --text-normal: #2e3338;
+    --text-muted: #4f5660;
+    --text-strong: #060607;
+    --link-normal: #0068e0;
+    --link-hover: #004bb5;
+    --bg-page: #f0f2f5;
+    --background-image: url('/static/img/backgrounds/background-light.png');
+    --bg-primary: rgba(255, 255, 255, 0.7);
+    --bg-primary-light: rgba(0, 0, 0, 0.04);
+    --bg-secondary: rgba(255, 255, 255, 0.85);
+    --bg-secondary-light: rgba(0, 0, 0, 0.05);
+    --bg-tertiary: rgba(255, 255, 255, 0.9);
+    --bg-card: rgba(255, 255, 255, 0.85);
+    --bg-modal: rgba(255, 255, 255, 0.97);
+    --bg-popout: rgba(255, 255, 255, 0.99);
+    --bg-input: rgba(255, 255, 255, 0.9);
+    --border-color: rgba(0, 0, 0, 0.1);
+    --border-hover: rgba(0, 0, 0, 0.2);
+    --scrollbar-track: rgba(0, 0, 0, 0.05);
+    --scrollbar-thumb: rgba(0, 0, 0, 0.2);
+    --scrollbar-thumb-hover: rgba(0, 0, 0, 0.35);
+    --btn-close-filter: none;
+    --table-stripe-bg: rgba(88, 101, 242, 0.04);
+    --card-hover-shadow: rgba(88, 101, 242, 0.2);
+    --input-focus-shadow: 0 0 0 2px rgba(88, 101, 242, 0.2), 0 0 6px rgba(88, 101, 242, 0.3);
+    --warn: #e67e22;
+    --mute: #3b5bdb;
+    --unmute: #2d7d46;
+    --kick: #e67e22;
+    --ban: #c0392b;
+    --unban: #2d7d46;
+    --home-bg: #f0f2f5;
+    --home-nav-bg: #ffffff;
+    --home-card-border: rgba(0, 0, 0, 0.1);
+    --home-text: #2e3338;
+    --bs-body-color: var(--text-normal);
+    color: var(--text-normal);
+
+    .text-white {
+        color: var(--text-normal) !important;
+    }
+
+    .text-light {
+        color: var(--text-muted) !important;
+    }
+
+    .text-secondary {
+        color: var(--text-muted) !important;
+    }
+
+    .vr {
+        background-color: var(--border-color);
+        opacity: 1;
+    }
+
+    /* Homepage navbar button */
+
+    .btn-outline-light {
+        --bs-btn-color: var(--text-normal);
+        --bs-btn-border-color: var(--border-hover);
+        --bs-btn-hover-color: var(--bg-page);
+        --bs-btn-hover-bg: var(--text-normal);
+        --bs-btn-hover-border-color: var(--text-normal);
+        --bs-btn-active-color: var(--bg-page);
+        --bs-btn-active-bg: var(--text-normal);
+        --bs-btn-active-border-color: var(--text-normal);
+    }
+
+    /* Dropdown items */
+
+    .dropdown-item {
+        color: var(--text-normal);
+    }
+
+    .dropdown-item:hover,
+    .dropdown-item:focus {
+        color: var(--text-normal);
+    }
+
+    /* Bootstrap navbar */
+
+    .navbar-dark .navbar-nav .nav-link,
+    .navbar-dark .navbar-brand {
+        color: var(--text-normal);
+    }
+}
+
+.theme-swatch[data-theme="light"] {
+    background: linear-gradient(135deg, #5865f2 50%, #f0f2f5 50%);
+}

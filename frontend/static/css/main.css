@@ -5,31 +5,36 @@
     --accentPurple: #0c0623;
     --accentGrey: #1e1e1e;
 
-    color: white;
+    color: var(--home-text);
     font-family: Arial, Helvetica, sans-serif;
 
-    --bs-body-color: white;
+    --bs-body-color: var(--home-text);
     --bs-font-sans-serif: 'Lexend', Arial, Helvetica, sans-serif;
 }
 
 /* Terms, Privacy etc */
 body {
-    background-color: var(--baseGrey);
+    background-color: var(--home-bg);
 }
+
 .policyBody .container {
     max-width: 1200px
 }
+
 .policyBody .link-light {
     color: #c0e8ff;
     text-decoration: underline;
 }
+
 .policyBody ol {
     counter-reset: list;
     padding-left: 1rem;
 }
+
 .policyBody ol > li {
     list-style: none;
 }
+
 .policyBody ol > li::before {
     content: "(" counter(list, lower-alpha) ") ";
     counter-increment: list;
@@ -37,9 +42,10 @@ body {
 
 /* Navbar */
 .navbar-main {
-    background-color: var(--secondaryPurple);
-    border-bottom: 1px solid var(--accentGrey);
+    background-color: var(--home-nav-bg);
+    border-bottom: 1px solid var(--home-card-border);
 }
+
 .navbar-main .navbar-login-section {
     margin-right: 1rem;
 }
@@ -47,23 +53,24 @@ body {
 /* Feature cards */
 .card.featureCard {
     background: none;
-    border: 1px solid var(--accentGrey);
+    border: 1px solid var(--home-card-border);
 }
 
 /* Footer */
 .footer-main {
-    background-color: var(--secondaryPurple);
-    border-top: 1px solid var(--accentGrey);
+    background-color: var(--home-nav-bg);
+    border-top: 1px solid var(--home-card-border);
 }
 
 .btn-outline-grey {
-    color: var(--accentGrey)!important;
+    color: var(--accentGrey) !important;
     background-color: transparent;
     background-image: none;
-    border-color: var(--accentGrey)!important;
+    border-color: var(--accentGrey) !important;
 }
+
 .btn-outline-grey:hover {
-    background-color: var(--accentGrey)!important;
+    background-color: var(--accentGrey) !important;
     background-image: none;
-    border-color: var(--accentGrey)!important;
+    border-color: var(--accentGrey) !important;
 }

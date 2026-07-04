@@ -14,7 +14,7 @@
 					<h2 class="mb-0">Notifications</h2>
 				</div>
 				<div class="d-flex">
-					<button type="submit" class="btn btn-success">Save changes</button>
+					<button type="submit" class="btn">Save changes</button>
 				</div>
 			</div>
 			<div class="m-4">
@@ -29,8 +29,8 @@
 									{{channelOptionsSingle .CurrentGuild.Channels .NotificationConfig.JoinServerChannel "JoinServerChannel"}}
                                     <p class="card-text">Note: If <code>None</code> is selected, the notification won't be sent.</p>
 									<textarea class="form-control text-light" name="JoinServerMessage" id="JoinServerMessage" rows="5">{{.NotificationConfig.JoinServerMessage}}</textarea>
-									<small class="text-white-50">Summit offers 4 template objects, these are the <a href="https://pkg.go.dev/github.com/bwmarrin/discordgo#Guild">Guild</a>, <a href="https://pkg.go.dev/github.com/bwmarrin/discordgo#Channel">Channel</a>, <a href="https://pkg.go.dev/github.com/bwmarrin/discordgo#Member">Member</a>, and <a href="https://pkg.go.dev/github.com/bwmarrin/discordgo#User">User</a> objects.</small>
-									<small class="text-white-50">These can be accessed using Golangs <a href="https://pkg.go.dev/text/template">Text/Template</a> <code>&#123;&#123;</code> and <code>&#125;&#125;</code> syntax.</small>
+									<small class="text-muted-theme">Summit offers 4 template objects, these are the <a href="https://pkg.go.dev/github.com/bwmarrin/discordgo#Guild">Guild</a>, <a href="https://pkg.go.dev/github.com/bwmarrin/discordgo#Channel">Channel</a>, <a href="https://pkg.go.dev/github.com/bwmarrin/discordgo#Member">Member</a>, and <a href="https://pkg.go.dev/github.com/bwmarrin/discordgo#User">User</a> objects.</small>
+									<small class="text-muted-theme">These can be accessed using Golangs <a href="https://pkg.go.dev/text/template">Text/Template</a> <code>&#123;&#123;</code> and <code>&#125;&#125;</code> syntax.</small>
 								</div>
 							</div>
 						</div>
@@ -43,8 +43,8 @@
 									{{channelOptionsSingle .CurrentGuild.Channels .NotificationConfig.LeaveServerChannel "LeaveServerChannel"}}
 									<p class="card-text">Note: If <code>None</code> is selected, the notification won't be sent.</p>
 									<textarea class="form-control text-light" name="LeaveServerMessage" id="LeaveServerMessage" rows="5">{{.NotificationConfig.LeaveServerMessage}}</textarea>
-									<small class="text-white-50">Summit offers 4 template objects, these are the <a href="https://pkg.go.dev/github.com/bwmarrin/discordgo#Guild">Guild</a>, <a href="https://pkg.go.dev/github.com/bwmarrin/discordgo#Channel">Channel</a>, <a href="https://pkg.go.dev/github.com/bwmarrin/discordgo#Member">Member</a>, and <a href="https://pkg.go.dev/github.com/bwmarrin/discordgo#User">User</a> objects.</small>
-									<small class="text-white-50">These can be accessed using Golangs <a href="https://pkg.go.dev/text/template">Text/Template</a> <code>&#123;&#123;</code> and <code>&#125;&#125;</code> syntax.</small>
+									<small class="text-muted-theme">Summit offers 4 template objects, these are the <a href="https://pkg.go.dev/github.com/bwmarrin/discordgo#Guild">Guild</a>, <a href="https://pkg.go.dev/github.com/bwmarrin/discordgo#Channel">Channel</a>, <a href="https://pkg.go.dev/github.com/bwmarrin/discordgo#Member">Member</a>, and <a href="https://pkg.go.dev/github.com/bwmarrin/discordgo#User">User</a> objects.</small>
+									<small class="text-muted-theme">These can be accessed using Golangs <a href="https://pkg.go.dev/text/template">Text/Template</a> <code>&#123;&#123;</code> and <code>&#125;&#125;</code> syntax.</small>
 								</div>
 							</div>
 						</div>
