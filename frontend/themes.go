@@ -7,14 +7,14 @@ import (
 	"strings"
 )
 
+var Themes []Theme
+
 type Theme struct {
 	ID string
 }
 
 // LoadThemes reads embedded static FS and finds all theme CSS files.
-func LoadThemes(static fs.FS) ([]Theme, error) {
-	var themes []Theme
-
+func LoadThemes(static fs.FS) error {
 	err := fs.WalkDir(static, "static/css/themes", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -26,28 +26,28 @@ func LoadThemes(static fs.FS) ([]Theme, error) {
 
 		name := filepath.Base(path)
 
-		if name == "core.css" {
-			return nil
-		}
-
 		if filepath.Ext(name) != ".css" {
 			return nil
 		}
 
-		id := strings.TrimSuffix(filepath.Base(path), ".css")
+		if name == "core.css" {
+			return nil
+		}
 
-		themes = append(themes, Theme{ID: id})
+		Themes = append(Themes, Theme{
+			ID: strings.TrimSuffix(name, ".css"),
+		})
 
 		return nil
 	})
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	sort.Slice(themes, func(i, j int) bool {
-		return themes[i].ID < themes[j].ID
+	sort.Slice(Themes, func(i, j int) bool {
+		return Themes[i].ID < Themes[j].ID
 	})
 
-	return themes, nil
+	return nil
 }

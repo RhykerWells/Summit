@@ -112,11 +112,7 @@ func RenderPage(filename string) http.HandlerFunc {
 		// Retrieve the template data from the context
 		tmplData, _ := r.Context().Value(CtxKeyTmplData).(TmplContextData)
 		tmplData["Releases"] = getGithubReleases()
-
-		themes, err := frontend.LoadThemes(StaticFiles)
-		if err == nil {
-			tmplData["Themes"] = themes
-		}
+		tmplData["Themes"] = frontend.Themes
 
 		// Attempt to render the HTML templates and pages
 		w.Header().Set("Content-Type", "text/html")
@@ -169,6 +165,12 @@ func runRootMultiplexer() {
 	// Middlewares
 	mux.Use(BaseTemplateDataMW)
 	mux.Use(urlDataMW)
+
+	err := frontend.LoadThemes(StaticFiles)
+	if err != nil {
+		logrus.Panicf("Error loading themes: %v", err)
+		return
+	}
 
 	// Static files
 	mux.Handle(pat.Get("/static/*"), http.FileServer(http.FS(StaticFiles)))
