@@ -22,11 +22,4 @@
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap" rel="stylesheet">
 <!-- Custom CSS -->
 {{if eq .Path "" "/"}}<link rel="stylesheet" href="{{.HomeURL}}/static/css/main.css">{{else}}<link rel="stylesheet" href="{{.HomeURL}}/static/css/dashboard.css">{{end}}
-<link rel="stylesheet" href="{{.HomeURL}}/static/css/themes/core.css">
-{{range .Themes}}
-<link rel="stylesheet" href="{{$.HomeURL}}/static/css/themes/{{.ID}}.css">
-{{end}}
-<!-- Apply saved theme immediately to prevent flash of default theme -->
-<script>(function(){var t=localStorage.getItem('summit-theme')||'dark';document.documentElement.setAttribute('data-theme',t);})()</script>
-<script src="{{.HomeURL}}/static/js/themeSwitcher.js" defer></script>
 {{end}}

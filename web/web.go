@@ -113,11 +113,6 @@ func RenderPage(filename string) http.HandlerFunc {
 		tmplData, _ := r.Context().Value(CtxKeyTmplData).(TmplContextData)
 		tmplData["Releases"] = getGithubReleases()
 
-		themes, err := frontend.LoadThemes(StaticFiles)
-		if err == nil {
-			tmplData["Themes"] = themes
-		}
-
 		// Attempt to render the HTML templates and pages
 		w.Header().Set("Content-Type", "text/html")
 		if err := tmpl.ExecuteTemplate(w, filename, tmplData); err != nil {

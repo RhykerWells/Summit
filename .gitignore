@@ -11,6 +11,3 @@ cmd/summit/summit
 docker-compose*.yml
 
 *.code-workspace
-
-# JetBrains files are pretty much useless
-.idea/
