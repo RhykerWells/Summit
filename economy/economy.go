@@ -28,7 +28,7 @@ func (p *Plugin) PluginInfo() *common.PluginInfo {
 	}
 }
 
-func (p *Plugin) InitCommands(cmdHandler *dispatch.CommandHandler) {
+func (p *Plugin) InitCommands() {
 	command.RegisterCommands(informationCommands...)
 	command.RegisterCommands(incomeCommands...)
 	command.RegisterCommands(transferCommands...)
