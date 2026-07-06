@@ -17,6 +17,7 @@ function updateRoleOptionsSingle() {
 			if (item.classList.contains('disabled')) {
 				event.stopPropagation();
 				event.preventDefault();
+				return
 			}
 
 			const container = item.closest('.input-group'); // Drop down container. Makes sure we only select objects for the appropriate role select.
@@ -33,6 +34,9 @@ function updateRoleOptionsSingle() {
 				}
 			}
 			label.textContent = displayText;
+
+			const input = container.querySelector('input[type="hidden"]');
+			input.value = value;
 		});
 	});
 }
@@ -79,6 +83,7 @@ function updateChannelOptionsSingle() {
 			if (item.classList.contains('disabled')) {
 				event.stopPropagation();
 				event.preventDefault();
+				return
 			}
 
 			const container = item.closest('.input-group'); // Drop down container. Makes sure we only select objects for the appropriate role select.
@@ -95,6 +100,9 @@ function updateChannelOptionsSingle() {
 				}
 			}
 			label.textContent = displayText;
+
+			const input = container.querySelector('input[type="hidden"]');
+			input.value = value;
 		});
 	});
 }

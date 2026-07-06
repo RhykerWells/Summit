@@ -277,6 +277,7 @@ func channelOptionsSingle(channels []*discordgo.Channel, selectedChannelID strin
 	}
 
 	menu.WriteString(`</ul>`)
+	menu.WriteString(`<input type="hidden" id="` + uniqueID + `" name="` + uniqueID + `" value="` + template.HTMLEscapeString(selectedChannelID) + `">`)
 	menu.WriteString(`</div>`)
 	return template.HTML(menu.String())
 }
